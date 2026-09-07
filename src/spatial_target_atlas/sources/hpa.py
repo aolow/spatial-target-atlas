@@ -118,6 +118,13 @@ class HPAClient:
             if record.spatial_scale == SpatialScale.SUBCELLULAR
         ]
 
+    def resolve_uniprot(self, ensembl_id: str) -> tuple[str, str | None]:
+        url = f"https://www.proteinatlas.org/{ensembl_id}.json"
+        response = self.client.get(url)
+        response.raise_for_status()
+        payload = response.json()
+        return str(payload["Gene"]), _first(payload.get("Uniprot"))
+
     def _archive(self, name: str) -> list[dict[str, str]]:
         response = self.client.get(f"{HPA_DOWNLOAD}/{name}")
         response.raise_for_status()

@@ -9,7 +9,9 @@ import typer
 
 from .concordance import summarize_concordance
 from .config import load_spec
+from .cross_source import summarize_cross_source
 from .sources.hpa import HPAClient
+from .sources.proteomicsdb import ProteomicsDBClient
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -29,15 +31,24 @@ def build(
     records = []
     client = HPAClient()
     records.extend(client.fetch_complete(project.genes, project.tissues))
+    identities = []
     for identifier in project.genes:
         if not identifier.startswith("ENSG"):
             raise typer.BadParameter(f"HPA milestone 1 requires an Ensembl ID: {identifier}")
         records.extend(client.fetch_annotations(identifier))
+        identities.append((identifier, *client.resolve_uniprot(identifier)))
+    proteomicsdb = ProteomicsDBClient()
+    for identifier, gene_symbol, uniprot_id in identities:
+        if uniprot_id:
+            records.extend(proteomicsdb.fetch(gene_symbol, identifier, uniprot_id, project.tissues))
     output.mkdir(parents=True, exist_ok=True)
     serialized = [record.model_dump(mode="json") for record in records]
     (output / "evidence.json").write_text(json.dumps(serialized, indent=2), encoding="utf-8")
     (output / "concordance.json").write_text(
         json.dumps(summarize_concordance(records), indent=2), encoding="utf-8"
+    )
+    (output / "cross_source_concordance.json").write_text(
+        json.dumps(summarize_cross_source(records), indent=2), encoding="utf-8"
     )
     if serialized:
         with (output / "evidence.tsv").open("w", encoding="utf-8", newline="") as handle:

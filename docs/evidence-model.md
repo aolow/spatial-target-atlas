@@ -20,7 +20,7 @@ selection preserves the complete body-wide matrices, while a populated list expl
 ## Planned evidence families
 
 - HPA full tissue and DVP matrices
-- ProteomicsDB multi-experiment tissue MS
+- ProteomicsDB grouped tissue MS
 - CPTAC/PDC tumor and adjacent-tissue proteomics
 - HuBMAP imaging MS and spatial molecular assays
 - CELLxGENE spatial transcriptomics
@@ -33,3 +33,12 @@ output includes the complete context count, both-detected pairs, RNA-only, prote
 neither-detected contexts. Spearman rank correlation is withheld when fewer than three contexts have
 positive values in both modalities. Rank discordance never compares HPA intensity numerically with
 nCPM; it compares only their within-gene order across matched contexts.
+
+HPA–ProteomicsDB replication is assessed using within-source tissue ranks over exact,
+case-insensitive tissue-name matches. Raw intensities remain in source-specific units. ProteomicsDB
+records retain BRENDA Tissue Ontology identifiers, sample counts, intensity ranges, and the iBAQ
+aggregation parameters returned by the API.
+
+ProteomicsDB is a live API rather than a pinned atlas archive. Each record therefore includes its
+retrieval timestamp and declares `API v1.1 live` as the source release. Tissue labels that appear
+unusual remain unchanged until an auditable ontology crosswalk is introduced.

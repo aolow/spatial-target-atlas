@@ -36,6 +36,7 @@ class ProteinEvidenceRecord(BaseModel):
     uniprot_id: str | None = None
     source: str
     source_release: str
+    retrieved_at: str | None = None
     evidence_origin: EvidenceOrigin
     modality: Modality
     spatial_scale: SpatialScale

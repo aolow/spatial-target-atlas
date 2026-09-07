@@ -11,6 +11,7 @@ collapses unlike assays into an opaque safety score.
 - Explicit detection, donor-support, modality, spatial-scale, and provenance fields
 - JSON and TSV evidence bundles
 - Within-DVP RNA–protein rank concordance and discordant cell contexts
+- HPA–ProteomicsDB tissue-rank reproducibility without raw-scale merging
 
 ```bash
 python -m venv .venv
@@ -32,7 +33,7 @@ measured/model-derived evidence boundary.
 ## Roadmap
 
 1. Gene-symbol identifier resolution
-2. ProteomicsDB and CPTAC/PDC quantitative proteomics
+2. CPTAC/PDC quantitative tumor and adjacent-tissue proteomics
 3. HuBMAP and CELLxGENE spatial evidence
 4. Body → tissue → cell → compartment visualization
 5. PINNACLE and SPATIA model-derived evidence, clearly separated from measurements
@@ -44,6 +45,12 @@ DVP cell-type groups, EPCAM has 11 contexts detected by both modalities and mode
 agreement (Spearman ρ = 0.336). CEACAM5 and MSLN each have only one jointly detected context, so the
 software reports no correlation rather than manufacturing one from insufficient pairs. Detection
 quadrants reveal RNA-only and protein-only contexts separately.
+
+The independent ProteomicsDB run returns 13 tissues for CEACAM5, 36 for EPCAM, and 22 for MSLN.
+Across exactly matched, jointly detected tissue labels, HPA–ProteomicsDB rank correlations are 1.0
+for CEACAM5 (4 tissues), 0.643 for EPCAM (8), and 0.3 for MSLN (5). These small overlap counts are
+reported alongside the correlations; broader ontology-based tissue harmonization is intentionally a
+future step rather than an implicit synonym merge.
 
 ## Relationship to open-cohort-factory
 
