@@ -69,3 +69,23 @@ class AtlasSpec(BaseModel):
     tissues: list[str] = Field(default_factory=list)
     hpa_release: str = "25.1"
     pdc_studies: list[str] = Field(default_factory=list)
+    hubmap_organs: list[str] = Field(default_factory=list)
+
+
+class SpatialDatasetRecord(BaseModel):
+    dataset_id: str
+    dataset_uuid: str
+    source: str
+    source_release: str
+    retrieved_at: str
+    source_payload_sha256: list[str] = Field(default_factory=list)
+    assay: str
+    organ: str
+    donor_id: str | None = None
+    access_level: str
+    status: str
+    citation_url: str
+    source_url: str
+    protocol_urls: list[str] = Field(default_factory=list)
+    donor_covariates: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)

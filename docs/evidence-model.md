@@ -68,3 +68,12 @@ from being silently labeled as an older release. Evidence records also carry SHA
 source API responses or downloadable archives used to create them, and the manifest consolidates
 those hashes by source and release. Git dirty state is explicit so a locally modified build cannot be
 mistaken for an exact committed-code reproduction.
+
+## Spatial dataset registry
+
+HuBMAP discovery is a separate dataset-level contract rather than synthetic gene evidence. Published
+spatial assays are selected from the Search API by explicit organ codes and written to
+`spatial_datasets.json`. Each entry retains immutable dataset and donor identifiers, DOI, protocol,
+access level, response checksums, and every ontology-backed donor covariate supplied by HuBMAP.
+Protected datasets remain discoverable but are never represented as directly downloadable public
+data. Target-level spatial expression will be added only for datasets with auditable processed assets.

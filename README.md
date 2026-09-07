@@ -14,6 +14,7 @@ collapses unlike assays into an opaque safety score.
 - HPA–ProteomicsDB tissue-rank reproducibility without raw-scale merging
 - CPTAC/PDC aliquot proteomics with patient-matched tumor–adjacent comparisons
 - SHA-256 build manifest with input, artifact, source-release, software, and Git provenance
+- HuBMAP spatial-dataset registry with donor covariates and public/protected access labels
 
 ```bash
 python -m venv .venv
@@ -35,7 +36,7 @@ measured/model-derived evidence boundary.
 ## Roadmap
 
 1. Gene-symbol identifier resolution
-2. HuBMAP and CELLxGENE spatial evidence
+2. Target-level HuBMAP and CELLxGENE spatial expression
 3. Body → tissue → cell → compartment visualization
 4. PINNACLE and SPATIA model-derived evidence, clearly separated from measurements
 
@@ -69,6 +70,14 @@ effects establish heterogeneity without presenting a cohort median as universal 
 
 Every build also writes `manifest.json` with the input-spec checksum, output checksums, exact source
 releases and URLs, retrieval timestamps where supplied, package version, Git commit, and build time.
+
+`spatial_datasets.json` inventories published HuBMAP spatial assays for configured organ codes before
+large expression assets are downloaded. It retains donor age, sex, race, BMI, cause of death,
+medical history and other available ontology-backed fields, alongside access level, DOI, protocol,
+dataset UUID and donor UUID. This makes “normal” donor context visible during dataset selection.
+The verified lung registry currently finds 11 public spatial-proteomic datasets: eight PhenoCycler
+acquisitions and three DeepCell/SPRM-derived datasets. Covariates are retained without collapsing
+multiple medical-history or pathology entries into a single label.
 
 ## Relationship to open-cohort-factory
 

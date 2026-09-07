@@ -13,6 +13,7 @@ from .cross_source import summarize_cross_source
 from .paired import summarize_paired
 from .provenance import build_manifest
 from .sources.hpa import HPAClient
+from .sources.hubmap import HuBMAPClient
 from .sources.pdc import PDCClient
 from .sources.proteomicsdb import ProteomicsDBClient
 
@@ -51,12 +52,14 @@ def build(
     pdc = PDCClient()
     for study_id in project.pdc_studies:
         records.extend(pdc.fetch(study_id, identity_map))
+    spatial_datasets = HuBMAPClient().fetch_spatial_registry(project.hubmap_organs)
     output.mkdir(parents=True, exist_ok=True)
     serialized = [record.model_dump(mode="json") for record in records]
     evidence_json = output / "evidence.json"
     concordance_json = output / "concordance.json"
     cross_source_json = output / "cross_source_concordance.json"
     paired_json = output / "paired_tumor_normal.json"
+    spatial_json = output / "spatial_datasets.json"
     evidence_tsv = output / "evidence.tsv"
     evidence_json.write_text(json.dumps(serialized, indent=2), encoding="utf-8")
     concordance_json.write_text(
@@ -68,6 +71,10 @@ def build(
     paired_json.write_text(
         json.dumps(summarize_paired(records), indent=2), encoding="utf-8"
     )
+    spatial_json.write_text(
+        json.dumps([record.model_dump(mode="json") for record in spatial_datasets], indent=2),
+        encoding="utf-8",
+    )
     if serialized:
         with evidence_tsv.open("w", encoding="utf-8", newline="") as handle:
             flat = [
@@ -77,7 +84,7 @@ def build(
             writer = csv.DictWriter(handle, fieldnames=list(flat[0]), delimiter="\t")
             writer.writeheader()
             writer.writerows(flat)
-    artifacts = [evidence_json, concordance_json, cross_source_json, paired_json]
+    artifacts = [evidence_json, concordance_json, cross_source_json, paired_json, spatial_json]
     if evidence_tsv.exists():
         artifacts.append(evidence_tsv)
     manifest = build_manifest(spec, records, artifacts)
