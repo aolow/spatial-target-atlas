@@ -7,6 +7,7 @@ from typing import Annotated
 
 import typer
 
+from .concordance import summarize_concordance
 from .config import load_spec
 from .sources.hpa import HPAClient
 
@@ -27,13 +28,17 @@ def build(
     project = load_spec(spec)
     records = []
     client = HPAClient()
+    records.extend(client.fetch_complete(project.genes, project.tissues))
     for identifier in project.genes:
         if not identifier.startswith("ENSG"):
             raise typer.BadParameter(f"HPA milestone 1 requires an Ensembl ID: {identifier}")
-        records.extend(client.fetch_gene(identifier, project.tissues))
+        records.extend(client.fetch_annotations(identifier))
     output.mkdir(parents=True, exist_ok=True)
     serialized = [record.model_dump(mode="json") for record in records]
     (output / "evidence.json").write_text(json.dumps(serialized, indent=2), encoding="utf-8")
+    (output / "concordance.json").write_text(
+        json.dumps(summarize_concordance(records), indent=2), encoding="utf-8"
+    )
     if serialized:
         with (output / "evidence.tsv").open("w", encoding="utf-8", newline="") as handle:
             flat = [

@@ -21,3 +21,15 @@ def test_normalizes_measured_modalities_without_combining_scales() -> None:
     cell = next(record for record in records if record.spatial_scale.value == "cell_type")
     assert cell.donor_count == 1
     assert cell.metadata["platform"] == "Deep Visual Proteomics"
+
+
+def test_measurement_dicts_retain_quantitative_intensity() -> None:
+    payload = {
+        "Gene": "EPCAM",
+        "Ensembl": "ENSG1",
+        "Uniprot": "P16422",
+        "Protein tissue specific Intensity": {"lung": "12.5"},
+        "Protein cell type specific Intensity": {"alveolar cells": "7.5"},
+    }
+    records = HPAClient.normalize(payload, "https://example.test", ["lung"])
+    assert [record.value for record in records] == [12.5, 7.5]

@@ -48,6 +48,8 @@ class ProteinEvidenceRecord(BaseModel):
     detection_state: str = "measured"
     donor_count: int | None = Field(default=None, ge=0)
     sample_count: int | None = Field(default=None, ge=0)
+    sample_id: str | None = None
+    replicate: str | None = None
     sex: str | None = None
     healthy_status: str | None = None
     citation_url: str

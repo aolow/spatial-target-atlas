@@ -13,6 +13,10 @@ absence from the response does not mean the protein was measured and found absen
 Deep Visual Proteomics contributes cell-type-resolved mass-spectrometry evidence from one healthy
 female donor. Tissue MS and subcellular immunofluorescence remain separate records.
 
+Complete matrices retain blank intensity cells as `not_detected`; they are not converted to numeric
+zero. Gene-level specificity summaries remain labeled `specific_expression`. An empty `tissues`
+selection preserves the complete body-wide matrices, while a populated list explicitly subsets them.
+
 ## Planned evidence families
 
 - HPA full tissue and DVP matrices
@@ -21,3 +25,11 @@ female donor. Tissue MS and subcellular immunofluorescence remain separate recor
 - HuBMAP imaging MS and spatial molecular assays
 - CELLxGENE spatial transcriptomics
 - PINNACLE and SPATIA model-derived representations
+
+## Concordance
+
+RNA–protein concordance is calculated only within the matched HPA DVP cell-type-group table. The
+output includes the complete context count, both-detected pairs, RNA-only, protein-only, and
+neither-detected contexts. Spearman rank correlation is withheld when fewer than three contexts have
+positive values in both modalities. Rank discordance never compares HPA intensity numerically with
+nCPM; it compares only their within-gene order across matched contexts.
