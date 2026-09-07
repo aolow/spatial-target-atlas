@@ -3,27 +3,37 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
+import re
 import zipfile
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
 
 from ..models import EvidenceOrigin, Modality, ProteinEvidenceRecord, SpatialScale
 
-HPA_RELEASE = "25.1"
-HPA_CITATION = "https://www.proteinatlas.org/about/licence"
-HPA_DOWNLOAD = "https://www.proteinatlas.org/download/tsv"
+HPA_CITATION = "https://www.proteinatlas.org/humanproteome/tissue/method"
+HPA_LICENSE = "https://www.proteinatlas.org/about/licence"
 
 
 class HPAClient:
-    def __init__(self, client: httpx.Client | None = None) -> None:
+    def __init__(self, client: httpx.Client | None = None, release: str = "25.1") -> None:
+        if re.fullmatch(r"[1-9][0-9]*(?:\.[0-9]+)?", release) is None:
+            raise ValueError(f"Invalid HPA release: {release}")
         self.client = client or httpx.Client(timeout=60, follow_redirects=True)
+        self.release = release
+        self.base_url = f"https://v{release.split('.', 1)[0]}.proteinatlas.org"
+        self.download_url = f"{self.base_url}/download/tsv"
+        self.retrieved_at = datetime.now(UTC).isoformat()
+        self.payload_hashes: dict[str, str] = {}
 
     def fetch_gene(self, ensembl_id: str, tissues: list[str]) -> list[ProteinEvidenceRecord]:
-        url = f"https://www.proteinatlas.org/{ensembl_id}.json"
+        url = f"{self.base_url}/{ensembl_id}.json"
         response = self.client.get(url)
         response.raise_for_status()
+        self.payload_hashes[url] = hashlib.sha256(response.content).hexdigest()
         return self.normalize(response.json(), url, tissues)
 
     def fetch_complete(
@@ -36,6 +46,7 @@ class HPAClient:
             row["Cell type group"]: row["Tissue name"]
             for row in self._archive("dvp_cell_types.tsv.zip")
         }
+        cell_types_url = f"{self.download_url}/dvp_cell_types.tsv.zip"
         records: list[ProteinEvidenceRecord] = []
         for row in self._archive("dvp_cell_type_group_data.tsv.zip"):
             if row["Gene"] not in selected_genes:
@@ -45,6 +56,8 @@ class HPAClient:
             if selected_tissues and (tissue is None or tissue.casefold() not in selected_tissues):
                 continue
             common = self._row_common(row, "dvp_cell_type_group_data.tsv.zip")
+            common["source_payload_sha256"].append(self.payload_hashes[cell_types_url])
+            common["supporting_source_urls"] = [cell_types_url]
             protein_value = _float(row["Intensity"])
             rna_value = _float(row["Matched nCPM"])
             records.extend(
@@ -58,14 +71,15 @@ class HPAClient:
                         value=protein_value,
                         unit="HPA DVP intensity",
                         detection_state=(
-                            "detected"
-                            if protein_value is not None and protein_value > 0
-                            else "not_detected"
+                            "detected" if protein_value is not None else "not_detected"
                         ),
                         donor_count=1,
                         sex="female",
                         healthy_status="healthy donor",
-                        metadata={"platform": "Deep Visual Proteomics"},
+                        metadata={
+                            "platform": "Deep Visual Proteomics",
+                            "license_url": HPA_LICENSE,
+                        },
                     ),
                     ProteinEvidenceRecord(
                         **common,
@@ -77,13 +91,16 @@ class HPAClient:
                         unit="matched nCPM",
                         detection_state=(
                             "detected"
-                            if rna_value is not None and rna_value > 0
+                            if rna_value is not None and rna_value >= 1
                             else "not_detected"
                         ),
                         donor_count=1,
                         sex="female",
                         healthy_status="healthy donor",
-                        metadata={"paired_modality": "Deep Visual Proteomics"},
+                        metadata={
+                            "paired_modality": "Deep Visual Proteomics",
+                            "license_url": HPA_LICENSE,
+                        },
                     ),
                 ]
             )
@@ -107,6 +124,13 @@ class HPAClient:
                     sample_id=row["sample_name"],
                     replicate=row["replicate_nr"],
                     sample_count=1,
+                    donor_count=1,
+                    sex="female",
+                    healthy_status="healthy donor",
+                    metadata={
+                        "donor_scope": "single donor; three tissue replicates",
+                        "license_url": HPA_LICENSE,
+                    },
                 )
             )
         return records
@@ -119,35 +143,40 @@ class HPAClient:
         ]
 
     def resolve_uniprot(self, ensembl_id: str) -> tuple[str, str | None]:
-        url = f"https://www.proteinatlas.org/{ensembl_id}.json"
+        url = f"{self.base_url}/{ensembl_id}.json"
         response = self.client.get(url)
         response.raise_for_status()
+        self.payload_hashes[url] = hashlib.sha256(response.content).hexdigest()
         payload = response.json()
         return str(payload["Gene"]), _first(payload.get("Uniprot"))
 
     def _archive(self, name: str) -> list[dict[str, str]]:
-        response = self.client.get(f"{HPA_DOWNLOAD}/{name}")
+        url = f"{self.download_url}/{name}"
+        response = self.client.get(url)
         response.raise_for_status()
+        self.payload_hashes[url] = hashlib.sha256(response.content).hexdigest()
         with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
             member = archive.namelist()[0]
             text = io.TextIOWrapper(archive.open(member), encoding="utf-8")
             return list(csv.DictReader(text, delimiter="\t"))
 
-    @staticmethod
-    def _row_common(row: dict[str, str], archive: str) -> dict[str, Any]:
+    def _row_common(self, row: dict[str, str], archive: str) -> dict[str, Any]:
         return {
             "gene_symbol": row["Gene name"],
             "ensembl_id": row["Gene"],
             "source": "Human Protein Atlas",
-            "source_release": HPA_RELEASE,
+            "source_release": self.release,
+            "retrieved_at": self.retrieved_at,
+            "source_payload_sha256": [
+                self.payload_hashes[f"{self.download_url}/{archive}"]
+            ],
             "evidence_origin": EvidenceOrigin.MEASURED,
             "citation_url": HPA_CITATION,
-            "source_url": f"{HPA_DOWNLOAD}/{archive}",
+            "source_url": f"{self.download_url}/{archive}",
         }
 
-    @staticmethod
     def normalize(
-        payload: dict[str, Any], source_url: str, tissues: list[str]
+        self, payload: dict[str, Any], source_url: str, tissues: list[str]
     ) -> list[ProteinEvidenceRecord]:
         gene = str(payload["Gene"])
         ensembl = str(payload["Ensembl"])
@@ -158,7 +187,11 @@ class HPAClient:
             "ensembl_id": ensembl,
             "uniprot_id": uniprot,
             "source": "Human Protein Atlas",
-            "source_release": HPA_RELEASE,
+            "source_release": self.release,
+            "retrieved_at": self.retrieved_at,
+            "source_payload_sha256": (
+                [self.payload_hashes[source_url]] if source_url in self.payload_hashes else []
+            ),
             "evidence_origin": EvidenceOrigin.MEASURED,
             "citation_url": HPA_CITATION,
             "source_url": source_url,
@@ -176,7 +209,10 @@ class HPAClient:
                     value=value,
                     unit="HPA MS intensity",
                     detection_state="specific_expression",
-                    metadata={"selection": "HPA gene-level specificity summary"},
+                    metadata={
+                        "license_url": HPA_LICENSE,
+                        "selection": "HPA gene-level specificity summary",
+                    },
                 )
             )
         for cell_type, value in _measurements(payload.get("Protein cell type specific Intensity")):
@@ -193,6 +229,7 @@ class HPAClient:
                     sex="female",
                     healthy_status="healthy donor",
                     metadata={
+                        "license_url": HPA_LICENSE,
                         "platform": "Deep Visual Proteomics",
                         "selection": "HPA gene-level specificity summary",
                     },
@@ -202,10 +239,14 @@ class HPAClient:
             records.append(
                 ProteinEvidenceRecord(
                     **common,
-                    modality=Modality.IMMUNOHISTOCHEMISTRY,
+                    modality=Modality.IMMUNOFLUORESCENCE,
                     spatial_scale=SpatialScale.SUBCELLULAR,
                     subcellular_location=str(location),
-                    metadata={"reliability": payload.get("Reliability (IF)")},
+                    metadata={
+                        "license_url": HPA_LICENSE,
+                        "reliability": payload.get("Reliability (IF)"),
+                        "assay": "indirect immunofluorescence and confocal microscopy",
+                    },
                 )
             )
         return records

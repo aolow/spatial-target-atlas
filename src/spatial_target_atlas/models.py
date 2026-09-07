@@ -17,6 +17,7 @@ class Modality(StrEnum):
     MASS_SPECTROMETRY = "mass_spectrometry"
     IMAGING_MASS_SPECTROMETRY = "imaging_mass_spectrometry"
     IMMUNOHISTOCHEMISTRY = "immunohistochemistry"
+    IMMUNOFLUORESCENCE = "immunofluorescence"
     SPATIAL_TRANSCRIPTOMICS = "spatial_transcriptomics"
     TRANSCRIPTOMICS = "transcriptomics"
     FOUNDATION_MODEL = "foundation_model"
@@ -37,6 +38,7 @@ class ProteinEvidenceRecord(BaseModel):
     source: str
     source_release: str
     retrieved_at: str | None = None
+    source_payload_sha256: list[str] = Field(default_factory=list)
     evidence_origin: EvidenceOrigin
     modality: Modality
     spatial_scale: SpatialScale
@@ -57,6 +59,7 @@ class ProteinEvidenceRecord(BaseModel):
     case_id: str | None = None
     citation_url: str
     source_url: str
+    supporting_source_urls: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 

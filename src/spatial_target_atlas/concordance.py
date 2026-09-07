@@ -9,17 +9,27 @@ from .models import Modality, ProteinEvidenceRecord, SpatialScale
 
 
 def summarize_concordance(records: list[ProteinEvidenceRecord]) -> list[dict[str, Any]]:
-    paired: defaultdict[tuple[str, str], dict[Modality, float | None]] = defaultdict(dict)
+    paired: defaultdict[tuple[str, str], dict[Modality, ProteinEvidenceRecord]] = defaultdict(dict)
     for record in records:
-        if record.spatial_scale == SpatialScale.CELL_TYPE and record.cell_type:
-            paired[(record.gene_symbol, record.cell_type)][record.modality] = record.value
+        if (
+            record.source == "Human Protein Atlas"
+            and record.spatial_scale == SpatialScale.CELL_TYPE
+            and record.cell_type
+        ):
+            paired[(record.gene_symbol, record.cell_type)][record.modality] = record
     results = []
     for gene in sorted({gene for gene, _ in paired}):
         all_rows: list[dict[str, Any]] = [
             {
                 "cell_type": cell_type,
-                "rna": values.get(Modality.TRANSCRIPTOMICS),
-                "protein": values.get(Modality.MASS_SPECTROMETRY),
+                "rna": values[Modality.TRANSCRIPTOMICS].value
+                if Modality.TRANSCRIPTOMICS in values
+                else None,
+                "protein": values[Modality.MASS_SPECTROMETRY].value
+                if Modality.MASS_SPECTROMETRY in values
+                else None,
+                "rna_detected": _detected(values.get(Modality.TRANSCRIPTOMICS)),
+                "protein_detected": _detected(values.get(Modality.MASS_SPECTROMETRY)),
             }
             for (row_gene, cell_type), values in paired.items()
             if row_gene == gene
@@ -27,10 +37,7 @@ def summarize_concordance(records: list[ProteinEvidenceRecord]) -> list[dict[str
         rows = [
             row
             for row in all_rows
-            if row["rna"] is not None
-            and float(row["rna"]) > 0
-            and row["protein"] is not None
-            and float(row["protein"]) > 0
+            if row["rna_detected"] and row["protein_detected"]
         ]
         rna_ranks = _ranks([float(row["rna"]) for row in rows])
         protein_ranks = _ranks([float(row["protein"]) for row in rows])
@@ -62,10 +69,14 @@ def summarize_concordance(records: list[ProteinEvidenceRecord]) -> list[dict[str
 
 def _quadrant(rows: list[dict[str, Any]], rna_detected: bool, protein_detected: bool) -> int:
     return sum(
-        (row["rna"] is not None and float(row["rna"]) > 0) == rna_detected
-        and (row["protein"] is not None and float(row["protein"]) > 0) == protein_detected
+        bool(row["rna_detected"]) == rna_detected
+        and bool(row["protein_detected"]) == protein_detected
         for row in rows
     )
+
+
+def _detected(record: ProteinEvidenceRecord | None) -> bool:
+    return record is not None and record.detection_state == "detected"
 
 
 def _ranks(values: list[float]) -> list[float]:

@@ -13,6 +13,7 @@ collapses unlike assays into an opaque safety score.
 - Within-DVP RNA–protein rank concordance and discordant cell contexts
 - HPA–ProteomicsDB tissue-rank reproducibility without raw-scale merging
 - CPTAC/PDC aliquot proteomics with patient-matched tumor–adjacent comparisons
+- SHA-256 build manifest with input, artifact, source-release, software, and Git provenance
 
 ```bash
 python -m venv .venv
@@ -58,11 +59,16 @@ calculated within patients as tumor minus adjacent-normal TMT log2 ratios. “So
 represented as `adjacent_normal` and `not_healthy_reference`: it is tissue from a cancer-bearing
 patient, not a population healthy control. Pooled/internal reference channels are excluded.
 
-The verified live build contains 669 PDC target measurements: 112 tumors and 101 adjacent-normal
-samples per gene, yielding 101 patient-matched pairs. Median tumor-minus-adjacent log2-ratio
+The verified live build contains 639 biological PDC target measurements: 112 tumors and 101
+adjacent-normal samples per gene, yielding 101 patient-matched pairs. Internal-reference channels
+are excluded using PDC's reference flag with an identifier fallback for incompletely flagged study
+records. Median tumor-minus-adjacent log2-ratio
 differences are +0.584 for CEACAM5, +0.516 for EPCAM, and −0.701 for MSLN; the corresponding
 fractions of patients with higher tumor abundance are 68%, 79%, and 29%. These descriptive paired
 effects establish heterogeneity without presenting a cohort median as universal target biology.
+
+Every build also writes `manifest.json` with the input-spec checksum, output checksums, exact source
+releases and URLs, retrieval timestamps where supplied, package version, Git commit, and build time.
 
 ## Relationship to open-cohort-factory
 

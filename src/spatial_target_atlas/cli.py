@@ -11,6 +11,7 @@ from .concordance import summarize_concordance
 from .config import load_spec
 from .cross_source import summarize_cross_source
 from .paired import summarize_paired
+from .provenance import build_manifest
 from .sources.hpa import HPAClient
 from .sources.pdc import PDCClient
 from .sources.proteomicsdb import ProteomicsDBClient
@@ -31,7 +32,7 @@ def build(
     """Build a versioned measured-evidence bundle."""
     project = load_spec(spec)
     records = []
-    client = HPAClient()
+    client = HPAClient(release=project.hpa_release)
     records.extend(client.fetch_complete(project.genes, project.tissues))
     identities = []
     for identifier in project.genes:
@@ -52,18 +53,23 @@ def build(
         records.extend(pdc.fetch(study_id, identity_map))
     output.mkdir(parents=True, exist_ok=True)
     serialized = [record.model_dump(mode="json") for record in records]
-    (output / "evidence.json").write_text(json.dumps(serialized, indent=2), encoding="utf-8")
-    (output / "concordance.json").write_text(
+    evidence_json = output / "evidence.json"
+    concordance_json = output / "concordance.json"
+    cross_source_json = output / "cross_source_concordance.json"
+    paired_json = output / "paired_tumor_normal.json"
+    evidence_tsv = output / "evidence.tsv"
+    evidence_json.write_text(json.dumps(serialized, indent=2), encoding="utf-8")
+    concordance_json.write_text(
         json.dumps(summarize_concordance(records), indent=2), encoding="utf-8"
     )
-    (output / "cross_source_concordance.json").write_text(
+    cross_source_json.write_text(
         json.dumps(summarize_cross_source(records), indent=2), encoding="utf-8"
     )
-    (output / "paired_tumor_normal.json").write_text(
+    paired_json.write_text(
         json.dumps(summarize_paired(records), indent=2), encoding="utf-8"
     )
     if serialized:
-        with (output / "evidence.tsv").open("w", encoding="utf-8", newline="") as handle:
+        with evidence_tsv.open("w", encoding="utf-8", newline="") as handle:
             flat = [
                 {**row, "metadata": json.dumps(row["metadata"], sort_keys=True)}
                 for row in serialized
@@ -71,6 +77,11 @@ def build(
             writer = csv.DictWriter(handle, fieldnames=list(flat[0]), delimiter="\t")
             writer.writeheader()
             writer.writerows(flat)
+    artifacts = [evidence_json, concordance_json, cross_source_json, paired_json]
+    if evidence_tsv.exists():
+        artifacts.append(evidence_tsv)
+    manifest = build_manifest(spec, records, artifacts)
+    (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     typer.echo(f"Built {len(records)} evidence records in {output}")
 
 

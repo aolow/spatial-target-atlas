@@ -22,7 +22,7 @@ spatial-target-atlas = "spatial_target_atlas.cli:app"
 packages = ["src/spatial_target_atlas"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=spatial_target_atlas --cov-report=term-missing"
+addopts = "--cov=spatial_target_atlas --cov-report=term-missing --cov-fail-under=70"
 testpaths = ["tests"]
 
 [tool.ruff]

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from datetime import UTC, datetime
 from typing import Any
 
@@ -11,6 +12,7 @@ from ..models import EvidenceOrigin, Modality, ProteinEvidenceRecord, SpatialSca
 
 API_ROOT = "https://www.proteomicsdb.org/proteomicsdb/logic/api"
 API_DOCS = "https://www.proteomicsdb.org/api"
+PUBLICATION = "https://doi.org/10.1093/nar/gkaf1265"
 
 
 class ProteomicsDBClient:
@@ -47,6 +49,7 @@ class ProteomicsDBClient:
                     source="ProteomicsDB",
                     source_release="API v1.1 live",
                     retrieved_at=datetime.now(UTC).isoformat(),
+                    source_payload_sha256=[hashlib.sha256(response.content).hexdigest()],
                     evidence_origin=EvidenceOrigin.MEASURED,
                     modality=Modality.MASS_SPECTROMETRY,
                     spatial_scale=SpatialScale.TISSUE,
@@ -58,7 +61,7 @@ class ProteomicsDBClient:
                         "detected" if value is not None and value > 0 else "not_detected"
                     ),
                     sample_count=int(row.get("SAMPLES") or 0),
-                    citation_url=API_DOCS,
+                    citation_url=PUBLICATION,
                     source_url=str(response.url),
                     metadata={
                         "unnormalized_intensity": _float(row.get("UNNORMALIZED_INTENSITY")),
@@ -66,6 +69,7 @@ class ProteomicsDBClient:
                         "maximum_normalized_intensity": _float(row.get("MAX_NORMALIZED_INTENSITY")),
                         "aggregation": "grouped_by_tissue",
                         "calculation_method": "iBAQ",
+                        "api_documentation": API_DOCS,
                     },
                 )
             )
