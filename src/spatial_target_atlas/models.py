@@ -89,3 +89,19 @@ class SpatialDatasetRecord(BaseModel):
     protocol_urls: list[str] = Field(default_factory=list)
     donor_covariates: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class SpatialTargetCoverageRecord(BaseModel):
+    dataset_id: str
+    dataset_uuid: str
+    source: str
+    gene_symbol: str
+    ensembl_id: str
+    uniprot_id: str | None = None
+    coverage_state: str
+    matched_channels: list[dict[str, Any]] = Field(default_factory=list)
+    panel_size: int | None = Field(default=None, ge=0)
+    panel_url: str | None = None
+    panel_sha256: str | None = None
+    retrieved_at: str
+    note: str

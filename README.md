@@ -15,6 +15,7 @@ collapses unlike assays into an opaque safety score.
 - CPTAC/PDC aliquot proteomics with patient-matched tumor–adjacent comparisons
 - SHA-256 build manifest with input, artifact, source-release, software, and Git provenance
 - HuBMAP spatial-dataset registry with donor covariates and public/protected access labels
+- HuBMAP targeted-panel coverage audit that separates `not_assayed` from non-detection
 
 ```bash
 python -m venv .venv
@@ -78,6 +79,14 @@ dataset UUID and donor UUID. This makes “normal” donor context visible durin
 The verified lung registry currently finds 11 public spatial-proteomic datasets: eight PhenoCycler
 acquisitions and three DeepCell/SPRM-derived datasets. Covariates are retained without collapsing
 multiple medical-history or pathology entries into a single label.
+
+`spatial_target_coverage.json` then follows processed PhenoCycler datasets to their raw parent,
+reads the source-declared antibody TSV, and matches targets using UniProt accessions (with an exact
+channel-name fallback). It retains channel metadata, antibody RRIDs, panel URL, and SHA-256 checksum.
+The three currently available DeepCell/SPRM lung datasets use 39- or 45-antibody panels that do not
+include CEACAM5, EPCAM, or MSLN, so these targets are reported as `not_assayed`. This is a panel
+coverage limitation, not protein non-detection. Large AnnData, image, and per-cell feature assets
+are therefore not downloaded for targets that the panel could not measure.
 
 ## Relationship to open-cohort-factory
 
