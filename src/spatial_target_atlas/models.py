@@ -53,6 +53,8 @@ class ProteinEvidenceRecord(BaseModel):
     replicate: str | None = None
     sex: str | None = None
     healthy_status: str | None = None
+    specimen_context: str | None = None
+    case_id: str | None = None
     citation_url: str
     source_url: str
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -63,3 +65,4 @@ class AtlasSpec(BaseModel):
     genes: list[str] = Field(min_length=1)
     tissues: list[str] = Field(default_factory=list)
     hpa_release: str = "25.1"
+    pdc_studies: list[str] = Field(default_factory=list)

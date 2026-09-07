@@ -5,3 +5,5 @@ genes:
   - ENSG00000102854  # MSLN
 tissues: []  # Empty means retain the complete body-wide HPA matrices.
 hpa_release: "25.1"
+pdc_studies:
+  - PDC000153  # CPTAC LUAD Discovery Study - Proteome

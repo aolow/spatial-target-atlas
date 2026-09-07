@@ -21,7 +21,7 @@ selection preserves the complete body-wide matrices, while a populated list expl
 
 - HPA full tissue and DVP matrices
 - ProteomicsDB grouped tissue MS
-- CPTAC/PDC tumor and adjacent-tissue proteomics
+- CPTAC/PDC tumor and adjacent-tissue proteomics (configurable studies implemented)
 - HuBMAP imaging MS and spatial molecular assays
 - CELLxGENE spatial transcriptomics
 - PINNACLE and SPATIA model-derived representations
@@ -42,3 +42,12 @@ aggregation parameters returned by the API.
 ProteomicsDB is a live API rather than a pinned atlas archive. Each record therefore includes its
 retrieval timestamp and declares `API v1.1 live` as the source release. Tissue labels that appear
 unusual remain unchanged until an auditable ontology crosswalk is introduced.
+
+## PDC tumor–adjacent comparisons
+
+PDC quantitative values are stored per aliquot with `case_id`, `specimen_context`, and the original
+`sample_type`. Tumor and adjacent-normal values are paired only when PDC assigns both aliquots to the
+same case. The summary reports the median paired difference and fraction of patients with a positive
+difference; it does not treat adjacent tissue as healthy or pool TMT ratios across studies. Stable
+PDC accessions resolve to the latest version, while resolved study UUID and retrieval time remain in
+each record for auditability.

@@ -12,6 +12,7 @@ collapses unlike assays into an opaque safety score.
 - JSON and TSV evidence bundles
 - Within-DVP RNA–protein rank concordance and discordant cell contexts
 - HPA–ProteomicsDB tissue-rank reproducibility without raw-scale merging
+- CPTAC/PDC aliquot proteomics with patient-matched tumor–adjacent comparisons
 
 ```bash
 python -m venv .venv
@@ -33,10 +34,9 @@ measured/model-derived evidence boundary.
 ## Roadmap
 
 1. Gene-symbol identifier resolution
-2. CPTAC/PDC quantitative tumor and adjacent-tissue proteomics
-3. HuBMAP and CELLxGENE spatial evidence
-4. Body → tissue → cell → compartment visualization
-5. PINNACLE and SPATIA model-derived evidence, clearly separated from measurements
+2. HuBMAP and CELLxGENE spatial evidence
+3. Body → tissue → cell → compartment visualization
+4. PINNACLE and SPATIA model-derived evidence, clearly separated from measurements
 
 ## Verified LUAD example
 
@@ -51,6 +51,18 @@ Across exactly matched, jointly detected tissue labels, HPA–ProteomicsDB rank 
 for CEACAM5 (4 tissues), 0.643 for EPCAM (8), and 0.3 for MSLN (5). These small overlap counts are
 reported alongside the correlations; broader ontology-based tissue harmonization is intentionally a
 future step rather than an implicit synonym merge.
+
+The LUAD example also queries the latest PDC version behind `PDC000153`, maps aliquots using the
+authoritative PDC biospecimen `sample_type`, and emits `paired_tumor_normal.json`. Effects are
+calculated within patients as tumor minus adjacent-normal TMT log2 ratios. “Solid Tissue Normal” is
+represented as `adjacent_normal` and `not_healthy_reference`: it is tissue from a cancer-bearing
+patient, not a population healthy control. Pooled/internal reference channels are excluded.
+
+The verified live build contains 669 PDC target measurements: 112 tumors and 101 adjacent-normal
+samples per gene, yielding 101 patient-matched pairs. Median tumor-minus-adjacent log2-ratio
+differences are +0.584 for CEACAM5, +0.516 for EPCAM, and −0.701 for MSLN; the corresponding
+fractions of patients with higher tumor abundance are 68%, 79%, and 29%. These descriptive paired
+effects establish heterogeneity without presenting a cohort median as universal target biology.
 
 ## Relationship to open-cohort-factory
 
