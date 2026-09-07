@@ -22,9 +22,19 @@ def test_manifest_hashes_inputs_outputs_and_records_source_release(tmp_path) -> 
         source_url="https://example.org/data",
     )
 
-    manifest = build_manifest(spec, [record], [artifact])
+    manifest = build_manifest(
+        spec,
+        [record],
+        [artifact],
+        extra_sources=[{
+            "source": "Other", "release": "1", "record_count": 2,
+            "retrieved_at": [], "source_urls": [], "source_payload_sha256": [],
+        }],
+    )
 
     assert manifest["input_spec"]["sha256"] == hashlib.sha256(b"name: test\n").hexdigest()
     assert manifest["artifacts"][0]["sha256"] == hashlib.sha256(b"[]").hexdigest()
-    assert manifest["sources"][0]["release"] == "release"
-    assert manifest["sources"][0]["source_payload_sha256"] == ["abc123"]
+    sources = {source["source"]: source for source in manifest["sources"]}
+    assert sources["source"]["release"] == "release"
+    assert sources["source"]["source_payload_sha256"] == ["abc123"]
+    assert sources["Other"]["record_count"] == 2

@@ -105,3 +105,42 @@ class SpatialTargetCoverageRecord(BaseModel):
     panel_sha256: str | None = None
     retrieved_at: str
     note: str
+
+
+class SpatialTranscriptomicDatasetRecord(BaseModel):
+    dataset_id: str
+    source: str
+    source_release: str
+    dataset_title: str
+    collection_id: str
+    collection_name: str
+    collection_doi: str | None = None
+    citation: str
+    spot_count: int = Field(ge=0)
+    assays: list[str]
+    donor_contexts: list[dict[str, Any]]
+
+
+class SpatialTranscriptomicSummaryRecord(BaseModel):
+    dataset_id: str
+    source: str
+    source_release: str
+    gene_symbol: str
+    ensembl_id: str
+    assay: str
+    tissue: str
+    disease: str
+    donor_id: str
+    development_stage: str
+    sex: str
+    self_reported_ethnicity: str
+    cell_type: str
+    is_primary_data: bool
+    spot_count: int = Field(ge=0)
+    positive_spot_count: int = Field(ge=0)
+    positive_spot_fraction: float = Field(ge=0, le=1)
+    mean_raw_count: float = Field(ge=0)
+    detection_state: str
+    reference_context: str
+    unit: str = "raw_UMI_or_read_count_per_spot"
+    note: str

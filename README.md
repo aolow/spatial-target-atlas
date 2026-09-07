@@ -21,6 +21,11 @@ collapses unlike assays into an opaque safety score.
 python -m venv .venv
 .venv/bin/pip install -e '.[dev]'
 .venv/bin/spatial-target-atlas build examples/luad_targets.yaml -o outputs/luad
+
+# Optional spatial-transcriptomics connector (larger dependency set)
+.venv/bin/pip install -e '.[spatial]'
+.venv/bin/spatial-target-atlas build-spatial-census examples/luad_targets.yaml \
+  --census-version 2025-11-08 --tissue lung -o outputs/luad-census-spatial
 ```
 
 Leave `tissues` empty to retain all available tissues and DVP cell-type groups for body-wide
@@ -37,7 +42,7 @@ measured/model-derived evidence boundary.
 ## Roadmap
 
 1. Gene-symbol identifier resolution
-2. Target-level HuBMAP and CELLxGENE spatial expression
+2. Target-level HuBMAP cell-intensity extraction for assayed panels
 3. Body → tissue → cell → compartment visualization
 4. PINNACLE and SPATIA model-derived evidence, clearly separated from measurements
 
@@ -87,6 +92,19 @@ The three currently available DeepCell/SPRM lung datasets use 39- or 45-antibody
 include CEACAM5, EPCAM, or MSLN, so these targets are reported as `not_assayed`. This is a panel
 coverage limitation, not protein non-detection. Large AnnData, image, and per-cell feature assets
 are therefore not downloaded for targets that the panel could not measure.
+
+The optional CELLxGENE Census command queries the spatial corpus separately because its TileDB-SOMA
+stack is substantially larger than the core package. It emits a dataset registry with citations and
+donor contexts plus raw-count summaries stratified by dataset, donor, disease, sex, ethnicity,
+developmental stage, assay, tissue, cell-type annotation, and primary-data status. Per-dataset feature presence is checked
+before zeros are interpreted. Counts are never normalized across studies. Pin `--census-version` for
+reproducibility; the verified build uses the stable `2025-11-08` release.
+
+That release contains 22 lung spatial datasets and 275,274 spots. The apparent reference pool is
+not a homogeneous adult healthy cohort: 11 source-labeled-normal donors are fetal (12–20 weeks
+post-fertilization), two are adults (age 59 and seventh decade), and seven Slide-seqV2 datasets are
+lung metastasis tissue from a 61-year-old donor with renal cell carcinoma. The output therefore
+labels developmental normal, adult/unspecified normal, and disease tissue separately.
 
 ## Relationship to open-cohort-factory
 

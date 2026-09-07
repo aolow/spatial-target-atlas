@@ -106,5 +106,48 @@ def build(
     typer.echo(f"Built {len(records)} evidence records in {output}")
 
 
+@app.command("build-spatial-census")
+def build_spatial_census(
+    spec: Annotated[Path, typer.Argument(exists=True, readable=True)],
+    tissue: Annotated[str, typer.Option("--tissue")] = "lung",
+    census_version: Annotated[str, typer.Option("--census-version")] = "stable",
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path("outputs/census-spatial"),
+) -> None:
+    """Build raw-count spatial summaries from a versioned CELLxGENE Census release."""
+    from .sources.cellxgene import CensusSpatialClient
+
+    project = load_spec(spec)
+    datasets, summaries = CensusSpatialClient(census_version).fetch(project.genes, tissue)
+    output.mkdir(parents=True, exist_ok=True)
+    dataset_json = output / "census_spatial_datasets.json"
+    summary_json = output / "census_spatial_expression.json"
+    dataset_json.write_text(
+        json.dumps([record.model_dump(mode="json") for record in datasets], indent=2),
+        encoding="utf-8",
+    )
+    summary_json.write_text(
+        json.dumps([record.model_dump(mode="json") for record in summaries], indent=2),
+        encoding="utf-8",
+    )
+    release = summaries[0].source_release if summaries else census_version
+    manifest = build_manifest(
+        spec,
+        [],
+        [dataset_json, summary_json],
+        extra_sources=[{
+            "source": "CZ CELLxGENE Census",
+            "release": release,
+            "record_count": len(summaries),
+            "retrieved_at": [],
+            "source_urls": ["https://cellxgene.cziscience.com/"],
+            "source_payload_sha256": [],
+        }],
+    )
+    (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    typer.echo(
+        f"Built {len(summaries)} spatial summaries from {len(datasets)} datasets in {output}"
+    )
+
+
 if __name__ == "__main__":
     app()
