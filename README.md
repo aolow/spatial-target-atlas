@@ -26,6 +26,9 @@ python -m venv .venv
 .venv/bin/pip install -e '.[spatial]'
 .venv/bin/spatial-target-atlas build-spatial-census examples/luad_targets.yaml \
   --census-version 2025-11-08 --tissue lung -o outputs/luad-census-spatial
+.venv/bin/spatial-target-atlas reference-audit examples/luad_targets.yaml \
+  --spatial-expression outputs/luad-census-spatial/census_spatial_expression.json \
+  --core-evidence outputs/luad/evidence.json -o outputs/luad-reference-audit.json
 ```
 
 Leave `tissues` empty to retain all available tissues and DVP cell-type groups for body-wide
@@ -105,6 +108,12 @@ not a homogeneous adult healthy cohort: 11 source-labeled-normal donors are feta
 post-fertilization), two are adults (age 59 and seventh decade), and seven Slide-seqV2 datasets are
 lung metastasis tissue from a 61-year-old donor with renal cell carcinoma. The output therefore
 labels developmental normal, adult/unspecified normal, and disease tissue separately.
+
+`reference-audit` ranks contexts by an explicit decision rule rather than an opaque composite score.
+Adult source-labeled-normal tissue is the primary candidate, with low donor depth surfaced as a
+caveat. Cancer-patient adjacent normal and developmental normal are sensitivity references; disease
+tissue is comparator-only. The output shows target prevalence or abundance within each modality and
+never numerically compares spatial raw counts with proteomic ratios.
 
 ## Relationship to open-cohort-factory
 

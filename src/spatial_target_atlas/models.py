@@ -70,6 +70,7 @@ class AtlasSpec(BaseModel):
     hpa_release: str = "25.1"
     pdc_studies: list[str] = Field(default_factory=list)
     hubmap_organs: list[str] = Field(default_factory=list)
+    target_population: dict[str, Any] = Field(default_factory=dict)
 
 
 class SpatialDatasetRecord(BaseModel):

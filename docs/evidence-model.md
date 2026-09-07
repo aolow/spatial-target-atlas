@@ -69,6 +69,18 @@ source API responses or downloadable archives used to create them, and the manif
 those hashes by source and release. Git dirty state is explicit so a locally modified build cannot be
 mistaken for an exact committed-code reproduction.
 
+## Reference selection
+
+Reference ranking is categorical and auditable, not a learned or composite score. For an adult lung
+cancer target population, source-labeled adult normal lung is primary-eligible, while low donor depth
+is retained as a blocking caveat for strong population claims. Cancer-patient adjacent tissue and
+developmental normal tissue are sensitivity references for different biases. Disease tissue is a
+comparator only. The categories do not imply that a source label of `normal` proves healthy status.
+
+Sensitivity summaries remain within modality. CELLxGENE spatial results report the fraction of
+assayed spots with positive raw counts; PDC reports source-scale abundance summaries for tumor and
+adjacent samples. These values are never combined or numerically ranked across assays.
+
 ## Spatial dataset registry
 
 HuBMAP discovery is a separate dataset-level contract rather than synthetic gene evidence. Published

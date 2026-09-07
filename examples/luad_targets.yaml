@@ -10,3 +10,7 @@ pdc_studies:
 hubmap_organs:
   - LL  # Lung, left
   - RL  # Lung, right
+target_population:
+  disease: lung adenocarcinoma
+  tissue: lung
+  life_stage: adult

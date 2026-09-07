@@ -10,8 +10,10 @@ import typer
 from .concordance import summarize_concordance
 from .config import load_spec
 from .cross_source import summarize_cross_source
+from .models import ProteinEvidenceRecord, SpatialTranscriptomicSummaryRecord
 from .paired import summarize_paired
 from .provenance import build_manifest
+from .reference_selection import build_reference_audit
 from .sources.hpa import HPAClient
 from .sources.hubmap import HuBMAPClient
 from .sources.pdc import PDCClient
@@ -147,6 +149,33 @@ def build_spatial_census(
     typer.echo(
         f"Built {len(summaries)} spatial summaries from {len(datasets)} datasets in {output}"
     )
+
+
+@app.command("reference-audit")
+def reference_audit(
+    spec: Annotated[Path, typer.Argument(exists=True, readable=True)],
+    spatial_expression: Annotated[
+        Path, typer.Option("--spatial-expression", exists=True, readable=True)
+    ],
+    core_evidence: Annotated[
+        Path | None, typer.Option("--core-evidence", exists=True, readable=True)
+    ] = None,
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path("reference_audit.json"),
+) -> None:
+    """Rank reference roles and show target sensitivity without mixing assay scales."""
+    project = load_spec(spec)
+    spatial = [
+        SpatialTranscriptomicSummaryRecord.model_validate(row)
+        for row in json.loads(spatial_expression.read_text(encoding="utf-8"))
+    ]
+    protein = [] if core_evidence is None else [
+        ProteinEvidenceRecord.model_validate(row)
+        for row in json.loads(core_evidence.read_text(encoding="utf-8"))
+    ]
+    audit = build_reference_audit(spatial, protein, project.target_population)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(audit, indent=2), encoding="utf-8")
+    typer.echo(f"Built reference audit with {len(audit['candidates'])} candidate contexts")
 
 
 if __name__ == "__main__":
