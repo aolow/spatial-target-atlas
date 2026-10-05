@@ -18,6 +18,7 @@ def build_manifest(
     records: list[ProteinEvidenceRecord],
     artifact_paths: list[Path],
     extra_sources: list[dict[str, Any]] | None = None,
+    source_failures: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     source_details: dict[tuple[str, str], dict[str, Any]] = defaultdict(
         lambda: {"retrieved_at": set(), "source_urls": set(), "source_payload_sha256": set()}
@@ -54,6 +55,7 @@ def build_manifest(
             "git_dirty": _git_dirty(),
         },
         "input_spec": {"path": str(spec_path), "sha256": _sha256(spec_path)},
+        "source_failures": source_failures or [],
         "sources": sorted(sources, key=lambda source: (source["source"], source["release"])),
         "artifacts": [
             {"path": path.name, "sha256": _sha256(path), "bytes": path.stat().st_size}

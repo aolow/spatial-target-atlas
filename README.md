@@ -67,6 +67,7 @@ This writes:
 - `paired_tumor_normal.json`
 - `spatial_datasets.json`
 - `spatial_target_coverage.json`
+- `source_status.json`
 - `manifest.json`
 
 Leave `tissues` empty to retain body-wide HPA matrices. Add tissues only when you intentionally want a subset.
@@ -177,6 +178,7 @@ Each build records source releases, URLs, retrieval metadata, source-payload has
 ## Important limitations
 
 - Most external connectors depend on live public APIs. Exact record counts and current compatibility can change as those services change.
+- Core builds isolate connector failures after target resolution: successful sources are still written, while failures are recorded in `source_status.json` and `manifest.json["source_failures"]`. Treat a partial build as incomplete evidence, not as evidence that the failed source was negative.
 - Pull-request CI uses mocked source responses for deterministic behavior. A separate weekly/manual smoke workflow checks lightweight live compatibility with Ensembl, HPA, ProteomicsDB, PDC study lookup, and HuBMAP discovery.
 - CELLxGENE can be pinned to a stable Census release; ProteomicsDB is a live API.
 - HuBMAP per-cell protein extraction depends on the separate Cells API index; not every public spatial dataset is indexed there.
