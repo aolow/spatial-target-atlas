@@ -110,7 +110,10 @@ class TargetResolver:
         if response.status_code == 404:
             raise ValueError(not_found) from None
         response.raise_for_status()
-        payload = response.json()
+        raw_payload = response.json()
+        if not isinstance(raw_payload, dict):
+            raise ValueError("Ensembl lookup returned an invalid response.")
+        payload: dict[str, object] = raw_payload
         ensembl_id = str(payload.get("id") or "")
         object_type = str(payload.get("object_type") or "")
         if not _ENSEMBL_GENE.fullmatch(ensembl_id) or object_type.casefold() != "gene":
