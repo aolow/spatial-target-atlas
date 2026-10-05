@@ -1,8 +1,8 @@
 name: LUAD spatial target atlas
 genes:
-  - ENSG00000105388  # CEACAM5
-  - ENSG00000119888  # EPCAM
-  - ENSG00000102854  # MSLN
+  - CEACAM5
+  - EPCAM
+  - MSLN
 tissues: []  # Empty means retain the complete body-wide HPA matrices.
 hpa_release: "25.1"
 pdc_studies:

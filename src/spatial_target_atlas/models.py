@@ -73,6 +73,41 @@ class AtlasSpec(BaseModel):
     target_population: dict[str, Any] = Field(default_factory=dict)
 
 
+
+class TargetIdentityRecord(BaseModel):
+    input_id: str
+    ensembl_id: str
+    gene_symbol: str
+    uniprot_id: str | None = None
+    resolution_sources: list[str]
+    source_urls: list[str]
+    source_payload_sha256: list[str] = Field(default_factory=list)
+    retrieved_at: str
+
+
+class HuBMAPCellMeasurementRecord(BaseModel):
+    dataset_id: str
+    dataset_uuid: str
+    assay: str
+    organ: str
+    donor_id: str | None = None
+    cell_id: str
+    cell_type: str | None = None
+    clusters: list[str] = Field(default_factory=list)
+    modality: str
+    gene_symbol: str
+    ensembl_id: str
+    uniprot_id: str | None = None
+    protein_id: str
+    value: float
+    detection_state: str
+    source: str
+    source_release: str
+    source_url: str
+    retrieved_at: str
+    unit: str
+
+
 class SpatialDatasetRecord(BaseModel):
     dataset_id: str
     dataset_uuid: str
