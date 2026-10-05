@@ -44,14 +44,15 @@ Internal reference channels are excluded.
 
 ### HuBMAP
 
-HuBMAP currently contributes two layers:
+HuBMAP currently contributes three layers:
 
 1. A spatial-dataset registry with assay type, organ, donor metadata, access level, DOI, protocol, and identifiers.
 2. A targeted-panel coverage audit for supported antibody panels.
+3. Optional per-cell target protein values from the HuBMAP Cells API for dataset/marker pairs available in that index.
 
-Panel absence is `not_assayed`, not non-detection.
+Panel absence is `not_assayed`, not non-detection. Per-cell values are queried only after the panel audit says the target was assayed.
 
-Per-cell target abundance extraction from HuBMAP spatial assets is not yet implemented.
+Cells API values retain the source protein/channel identifier and are summarized within dataset and cell type. Their unit is deliberately labeled `source_scale_intensity`; no cross-dataset normalization or comparability is assumed. Datasets not indexed by the Cells API are retained as explicit query-status failures rather than silently omitted.
 
 ### CELLxGENE Census
 
