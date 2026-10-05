@@ -1,0 +1,20 @@
+name: Live source smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 14 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync
+      - name: Check live public source compatibility
+        run: uv run python scripts/live_source_smoke.py
