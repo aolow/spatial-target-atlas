@@ -10,6 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
+      - run: uv lock --check
       - run: uv sync
       - name: Verify dependency-light model import
         run: |
