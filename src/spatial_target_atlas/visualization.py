@@ -14,6 +14,7 @@ def render_atlas_html(
     hubmap_cells_dir: Path | None = None,
     spatial_census_dir: Path | None = None,
     reference_audit_path: Path | None = None,
+    model_evidence_path: Path | None = None,
 ) -> str:
     identities = _read_list(core_dir / "target_identities.json")
     evidence = _read_list(core_dir / "evidence.json")
@@ -31,6 +32,10 @@ def render_atlas_html(
     census: list[dict[str, Any]] = []
     if spatial_census_dir is not None:
         census = _read_list(spatial_census_dir / "census_spatial_expression.json")
+
+    model_evidence: list[dict[str, Any]] = []
+    if model_evidence_path is not None:
+        model_evidence = _read_list(model_evidence_path)
 
     reference_audit: dict[str, Any] | None = None
     if reference_audit_path is not None and reference_audit_path.exists():
@@ -51,6 +56,7 @@ def render_atlas_html(
                 coverage,
                 cell_summary,
                 census,
+                model_evidence,
             )
             for target in targets
         ],
@@ -84,6 +90,7 @@ def _overview(
     coverage: list[dict[str, Any]],
     cell_summary: list[dict[str, Any]],
     census: list[dict[str, Any]],
+    model_evidence: list[dict[str, Any]],
 ) -> str:
     rows = []
     for target in targets:
@@ -199,6 +206,23 @@ def _target_section(
     if spatial:
         parts.append("<h3>Spatial transcriptomic reference contexts</h3>")
         parts.append(_table(_census_summary(spatial)))
+
+    modeled = [row for row in model_evidence if row.get("gene_symbol") == target]
+    if modeled:
+        parts.append("<h3>Model-derived context</h3>")
+        parts.append(_table([{
+            "Model": row.get("model_name"),
+            "Evidence kind": row.get("evidence_kind"),
+            "Context type": row.get("context_type"),
+            "Context": row.get("context"),
+            "Score": row.get("score"),
+            "Score name": row.get("score_name"),
+            "Note": row.get("note"),
+        } for row in modeled[:50]]))
+        parts.append(
+            "<p class=\"note\">Model-derived records are displayed separately from "
+            "measured evidence and are not included in assay counts.</p>"
+        )
 
     parts.append("</section>")
     return "".join(parts)
