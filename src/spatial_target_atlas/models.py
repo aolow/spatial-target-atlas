@@ -108,6 +108,28 @@ class HuBMAPCellMeasurementRecord(BaseModel):
     unit: str
 
 
+
+class CohortReferencePanelRecord(BaseModel):
+    name: str
+    source: str
+    tissue: str
+    context: str
+    resolution: str
+    age: dict[str, Any] = Field(default_factory=dict)
+    notes: str | None = None
+
+
+class CohortContextRecord(BaseModel):
+    source: str
+    project_name: str
+    description: str | None = None
+    disease_population: dict[str, Any]
+    reference_panels: list[CohortReferencePanelRecord] = Field(default_factory=list)
+    reference_donor_counts: dict[str, int] = Field(default_factory=dict)
+    warnings: list[str] = Field(default_factory=list)
+    source_manifest_sha256: str
+
+
 class SpatialDatasetRecord(BaseModel):
     dataset_id: str
     dataset_uuid: str

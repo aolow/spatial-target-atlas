@@ -7,6 +7,7 @@ from typing import Annotated
 
 import typer
 
+from .cohort_adapter import load_open_cohort_context
 from .concordance import summarize_concordance
 from .config import load_spec
 from .cross_source import summarize_cross_source
@@ -329,6 +330,10 @@ def reference_audit(
     core_evidence: Annotated[
         Path | None, typer.Option("--core-evidence", exists=True, readable=True)
     ] = None,
+    cohort_manifest: Annotated[
+        Path | None,
+        typer.Option("--cohort-manifest", exists=True, dir_okay=False, readable=True),
+    ] = None,
     output: Annotated[Path, typer.Option("--output", "-o")] = Path("reference_audit.json"),
 ) -> None:
     """Rank reference roles and show target sensitivity without mixing assay scales."""
@@ -341,7 +346,20 @@ def reference_audit(
         ProteinEvidenceRecord.model_validate(row)
         for row in json.loads(core_evidence.read_text(encoding="utf-8"))
     ]
-    audit = build_reference_audit(spatial, protein, project.target_population)
+    cohort = (
+        load_open_cohort_context(cohort_manifest)
+        if cohort_manifest is not None
+        else None
+    )
+    target_population = dict(project.target_population)
+    if cohort is not None:
+        target_population["open_cohort_factory"] = cohort.disease_population
+    audit = build_reference_audit(
+        spatial,
+        protein,
+        target_population,
+        cohort.model_dump(mode="json") if cohort is not None else None,
+    )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(audit, indent=2), encoding="utf-8")
     typer.echo(f"Built reference audit with {len(audit['candidates'])} candidate contexts")

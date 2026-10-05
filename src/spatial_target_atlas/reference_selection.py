@@ -13,6 +13,7 @@ def build_reference_audit(
     spatial: list[SpatialTranscriptomicSummaryRecord],
     protein: list[ProteinEvidenceRecord],
     target_population: dict[str, Any],
+    cohort_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     candidates = _spatial_candidates(spatial)
     if any(record.specimen_context == "adjacent_normal" for record in protein):
@@ -36,6 +37,7 @@ def build_reference_audit(
     return {
         "schema_version": "1.0",
         "target_population": target_population,
+        "cohort_context": cohort_context,
         "decision_rule": (
             "Ranks express reference role, not a composite biological score. Primary eligibility "
             "requires source-labeled normal adult tissue; limited donor depth remains explicit."

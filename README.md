@@ -24,7 +24,7 @@ A research prototype for assembling target evidence across tissues, cell types, 
 | Self-contained local HTML evidence report | Implemented |
 | Interactive spatial image/browser UI | Not yet implemented |
 | PINNACLE/SPATIA or other model-derived evidence | Not yet implemented |
-| open-cohort-factory adapter | Not yet implemented |
+| open-cohort-factory context adapter | Implemented |
 
 The code is therefore useful as a reproducible **evidence-integration and reference-audit pipeline**, not yet as a complete spatial atlas application.
 
@@ -171,4 +171,14 @@ See [docs/evidence-model.md](docs/evidence-model.md) for the measurement, detect
 
 ## Relationship to open-cohort-factory
 
-The project runs independently today. An adapter for `open-cohort-factory` population manifests is still planned and is not implemented.
+Spatial Target Atlas can optionally consume an `open-cohort-factory` `manifest.json` when building a reference audit:
+
+```bash
+spatial-target-atlas reference-audit examples/luad_targets.yaml \
+  --spatial-expression outputs/luad-census-spatial/census_spatial_expression.json \
+  --core-evidence outputs/luad/evidence.json \
+  --cohort-manifest ../open-cohort-factory/outputs/luad/manifest.json \
+  -o outputs/luad-reference-audit.json
+```
+
+This imports the validated disease population, declared reference panels, materialized donor counts, source contexts, and cohort warnings without creating a Python package dependency between the projects. Spatial evidence remains separate from cohort construction; the adapter carries context, not expression values or a composite score.
