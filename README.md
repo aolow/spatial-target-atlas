@@ -1,121 +1,144 @@
 # Spatial Target Atlas
 
-Spatial Target Atlas maps target evidence across body, tissue, anatomical region, cell type, and
-subcellular scales. It keeps measured observations separate from model-derived hypotheses and never
-collapses unlike assays into an opaque safety score.
+A research prototype for assembling target evidence across tissues, cell types, spatial datasets, and proteomic cohorts without collapsing unlike assays into a single opaque score.
 
-## First milestone
+**Project status:** the first evidence-integration milestone is implemented and tested. The broader "atlas" product is not finished.
 
-- Versioned `ProteinEvidenceRecord` interchange schema
-- Human Protein Atlas v25.1 tissue MS, Deep Visual Proteomics, and subcellular localization connector
-- Explicit detection, donor-support, modality, spatial-scale, and provenance fields
-- JSON and TSV evidence bundles
-- Within-DVP RNA–protein rank concordance and discordant cell contexts
-- HPA–ProteomicsDB tissue-rank reproducibility without raw-scale merging
-- CPTAC/PDC aliquot proteomics with patient-matched tumor–adjacent comparisons
-- SHA-256 build manifest with input, artifact, source-release, software, and Git provenance
-- HuBMAP spatial-dataset registry with donor covariates and public/protected access labels
-- HuBMAP targeted-panel coverage audit that separates `not_assayed` from non-detection
+## What is implemented
+
+| Area | Status |
+| --- | --- |
+| Versioned target-evidence data model | Implemented |
+| Human Protein Atlas tissue, DVP cell-type, and subcellular evidence | Implemented |
+| ProteomicsDB tissue-level replication | Implemented |
+| PDC/CPTAC patient-matched tumor vs adjacent-normal proteomics | Implemented |
+| HuBMAP spatial-dataset registry with donor context | Implemented |
+| HuBMAP targeted-panel coverage audit | Implemented |
+| CELLxGENE spatial transcriptomic summaries | Implemented as optional dependency |
+| Within-HPA RNA/protein concordance | Implemented |
+| HPA vs ProteomicsDB tissue-rank concordance | Implemented |
+| Transparent reference-context audit | Implemented |
+| SHA-256 build provenance and artifact manifest | Implemented |
+| Gene-symbol input resolution | Not yet implemented |
+| Target-level HuBMAP cell-intensity extraction | Not yet implemented |
+| Interactive body → tissue → cell → compartment visualization | Not yet implemented |
+| PINNACLE/SPATIA or other model-derived evidence | Not yet implemented |
+| open-cohort-factory adapter | Not yet implemented |
+
+The code is therefore useful as a reproducible **evidence-integration and reference-audit pipeline**, not yet as a complete spatial atlas application.
+
+## Install
+
+Python 3.11+:
 
 ```bash
 python -m venv .venv
-.venv/bin/pip install -e '.[dev]'
-.venv/bin/spatial-target-atlas build examples/luad_targets.yaml -o outputs/luad
-
-# Optional spatial-transcriptomics connector (larger dependency set)
-.venv/bin/pip install -e '.[spatial]'
-.venv/bin/spatial-target-atlas build-spatial-census examples/luad_targets.yaml \
-  --census-version 2025-11-08 --tissue lung -o outputs/luad-census-spatial
-.venv/bin/spatial-target-atlas reference-audit examples/luad_targets.yaml \
-  --spatial-expression outputs/luad-census-spatial/census_spatial_expression.json \
-  --core-evidence outputs/luad/evidence.json -o outputs/luad-reference-audit.json
+source .venv/bin/activate
+pip install -e ".[dev]"
 ```
 
-Leave `tissues` empty to retain all available tissues and DVP cell-type groups for body-wide
-concordance analysis; provide tissue names only when an explicit subset is intended.
+Run quality checks:
 
-The HPA DVP atlas is cell-type resolved but currently derives from one healthy female donor. The
-software retains that limitation rather than allowing cellular resolution to imply population depth.
-HPA data remain subject to the source's own licence and citation requirements; this repository's MIT
-licence applies only to the software.
+```bash
+pytest
+ruff check .
+mypy src
+```
 
-See [`docs/evidence-model.md`](docs/evidence-model.md) for detection-state semantics and the planned
-measured/model-derived evidence boundary.
+The GitHub CI runs linting, strict mypy, and pytest with a 70% coverage floor.
 
-## Roadmap
+## Quick start
 
-1. Gene-symbol identifier resolution
-2. Target-level HuBMAP cell-intensity extraction for assayed panels
-3. Body → tissue → cell → compartment visualization
-4. PINNACLE and SPATIA model-derived evidence, clearly separated from measurements
+The example uses three LUAD-related targets and expects Ensembl gene IDs.
 
-## Verified LUAD example
+```bash
+spatial-target-atlas build examples/luad_targets.yaml -o outputs/luad
+```
 
-The body-wide HPA v25.1 build emits 328 records for CEACAM5, EPCAM, and MSLN. Across the 24 matched
-DVP cell-type groups, EPCAM has 11 contexts detected by both modalities and modest RNA–protein rank
-agreement (Spearman ρ = 0.336). CEACAM5 and MSLN each have only one jointly detected context, so the
-software reports no correlation rather than manufacturing one from insufficient pairs. Detection
-quadrants reveal RNA-only and protein-only contexts separately.
+This writes:
 
-The independent ProteomicsDB run returns 13 tissues for CEACAM5, 36 for EPCAM, and 22 for MSLN.
-Across exactly matched, jointly detected tissue labels, HPA–ProteomicsDB rank correlations are 1.0
-for CEACAM5 (4 tissues), 0.643 for EPCAM (8), and 0.3 for MSLN (5). These small overlap counts are
-reported alongside the correlations; broader ontology-based tissue harmonization is intentionally a
-future step rather than an implicit synonym merge.
+- `evidence.json` and `evidence.tsv`
+- `concordance.json`
+- `cross_source_concordance.json`
+- `paired_tumor_normal.json`
+- `spatial_datasets.json`
+- `spatial_target_coverage.json`
+- `manifest.json`
 
-The LUAD example also queries the latest PDC version behind `PDC000153`, maps aliquots using the
-authoritative PDC biospecimen `sample_type`, and emits `paired_tumor_normal.json`. Effects are
-calculated within patients as tumor minus adjacent-normal TMT log2 ratios. “Solid Tissue Normal” is
-represented as `adjacent_normal` and `not_healthy_reference`: it is tissue from a cancer-bearing
-patient, not a population healthy control. Pooled/internal reference channels are excluded.
+Leave `tissues` empty to retain body-wide HPA matrices. Add tissues only when you intentionally want a subset.
 
-The verified live build contains 639 biological PDC target measurements: 112 tumors and 101
-adjacent-normal samples per gene, yielding 101 patient-matched pairs. Internal-reference channels
-are excluded using PDC's reference flag with an identifier fallback for incompletely flagged study
-records. Median tumor-minus-adjacent log2-ratio
-differences are +0.584 for CEACAM5, +0.516 for EPCAM, and −0.701 for MSLN; the corresponding
-fractions of patients with higher tumor abundance are 68%, 79%, and 29%. These descriptive paired
-effects establish heterogeneity without presenting a cohort median as universal target biology.
+### Optional CELLxGENE spatial transcriptomics
 
-Every build also writes `manifest.json` with the input-spec checksum, output checksums, exact source
-releases and URLs, retrieval timestamps where supplied, package version, Git commit, and build time.
+This uses a larger dependency stack:
 
-`spatial_datasets.json` inventories published HuBMAP spatial assays for configured organ codes before
-large expression assets are downloaded. It retains donor age, sex, race, BMI, cause of death,
-medical history and other available ontology-backed fields, alongside access level, DOI, protocol,
-dataset UUID and donor UUID. This makes “normal” donor context visible during dataset selection.
-The verified lung registry currently finds 11 public spatial-proteomic datasets: eight PhenoCycler
-acquisitions and three DeepCell/SPRM-derived datasets. Covariates are retained without collapsing
-multiple medical-history or pathology entries into a single label.
+```bash
+pip install -e ".[spatial]"
 
-`spatial_target_coverage.json` then follows processed PhenoCycler datasets to their raw parent,
-reads the source-declared antibody TSV, and matches targets using UniProt accessions (with an exact
-channel-name fallback). It retains channel metadata, antibody RRIDs, panel URL, and SHA-256 checksum.
-The three currently available DeepCell/SPRM lung datasets use 39- or 45-antibody panels that do not
-include CEACAM5, EPCAM, or MSLN, so these targets are reported as `not_assayed`. This is a panel
-coverage limitation, not protein non-detection. Large AnnData, image, and per-cell feature assets
-are therefore not downloaded for targets that the panel could not measure.
+spatial-target-atlas build-spatial-census examples/luad_targets.yaml \
+  --census-version 2025-11-08 \
+  --tissue lung \
+  -o outputs/luad-census-spatial
+```
 
-The optional CELLxGENE Census command queries the spatial corpus separately because its TileDB-SOMA
-stack is substantially larger than the core package. It emits a dataset registry with citations and
-donor contexts plus raw-count summaries stratified by dataset, donor, disease, sex, ethnicity,
-developmental stage, assay, tissue, cell-type annotation, and primary-data status. Per-dataset feature presence is checked
-before zeros are interpreted. Counts are never normalized across studies. Pin `--census-version` for
-reproducibility; the verified build uses the stable `2025-11-08` release.
+Then combine spatial reference context with the core protein evidence:
 
-That release contains 22 lung spatial datasets and 275,274 spots. The apparent reference pool is
-not a homogeneous adult healthy cohort: 11 source-labeled-normal donors are fetal (12–20 weeks
-post-fertilization), two are adults (age 59 and seventh decade), and seven Slide-seqV2 datasets are
-lung metastasis tissue from a 61-year-old donor with renal cell carcinoma. The output therefore
-labels developmental normal, adult/unspecified normal, and disease tissue separately.
+```bash
+spatial-target-atlas reference-audit examples/luad_targets.yaml \
+  --spatial-expression outputs/luad-census-spatial/census_spatial_expression.json \
+  --core-evidence outputs/luad/evidence.json \
+  -o outputs/luad-reference-audit.json
+```
 
-`reference-audit` ranks contexts by an explicit decision rule rather than an opaque composite score.
-Adult source-labeled-normal tissue is the primary candidate, with low donor depth surfaced as a
-caveat. Cancer-patient adjacent normal and developmental normal are sensitivity references; disease
-tissue is comparator-only. The output shows target prevalence or abundance within each modality and
-never numerically compares spatial raw counts with proteomic ratios.
+## Design principles
+
+### Keep unlike measurements separate
+
+The project does not numerically merge RNA counts, tissue proteomics, TMT ratios, immunofluorescence, or targeted spatial panels.
+
+Cross-source comparisons use within-source ranks or clearly labeled descriptive summaries.
+
+### Distinguish absence from non-detection
+
+The data model separates states such as:
+
+- measured and detected
+- measured and not detected
+- not assayed
+- source-specific summary evidence
+
+For targeted HuBMAP panels, a missing target is reported as `not_assayed`, not as protein absence.
+
+### Keep reference context explicit
+
+Cancer-patient adjacent tissue is not labeled as healthy control tissue. Developmental normal tissue, adult source-labeled normal tissue, and disease tissue remain separate reference contexts.
+
+### Preserve provenance
+
+Each build records source releases, URLs, retrieval metadata, source-payload hashes, generated artifact hashes, package version, Git commit, and Git dirty state.
+
+## Important limitations
+
+- Core builds currently require Ensembl IDs because automatic identifier resolution is not implemented.
+- Most external connectors depend on live public APIs. Exact record counts and current compatibility can change as those services change.
+- CI uses mocked source responses for deterministic connector behavior. It does not continuously run full live-data integration tests.
+- CELLxGENE can be pinned to a stable Census release; ProteomicsDB is a live API.
+- HuBMAP target coverage currently audits targeted panels but does not yet extract per-cell target intensity.
+- No visualization layer exists yet.
+- Model-derived evidence is represented in the schema but not populated by a model connector.
+- Source data retain their own licenses and citation requirements. The MIT license applies to this software.
+
+## Example results
+
+A live LUAD example was run and documented on **September 7, 2026**. It demonstrated the implemented HPA, ProteomicsDB, PDC, HuBMAP, CELLxGENE, and reference-audit workflows.
+
+Those numbers are a dated validation snapshot, not guaranteed current output from live APIs.
+
+See [docs/luad-example.md](docs/luad-example.md).
+
+## Evidence semantics
+
+See [docs/evidence-model.md](docs/evidence-model.md) for the measurement, detection-state, concordance, and reference-selection rules.
 
 ## Relationship to open-cohort-factory
 
-This repository can run independently. A future adapter will accept an `open-cohort-factory`
-manifest to inherit explicit disease and reference-population definitions.
+The project runs independently today. An adapter for `open-cohort-factory` population manifests is still planned and is not implemented.
