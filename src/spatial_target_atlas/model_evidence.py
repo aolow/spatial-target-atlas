@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .models import ModelDerivedEvidenceRecord, TargetIdentityRecord
+from .models import EvidenceOrigin, ModelDerivedEvidenceRecord, TargetIdentityRecord
 
 PINNACLE_URL = "https://github.com/mims-harvard/PINNACLE"
 PINNACLE_PAPER = "https://doi.org/10.1038/s41592-024-02341-3"
@@ -56,7 +56,7 @@ def import_pinnacle_contexts(
             ModelDerivedEvidenceRecord(
                 model_name="PINNACLE",
                 model_version="published_pretrained_representation",
-                evidence_origin="model_derived",
+                evidence_origin=EvidenceOrigin.MODEL_DERIVED,
                 evidence_kind="contextual_representation_available",
                 gene_symbol=identity.gene_symbol,
                 ensembl_id=identity.ensembl_id,
