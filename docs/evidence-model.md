@@ -1,6 +1,6 @@
 # Evidence model
 
-Spatial Target Atlas keeps measured observations, source metadata, and future model-derived hypotheses explicitly separated.
+Spatial Target Atlas keeps measured observations, source metadata, and model-derived evidence explicitly separated.
 
 Values from different modalities are not placed on a shared numerical scale unless a separate calibration method is introduced and documented.
 

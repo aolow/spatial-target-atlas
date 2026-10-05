@@ -2,7 +2,7 @@
 
 A research prototype for assembling target evidence across tissues, cell types, spatial datasets, and proteomic cohorts without collapsing unlike assays into a single opaque score.
 
-**Project status:** the first evidence-integration milestone is implemented and tested. The broader "atlas" product is not finished.
+**Project status:** the core evidence-integration pipeline is implemented and tested. The broader interactive atlas product is not finished.
 
 ## What is implemented
 
@@ -60,6 +60,7 @@ spatial-target-atlas build examples/luad_targets.yaml -o outputs/luad
 
 This writes:
 
+- `target_identities.json`
 - `evidence.json` and `evidence.tsv`
 - `concordance.json`
 - `cross_source_concordance.json`
@@ -180,7 +181,7 @@ Each build records source releases, URLs, retrieval metadata, source-payload has
 - CELLxGENE can be pinned to a stable Census release; ProteomicsDB is a live API.
 - HuBMAP per-cell protein extraction depends on the separate Cells API index; not every public spatial dataset is indexed there.
 - The HTML report summarizes generated evidence but is not an interactive image or coordinate viewer.
-- Model-derived evidence is represented in the schema but not populated by a model connector.
+- PINNACLE import records contextual representation coverage, but this project does not run PINNACLE/SPATIA models or infer target relevance from embeddings.
 - Source data retain their own licenses and citation requirements. The MIT license applies to this software.
 
 ## Example results
