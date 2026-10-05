@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
 import hashlib
+from collections import defaultdict
 from datetime import UTC, datetime
 from statistics import mean, median
 from typing import Any
