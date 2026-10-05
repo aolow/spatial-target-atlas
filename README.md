@@ -19,8 +19,8 @@ A research prototype for assembling target evidence across tissues, cell types, 
 | HPA vs ProteomicsDB tissue-rank concordance | Implemented |
 | Transparent reference-context audit | Implemented |
 | SHA-256 build provenance and artifact manifest | Implemented |
-| Gene-symbol input resolution | Not yet implemented |
-| Target-level HuBMAP cell-intensity extraction | Not yet implemented |
+| Gene-symbol and Ensembl input resolution | Implemented |
+| Target-level HuBMAP per-cell protein extraction | Implemented for Cells API-indexed targeted panels |
 | Interactive body → tissue → cell → compartment visualization | Not yet implemented |
 | PINNACLE/SPATIA or other model-derived evidence | Not yet implemented |
 | open-cohort-factory adapter | Not yet implemented |
@@ -66,6 +66,21 @@ This writes:
 - `manifest.json`
 
 Leave `tissues` empty to retain body-wide HPA matrices. Add tissues only when you intentionally want a subset.
+
+Targets may now be supplied as human gene symbols or Ensembl gene IDs. Resolution is written to `target_identities.json` with source URLs and payload hashes.
+
+### Optional HuBMAP per-cell protein values
+
+For targeted spatial-proteomic panels that are indexed by the HuBMAP Cells API:
+
+```bash
+spatial-target-atlas build-hubmap-cells examples/luad_targets.yaml \
+  -o outputs/luad-hubmap-cells
+```
+
+This first audits whether each target was actually present in the source antibody panel, then queries per-cell source-scale values only for assayed target/dataset pairs. It writes raw JSONL, within-dataset summaries, and a query-status file for datasets or markers unavailable through the Cells API.
+
+A local guard refuses datasets above 200,000 indexed cells unless `--max-cells-per-dataset` is raised explicitly. Values are never normalized across datasets.
 
 ### Optional CELLxGENE spatial transcriptomics
 
@@ -118,11 +133,10 @@ Each build records source releases, URLs, retrieval metadata, source-payload has
 
 ## Important limitations
 
-- Core builds currently require Ensembl IDs because automatic identifier resolution is not implemented.
 - Most external connectors depend on live public APIs. Exact record counts and current compatibility can change as those services change.
 - CI uses mocked source responses for deterministic connector behavior. It does not continuously run full live-data integration tests.
 - CELLxGENE can be pinned to a stable Census release; ProteomicsDB is a live API.
-- HuBMAP target coverage currently audits targeted panels but does not yet extract per-cell target intensity.
+- HuBMAP per-cell protein extraction depends on the separate Cells API index; not every public spatial dataset is indexed there.
 - No visualization layer exists yet.
 - Model-derived evidence is represented in the schema but not populated by a model connector.
 - Source data retain their own licenses and citation requirements. The MIT license applies to this software.
