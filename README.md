@@ -32,23 +32,38 @@ The code is therefore useful as a reproducible **evidence-integration and refere
 
 ## Install
 
-Python 3.11+:
+Python 3.11+.
+
+For library use such as importing the Pydantic evidence models, the base install stays minimal:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -e .
 ```
 
-Run quality checks:
+The base package depends only on Pydantic. It does not install Typer, Rich, HTTP clients, or YAML support.
+
+For the command-line workflows:
 
 ```bash
+pip install -e ".[cli]"
+```
+
+For development:
+
+```bash
+pip install -e ".[dev]"
 pytest
 ruff check .
 mypy src
 ```
 
-The GitHub CI runs linting, strict mypy, and pytest with a 70% coverage floor.
+The `spatial` extra includes the CLI stack plus CELLxGENE Census:
+
+```bash
+pip install -e ".[spatial]"
+```
+
+The GitHub CI verifies both the dependency-light library install and the full development stack.
 
 ## Quick start
 
