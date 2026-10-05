@@ -2,8 +2,9 @@
 
 import csv
 import json
+from collections.abc import Callable
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any, TypeVar
 
 import typer
 
@@ -25,6 +26,28 @@ from .sources.proteomicsdb import ProteomicsDBClient
 
 app = typer.Typer(no_args_is_help=True)
 
+_T = TypeVar("_T")
+
+
+def _collect(
+    stage: str,
+    fetch: Callable[[], list[_T]],
+    failures: list[dict[str, Any]],
+) -> list[_T]:
+    """Run one connector and record failures without aborting the full build."""
+    try:
+        return fetch()
+    except Exception as exc:  # noqa: BLE001 - connector isolation is intentional
+        failures.append(
+            {
+                "stage": stage,
+                "error_type": type(exc).__name__,
+                "error": str(exc)[:500],
+            }
+        )
+        typer.echo(f"warning: {stage} failed: {type(exc).__name__}: {exc}", err=True)
+        return []
+
 
 @app.callback()
 def main() -> None:
@@ -38,38 +61,75 @@ def build(
 ) -> None:
     """Build a versioned measured-evidence bundle."""
     project = load_spec(spec)
+    failures: list[dict[str, Any]] = []
     records = []
     client = HPAClient(release=project.hpa_release)
+
+    # Identity resolution is intentionally fatal. Without target identities,
+    # downstream source queries are not meaningful.
     identities = TargetResolver(hpa=client).resolve(project.genes)
     ensembl_ids = [identity.ensembl_id for identity in identities]
-    records.extend(client.fetch_complete(ensembl_ids, project.tissues))
-    for identity in identities:
-        records.extend(client.fetch_annotations(identity.ensembl_id))
-    proteomicsdb = ProteomicsDBClient()
-    for identity in identities:
-        if identity.uniprot_id:
-            records.extend(
-                proteomicsdb.fetch(
-                    identity.gene_symbol,
-                    identity.ensembl_id,
-                    identity.uniprot_id,
-                    project.tissues,
+
+    def _fetch_hpa_tissue() -> list[ProteinEvidenceRecord]:
+        return client.fetch_complete(ensembl_ids, project.tissues)
+
+    def _fetch_hpa_annotations() -> list[ProteinEvidenceRecord]:
+        output: list[ProteinEvidenceRecord] = []
+        for identity in identities:
+            output.extend(client.fetch_annotations(identity.ensembl_id))
+        return output
+
+    def _fetch_proteomicsdb() -> list[ProteinEvidenceRecord]:
+        proteomicsdb = ProteomicsDBClient()
+        output: list[ProteinEvidenceRecord] = []
+        for identity in identities:
+            if identity.uniprot_id:
+                output.extend(
+                    proteomicsdb.fetch(
+                        identity.gene_symbol,
+                        identity.ensembl_id,
+                        identity.uniprot_id,
+                        project.tissues,
+                    )
                 )
-            )
+        return output
+
     identity_map = {
         identity.gene_symbol: (identity.ensembl_id, identity.uniprot_id)
         for identity in identities
     }
+
+    records.extend(_collect("hpa.tissue", _fetch_hpa_tissue, failures))
+    records.extend(_collect("hpa.annotations", _fetch_hpa_annotations, failures))
+    records.extend(_collect("proteomicsdb", _fetch_proteomicsdb, failures))
+
     pdc = PDCClient()
+
+    def _fetch_pdc_study(study_id: str) -> Callable[[], list[ProteinEvidenceRecord]]:
+        return lambda: pdc.fetch(study_id, identity_map)
+
     for study_id in project.pdc_studies:
-        records.extend(pdc.fetch(study_id, identity_map))
+        records.extend(_collect(f"pdc.{study_id}", _fetch_pdc_study(study_id), failures))
+
     hubmap = HuBMAPClient()
-    spatial_datasets = hubmap.fetch_spatial_registry(project.hubmap_organs)
     identity_tuples = [
         (identity.ensembl_id, identity.gene_symbol, identity.uniprot_id)
         for identity in identities
     ]
-    spatial_coverage = hubmap.fetch_target_coverage(spatial_datasets, identity_tuples)
+    spatial_datasets = _collect(
+        "hubmap.spatial_registry",
+        lambda: hubmap.fetch_spatial_registry(project.hubmap_organs),
+        failures,
+    )
+    spatial_coverage = (
+        _collect(
+            "hubmap.target_coverage",
+            lambda: hubmap.fetch_target_coverage(spatial_datasets, identity_tuples),
+            failures,
+        )
+        if spatial_datasets
+        else []
+    )
     output.mkdir(parents=True, exist_ok=True)
     serialized = [record.model_dump(mode="json") for record in records]
     identities_json = output / "target_identities.json"
@@ -79,6 +139,7 @@ def build(
     paired_json = output / "paired_tumor_normal.json"
     spatial_json = output / "spatial_datasets.json"
     spatial_coverage_json = output / "spatial_target_coverage.json"
+    source_status_json = output / "source_status.json"
     evidence_tsv = output / "evidence.tsv"
     identities_json.write_text(
         json.dumps([identity.model_dump(mode="json") for identity in identities], indent=2),
@@ -102,6 +163,10 @@ def build(
         json.dumps([record.model_dump(mode="json") for record in spatial_coverage], indent=2),
         encoding="utf-8",
     )
+    source_status_json.write_text(
+        json.dumps({"ok": len(failures) == 0, "failures": failures}, indent=2),
+        encoding="utf-8",
+    )
     if serialized:
         with evidence_tsv.open("w", encoding="utf-8", newline="") as handle:
             flat = [
@@ -119,12 +184,14 @@ def build(
         paired_json,
         spatial_json,
         spatial_coverage_json,
+        source_status_json,
     ]
     if evidence_tsv.exists():
         artifacts.append(evidence_tsv)
-    manifest = build_manifest(spec, records, artifacts)
+    manifest = build_manifest(spec, records, artifacts, source_failures=failures)
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    typer.echo(f"Built {len(records)} evidence records in {output}")
+    suffix = f" ({len(failures)} source(s) failed)" if failures else ""
+    typer.echo(f"Built {len(records)} evidence records in {output}{suffix}")
 
 
 @app.command("build-spatial-census")
