@@ -168,7 +168,7 @@ def build_spatial_census(
             "record_count": len(summaries),
             "retrieved_at": [],
             "source_urls": ["https://cellxgene.cziscience.com/"],
-            "source_payload_sha256": sorted(cells.payload_hashes),
+            "source_payload_sha256": [],
         }],
     )
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -281,7 +281,7 @@ def build_hubmap_cells(
                 record.retrieved_at for record in records
             }),
             "source_urls": ["https://cells.api.hubmapconsortium.org/api"],
-            "source_payload_sha256": [],
+            "source_payload_sha256": sorted(cells.payload_hashes),
         }],
     )
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
