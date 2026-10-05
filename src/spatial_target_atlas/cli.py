@@ -13,6 +13,7 @@ from .config import load_spec
 from .cross_source import summarize_cross_source
 from .hubmap_cells import HuBMAPCellsClient, summarize_cell_measurements
 from .identifiers import TargetResolver
+from .model_evidence import import_pinnacle_contexts, load_model_evidence
 from .models import ProteinEvidenceRecord, SpatialTranscriptomicSummaryRecord
 from .paired import summarize_paired
 from .provenance import build_manifest
@@ -293,6 +294,42 @@ def build_hubmap_cells(
     )
 
 
+@app.command("import-pinnacle")
+def import_pinnacle(
+    labels: Annotated[Path, typer.Argument(exists=True, readable=True)],
+    target_identities: Annotated[
+        Path, typer.Option("--target-identities", exists=True, readable=True)
+    ],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path("outputs/pinnacle"),
+    embedding_file: Annotated[
+        Path | None, typer.Option("--embedding-file", exists=True, readable=True)
+    ] = None,
+) -> None:
+    """Import PINNACLE target/context representation coverage as model-derived evidence."""
+    records, summary = import_pinnacle_contexts(labels, target_identities, embedding_file)
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "model_evidence.json").write_text(
+        json.dumps([record.model_dump(mode="json") for record in records], indent=2),
+        encoding="utf-8",
+    )
+    (output / "model_evidence_summary.json").write_text(
+        json.dumps(summary, indent=2),
+        encoding="utf-8",
+    )
+    typer.echo(
+        f"Imported {len(records)} PINNACLE target-context representation records in {output}"
+    )
+
+
+@app.command("validate-model-evidence")
+def validate_model_evidence(
+    evidence: Annotated[Path, typer.Argument(exists=True, readable=True)],
+) -> None:
+    """Validate normalized model-derived target evidence without merging it into measurements."""
+    records = load_model_evidence(evidence)
+    typer.echo(f"Valid model-derived evidence: {len(records)} records")
+
+
 @app.command("render-atlas")
 def render_atlas(
     core: Annotated[Path, typer.Option("--core", exists=True, file_okay=False, readable=True)],
@@ -309,13 +346,23 @@ def render_atlas(
         Path | None,
         typer.Option("--reference-audit", exists=True, dir_okay=False, readable=True),
     ] = None,
+    model_evidence: Annotated[
+        Path | None,
+        typer.Option("--model-evidence", exists=True, dir_okay=False, readable=True),
+    ] = None,
 ) -> None:
     """Render a self-contained local HTML atlas report from saved outputs."""
     from .visualization import render_atlas_html
 
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
-        render_atlas_html(core, hubmap_cells, spatial_census, reference_audit),
+        render_atlas_html(
+            core,
+            hubmap_cells,
+            spatial_census,
+            reference_audit,
+            model_evidence,
+        ),
         encoding="utf-8",
     )
     typer.echo(f"Rendered atlas report: {output}")
