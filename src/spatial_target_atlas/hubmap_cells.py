@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import hashlib
 from datetime import UTC, datetime
 from statistics import mean, median
 from typing import Any
@@ -25,6 +26,7 @@ class HuBMAPCellsError(RuntimeError):
 class HuBMAPCellsClient:
     def __init__(self, client: httpx.Client | None = None) -> None:
         self.client = client or httpx.Client(timeout=120, follow_redirects=True)
+        self.payload_hashes: set[str] = set()
 
     def fetch_target(
         self,
@@ -162,6 +164,7 @@ class HuBMAPCellsClient:
 
     def _post(self, path: str, data: dict[str, str]) -> Any:
         response = self.client.post(f"{CELLS_API}/{path}", data=data)
+        self.payload_hashes.add(hashlib.sha256(response.content).hexdigest())
         if response.status_code >= 400:
             raise HuBMAPCellsError(
                 f"HuBMAP Cells API returned HTTP {response.status_code} for {path}"
