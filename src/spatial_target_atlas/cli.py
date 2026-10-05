@@ -168,7 +168,7 @@ def build_spatial_census(
             "record_count": len(summaries),
             "retrieved_at": [],
             "source_urls": ["https://cellxgene.cziscience.com/"],
-            "source_payload_sha256": [],
+            "source_payload_sha256": sorted(cells.payload_hashes),
         }],
     )
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
@@ -252,13 +252,9 @@ def build_hubmap_cells(
         json.dumps([item.model_dump(mode="json") for item in coverage], indent=2),
         encoding="utf-8",
     )
-    cells_jsonl.write_text(
-        "".join(
-            json.dumps(record.model_dump(mode="json"), sort_keys=True) + "\n"
-            for record in records
-        ),
-        encoding="utf-8",
-    )
+    with cells_jsonl.open("w", encoding="utf-8") as handle:
+        for record in records:
+            handle.write(json.dumps(record.model_dump(mode="json"), sort_keys=True) + "\n")
     summary_json.write_text(
         json.dumps(summarize_cell_measurements(records), indent=2),
         encoding="utf-8",
