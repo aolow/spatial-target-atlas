@@ -136,8 +136,16 @@ Sensitivity summaries stay within modality. Spatial raw-count prevalence and pro
 
 HPA downloads use release-specific archive hosts rather than silently labeling current data as an older release.
 
+## Model-derived evidence
+
+Model outputs use a separate `ModelDerivedEvidenceRecord` and are never appended to the measured `ProteinEvidenceRecord` table.
+
+PINNACLE import currently records **contextual representation availability** for requested targets and cell-type labels. The representation file can be hashed as provenance, but the vector is not interpreted and no therapeutic-target score is inferred.
+
+The generic model-derived contract can also carry an explicitly named downstream score when one was computed outside this project. Such a record must identify the model, version, target, context, score name, provenance, and interpretation note.
+
+SPATIA's released cell embeddings are not target-specific by themselves, so raw SPATIA embeddings are not treated as target evidence. A future target-level SPATIA downstream quantity can be imported only when that mapping is explicit.
+
 ## Schema boundary
 
-The shared record model already distinguishes `measured` and `model_derived` evidence origins.
-
-Only measured-source connectors are currently implemented. PINNACLE, SPATIA, or other model-derived connectors remain future work.
+The shared record model distinguishes `measured` and `model_derived` evidence origins. These layers remain separate in JSON and in the HTML report.
