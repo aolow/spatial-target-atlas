@@ -10,6 +10,8 @@ import typer
 from .concordance import summarize_concordance
 from .config import load_spec
 from .cross_source import summarize_cross_source
+from .hubmap_cells import HuBMAPCellsClient, summarize_cell_measurements
+from .identifiers import TargetResolver
 from .models import ProteinEvidenceRecord, SpatialTranscriptomicSummaryRecord
 from .paired import summarize_paired
 from .provenance import build_manifest
@@ -36,29 +38,39 @@ def build(
     project = load_spec(spec)
     records = []
     client = HPAClient(release=project.hpa_release)
-    records.extend(client.fetch_complete(project.genes, project.tissues))
-    identities = []
-    for identifier in project.genes:
-        if not identifier.startswith("ENSG"):
-            raise typer.BadParameter(f"HPA milestone 1 requires an Ensembl ID: {identifier}")
-        records.extend(client.fetch_annotations(identifier))
-        identities.append((identifier, *client.resolve_uniprot(identifier)))
+    identities = TargetResolver(hpa=client).resolve(project.genes)
+    ensembl_ids = [identity.ensembl_id for identity in identities]
+    records.extend(client.fetch_complete(ensembl_ids, project.tissues))
+    for identity in identities:
+        records.extend(client.fetch_annotations(identity.ensembl_id))
     proteomicsdb = ProteomicsDBClient()
-    for identifier, gene_symbol, uniprot_id in identities:
-        if uniprot_id:
-            records.extend(proteomicsdb.fetch(gene_symbol, identifier, uniprot_id, project.tissues))
+    for identity in identities:
+        if identity.uniprot_id:
+            records.extend(
+                proteomicsdb.fetch(
+                    identity.gene_symbol,
+                    identity.ensembl_id,
+                    identity.uniprot_id,
+                    project.tissues,
+                )
+            )
     identity_map = {
-        gene_symbol: (identifier, uniprot_id)
-        for identifier, gene_symbol, uniprot_id in identities
+        identity.gene_symbol: (identity.ensembl_id, identity.uniprot_id)
+        for identity in identities
     }
     pdc = PDCClient()
     for study_id in project.pdc_studies:
         records.extend(pdc.fetch(study_id, identity_map))
     hubmap = HuBMAPClient()
     spatial_datasets = hubmap.fetch_spatial_registry(project.hubmap_organs)
-    spatial_coverage = hubmap.fetch_target_coverage(spatial_datasets, identities)
+    identity_tuples = [
+        (identity.ensembl_id, identity.gene_symbol, identity.uniprot_id)
+        for identity in identities
+    ]
+    spatial_coverage = hubmap.fetch_target_coverage(spatial_datasets, identity_tuples)
     output.mkdir(parents=True, exist_ok=True)
     serialized = [record.model_dump(mode="json") for record in records]
+    identities_json = output / "target_identities.json"
     evidence_json = output / "evidence.json"
     concordance_json = output / "concordance.json"
     cross_source_json = output / "cross_source_concordance.json"
@@ -66,6 +78,10 @@ def build(
     spatial_json = output / "spatial_datasets.json"
     spatial_coverage_json = output / "spatial_target_coverage.json"
     evidence_tsv = output / "evidence.tsv"
+    identities_json.write_text(
+        json.dumps([identity.model_dump(mode="json") for identity in identities], indent=2),
+        encoding="utf-8",
+    )
     evidence_json.write_text(json.dumps(serialized, indent=2), encoding="utf-8")
     concordance_json.write_text(
         json.dumps(summarize_concordance(records), indent=2), encoding="utf-8"
@@ -94,6 +110,7 @@ def build(
             writer.writeheader()
             writer.writerows(flat)
     artifacts = [
+        identities_json,
         evidence_json,
         concordance_json,
         cross_source_json,
@@ -119,10 +136,19 @@ def build_spatial_census(
     from .sources.cellxgene import CensusSpatialClient
 
     project = load_spec(spec)
-    datasets, summaries = CensusSpatialClient(census_version).fetch(project.genes, tissue)
+    identities = TargetResolver().resolve(project.genes)
+    datasets, summaries = CensusSpatialClient(census_version).fetch(
+        [identity.ensembl_id for identity in identities],
+        tissue,
+    )
     output.mkdir(parents=True, exist_ok=True)
+    identities_json = output / "target_identities.json"
     dataset_json = output / "census_spatial_datasets.json"
     summary_json = output / "census_spatial_expression.json"
+    identities_json.write_text(
+        json.dumps([identity.model_dump(mode="json") for identity in identities], indent=2),
+        encoding="utf-8",
+    )
     dataset_json.write_text(
         json.dumps([record.model_dump(mode="json") for record in datasets], indent=2),
         encoding="utf-8",
@@ -135,7 +161,7 @@ def build_spatial_census(
     manifest = build_manifest(
         spec,
         [],
-        [dataset_json, summary_json],
+        [identities_json, dataset_json, summary_json],
         extra_sources=[{
             "source": "CZ CELLxGENE Census",
             "release": release,
@@ -148,6 +174,125 @@ def build_spatial_census(
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     typer.echo(
         f"Built {len(summaries)} spatial summaries from {len(datasets)} datasets in {output}"
+    )
+
+
+@app.command("build-hubmap-cells")
+def build_hubmap_cells(
+    spec: Annotated[Path, typer.Argument(exists=True, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path("outputs/hubmap-cells"),
+    page_size: Annotated[int, typer.Option("--page-size")] = 5000,
+    max_cells_per_dataset: Annotated[
+        int, typer.Option("--max-cells-per-dataset")
+    ] = 200000,
+) -> None:
+    """Fetch target-level per-cell HuBMAP protein values for assayed public panels."""
+    project = load_spec(spec)
+    hpa = HPAClient(release=project.hpa_release)
+    identities = TargetResolver(hpa=hpa).resolve(project.genes)
+    identity_by_gene = {identity.gene_symbol: identity for identity in identities}
+    identity_tuples = [
+        (identity.ensembl_id, identity.gene_symbol, identity.uniprot_id)
+        for identity in identities
+    ]
+
+    hubmap = HuBMAPClient()
+    datasets = hubmap.fetch_spatial_registry(project.hubmap_organs)
+    dataset_by_uuid = {dataset.dataset_uuid: dataset for dataset in datasets}
+    coverage = hubmap.fetch_target_coverage(datasets, identity_tuples)
+
+    cells = HuBMAPCellsClient()
+    records = []
+    statuses = []
+    seen_queries: set[tuple[str, str, str]] = set()
+    for item in coverage:
+        if item.coverage_state != "assayed":
+            continue
+        identity = identity_by_gene[item.gene_symbol]
+        dataset = dataset_by_uuid[item.dataset_uuid]
+        channels = sorted({
+            str(row.get("channel_id") or "").strip()
+            for row in item.matched_channels
+            if str(row.get("channel_id") or "").strip()
+        })
+        if not channels:
+            channels = [item.gene_symbol]
+        for protein_id in channels:
+            query_key = (dataset.dataset_uuid, identity.gene_symbol, protein_id)
+            if query_key in seen_queries:
+                continue
+            seen_queries.add(query_key)
+            target_records, status = cells.fetch_target(
+                dataset,
+                identity,
+                protein_id,
+                page_size=page_size,
+                max_cells=max_cells_per_dataset,
+            )
+            records.extend(target_records)
+            statuses.append(status)
+
+    output.mkdir(parents=True, exist_ok=True)
+    identities_json = output / "target_identities.json"
+    datasets_json = output / "spatial_datasets.json"
+    coverage_json = output / "spatial_target_coverage.json"
+    cells_jsonl = output / "hubmap_cell_protein.jsonl"
+    summary_json = output / "hubmap_cell_protein_summary.json"
+    status_json = output / "hubmap_cell_query_status.json"
+
+    identities_json.write_text(
+        json.dumps([identity.model_dump(mode="json") for identity in identities], indent=2),
+        encoding="utf-8",
+    )
+    datasets_json.write_text(
+        json.dumps([dataset.model_dump(mode="json") for dataset in datasets], indent=2),
+        encoding="utf-8",
+    )
+    coverage_json.write_text(
+        json.dumps([item.model_dump(mode="json") for item in coverage], indent=2),
+        encoding="utf-8",
+    )
+    cells_jsonl.write_text(
+        "".join(
+            json.dumps(record.model_dump(mode="json"), sort_keys=True) + "\n"
+            for record in records
+        ),
+        encoding="utf-8",
+    )
+    summary_json.write_text(
+        json.dumps(summarize_cell_measurements(records), indent=2),
+        encoding="utf-8",
+    )
+    status_json.write_text(json.dumps(statuses, indent=2), encoding="utf-8")
+
+    artifacts = [
+        identities_json,
+        datasets_json,
+        coverage_json,
+        cells_jsonl,
+        summary_json,
+        status_json,
+    ]
+    manifest = build_manifest(
+        spec,
+        [],
+        artifacts,
+        extra_sources=[{
+            "source": "HuBMAP Cells API",
+            "release": "live",
+            "record_count": len(records),
+            "retrieved_at": sorted({
+                record.retrieved_at for record in records
+            }),
+            "source_urls": ["https://cells.api.hubmapconsortium.org/api"],
+            "source_payload_sha256": [],
+        }],
+    )
+    (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    complete = sum(status["status"] == "complete" for status in statuses)
+    typer.echo(
+        f"Built {len(records)} per-cell measurements from {complete} target-dataset queries "
+        f"in {output}"
     )
 
 
