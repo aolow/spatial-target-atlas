@@ -21,7 +21,7 @@ class TargetResolver:
 
     def __init__(
         self,
-        hpa: HPAClient,
+        hpa: HPAClient | None = None,
         client: httpx.Client | None = None,
     ) -> None:
         self.hpa = hpa
@@ -45,46 +45,66 @@ class TargetResolver:
             raise ValueError("Target identifiers must be non-empty.")
 
         match = _ENSEMBL_GENE.fullmatch(target)
-        ensembl_payload_hash: str | None = None
-        ensembl_url: str | None = None
+        hashes: list[str] = []
+        urls: list[str] = []
+        sources: list[str] = []
+        gene_symbol: str | None = None
         if match:
             ensembl_id = match.group(1).upper()
+            if self.hpa is None:
+                payload, url, digest = self._ensembl_lookup_id(ensembl_id)
+                gene_symbol = str(payload.get("display_name") or "") or None
+                urls.append(url)
+                hashes.append(digest)
+                sources.append("Ensembl REST")
         else:
-            ensembl_url = (
-                f"{ENSEMBL_REST}/lookup/symbol/homo_sapiens/{quote(target, safe='')}"
-            )
-            response = self.client.get(
-                ensembl_url,
-                headers={"Accept": "application/json", "Content-Type": "application/json"},
-            )
-            if response.status_code == 404:
-                raise ValueError(f"Human gene symbol not found in Ensembl: {target}") from None
-            response.raise_for_status()
-            ensembl_payload_hash = hashlib.sha256(response.content).hexdigest()
-            payload = response.json()
-            ensembl_id = str(payload.get("id") or "")
-            object_type = str(payload.get("object_type") or "")
-            if not _ENSEMBL_GENE.fullmatch(ensembl_id) or object_type.casefold() != "gene":
-                raise ValueError(
-                    f"Ensembl symbol lookup did not resolve {target!r} to one human gene."
-                )
-            ensembl_id = ensembl_id.upper()
-
-        gene_symbol, uniprot_id = self.hpa.resolve_uniprot(ensembl_id)
-        hpa_url = f"{self.hpa.base_url}/{ensembl_id}.json"
-        hashes = []
-        urls = []
-        sources = []
-        if ensembl_url is not None:
-            urls.append(ensembl_url)
+            payload, url, digest = self._ensembl_lookup_symbol(target)
+            ensembl_id = str(payload.get("id") or "").upper()
+            gene_symbol = str(payload.get("display_name") or "") or target
+            urls.append(url)
+            hashes.append(digest)
             sources.append("Ensembl REST")
-        if ensembl_payload_hash is not None:
-            hashes.append(ensembl_payload_hash)
-        urls.append(hpa_url)
-        sources.append("Human Protein Atlas")
-        hpa_hash = self.hpa.payload_hashes.get(hpa_url)
-        if hpa_hash:
-            hashes.append(hpa_hash)
+
+        uniprot_id: str | None = None
+        if self.hpa is not None:
+            gene_symbol, uniprot_id = self.hpa.resolve_uniprot(ensembl_id)
+            hpa_url = f"{self.hpa.base_url}/{ensembl_id}.json"
+            urls.append(hpa_url)
+            sources.append("Human Protein Atlas")
+            hpa_hash = self.hpa.payload_hashes.get(hpa_url)
+            if hpa_hash:
+                hashes.append(hpa_hash)
+        if not gene_symbol:
+            raise ValueError(f"Could not resolve a gene symbol for {target!r}.")
+
+    def _ensembl_lookup_symbol(
+        self, symbol: str
+    ) -> tuple[dict[str, object], str, str]:
+        url = f"{ENSEMBL_REST}/lookup/symbol/homo_sapiens/{quote(symbol, safe='')}"
+        return self._ensembl_request(url, f"Human gene symbol not found in Ensembl: {symbol}")
+
+    def _ensembl_lookup_id(
+        self, ensembl_id: str
+    ) -> tuple[dict[str, object], str, str]:
+        url = f"{ENSEMBL_REST}/lookup/id/{quote(ensembl_id, safe='')}"
+        return self._ensembl_request(url, f"Ensembl gene not found: {ensembl_id}")
+
+    def _ensembl_request(
+        self, url: str, not_found: str
+    ) -> tuple[dict[str, object], str, str]:
+        response = self.client.get(
+            url,
+            headers={"Accept": "application/json", "Content-Type": "application/json"},
+        )
+        if response.status_code == 404:
+            raise ValueError(not_found) from None
+        response.raise_for_status()
+        payload = response.json()
+        ensembl_id = str(payload.get("id") or "")
+        object_type = str(payload.get("object_type") or "")
+        if not _ENSEMBL_GENE.fullmatch(ensembl_id) or object_type.casefold() != "gene":
+            raise ValueError("Ensembl lookup did not resolve to one human gene.")
+        return payload, url, hashlib.sha256(response.content).hexdigest()
 
         return TargetIdentityRecord(
             input_id=target,
