@@ -1,91 +1,142 @@
 # Evidence model
 
-Every record declares whether it is measured or model-derived, its assay modality, spatial scale,
-source release, identifier mapping, detection state, support, and provenance. Values from different
-modalities are not placed on a shared numerical scale without a separately documented calibration.
+Spatial Target Atlas keeps measured observations, source metadata, and future model-derived hypotheses explicitly separated.
 
-## Initial HPA interpretation
+Values from different modalities are not placed on a shared numerical scale unless a separate calibration method is introduced and documented.
 
-The v25.1 gene JSON fields used in milestone 1 are specificity summaries, not complete matrices.
-`specific_expression` therefore means HPA selected that tissue or cell type as specific for the gene;
-absence from the response does not mean the protein was measured and found absent.
+## Implemented evidence families
 
-Deep Visual Proteomics contributes cell-type-resolved mass-spectrometry evidence from one healthy
-female donor. Tissue MS and subcellular immunofluorescence remain separate records.
+### Human Protein Atlas
 
-Complete matrices retain blank intensity cells as `not_detected`; they are not converted to numeric
-zero. Gene-level specificity summaries remain labeled `specific_expression`. An empty `tissues`
-selection preserves the complete body-wide matrices, while a populated list explicitly subsets them.
-For DVP comparisons, RNA is detected at nCPM ≥ 1 and protein is detected when intensity is non-missing,
-matching HPA's published definitions. Bulk and DVP MS records identify the single healthy female
-donor design. Subcellular localization is represented as immunofluorescence rather than IHC.
+The HPA connector currently supports:
 
-## Planned evidence families
+- Full tissue mass-spectrometry matrices.
+- Deep Visual Proteomics cell-type protein intensity.
+- Matched DVP transcript abundance for within-source RNA/protein concordance.
+- Subcellular immunofluorescence localization.
 
-- HPA full tissue and DVP matrices
-- ProteomicsDB grouped tissue MS
-- CPTAC/PDC tumor and adjacent-tissue proteomics (configurable studies implemented)
-- HuBMAP imaging MS and spatial molecular assays
-- CELLxGENE spatial transcriptomics
-- PINNACLE and SPATIA model-derived representations
+DVP cellular evidence currently reflects a single healthy female donor. Cell-type resolution therefore must not be mistaken for population depth.
+
+Complete matrices retain blank measurements as `not_detected`. Gene-level specificity summaries use `specific_expression`, which is not equivalent to a measured negative.
+
+### ProteomicsDB
+
+ProteomicsDB contributes grouped tissue mass-spectrometry evidence.
+
+Raw intensities remain in ProteomicsDB units. HPA and ProteomicsDB are compared only through within-source tissue ranks over exact case-insensitive tissue-label matches.
+
+ProteomicsDB is a live API rather than a pinned atlas release, so retrieval timestamps and source metadata are retained.
+
+### PDC/CPTAC
+
+The PDC connector stores quantitative target measurements per aliquot and retains:
+
+- case identity
+- sample identity
+- original sample type
+- tumor vs adjacent-normal context
+- study identity
+- matrix/biospecimen join method
+
+Tumor and adjacent-normal values are paired only within the same patient. Adjacent normal from a cancer-bearing patient is not treated as a healthy population reference.
+
+Internal reference channels are excluded.
+
+### HuBMAP
+
+HuBMAP currently contributes two layers:
+
+1. A spatial-dataset registry with assay type, organ, donor metadata, access level, DOI, protocol, and identifiers.
+2. A targeted-panel coverage audit for supported antibody panels.
+
+Panel absence is `not_assayed`, not non-detection.
+
+Per-cell target abundance extraction from HuBMAP spatial assets is not yet implemented.
+
+### CELLxGENE Census
+
+The optional CELLxGENE connector summarizes spatial transcriptomic raw counts by dataset and donor context.
+
+Before a zero is interpreted, feature presence is checked at the dataset level. If the feature is absent from a dataset's matrix, the state is `not_assayed`.
+
+Counts are summarized within datasets and contexts. They are not normalized or numerically compared across studies.
+
+Pin a Census version for reproducibility.
+
+## Detection-state semantics
+
+The project distinguishes measurement coverage from biological absence.
+
+Common states include:
+
+- `detected`
+- `not_detected`
+- `quantified`
+- `specific_expression`
+- `assayed`
+- `not_assayed`
+- `assayed_detected`
+- `assayed_not_detected`
+
+These labels are source- and modality-aware. They should not be collapsed into a single boolean target-present field.
 
 ## Concordance
 
-RNA–protein concordance is calculated only within the matched HPA DVP cell-type-group table. The
-output includes the complete context count, both-detected pairs, RNA-only, protein-only, and
-neither-detected contexts. Spearman rank correlation is withheld when fewer than three contexts have
-positive values in both modalities. Rank discordance never compares HPA intensity numerically with
-nCPM; it compares only their within-gene order across matched contexts.
+### HPA DVP RNA vs protein
 
-HPA–ProteomicsDB replication is assessed using within-source tissue ranks over exact,
-case-insensitive tissue-name matches. Raw intensities remain in source-specific units. ProteomicsDB
-records retain BRENDA Tissue Ontology identifiers, sample counts, intensity ranges, and the iBAQ
-aggregation parameters returned by the API.
+RNA/protein concordance is calculated only within matched HPA DVP cell-type groups.
 
-ProteomicsDB is a live API rather than a pinned atlas archive. Each record therefore includes its
-retrieval timestamp and declares `API v1.1 live` as the source release. Tissue labels that appear
-unusual remain unchanged until an auditable ontology crosswalk is introduced.
+The report includes:
 
-## PDC tumor–adjacent comparisons
+- number of available contexts
+- jointly detected contexts
+- RNA-only contexts
+- protein-only contexts
+- neither-detected contexts
+- within-gene Spearman rank correlation when at least three jointly positive contexts exist
+- largest rank disagreements
 
-PDC quantitative values are stored per aliquot with `case_id`, `specimen_context`, and the original
-`sample_type`. Tumor and adjacent-normal values are paired only when PDC assigns both aliquots to the
-same case. The summary reports the median paired difference and fraction of patients with a positive
-difference; it does not treat adjacent tissue as healthy or pool TMT ratios across studies. Stable
-PDC accessions resolve to the latest version, while resolved study UUID and retrieval time remain in
-each record for auditability.
+RNA nCPM and protein intensity are never directly merged.
 
-Internal-reference channels are excluded before evidence records are created. Matrix aliquot UUIDs
-are retained as `sample_id`; submitter IDs are used only as an explicit fallback join and both join
-identifiers and the join method are recorded. Case UUIDs, rather than submitter labels, define pairs.
+### HPA vs ProteomicsDB
 
-## Build provenance
+Cross-source protein reproducibility uses within-source tissue ranks on exactly matched tissue labels.
 
-`manifest.json` records SHA-256 hashes for the input specification and generated artifacts, exact
-source releases and URLs, retrieval times, package version, Git commit, and build time. HPA downloads
-use the requested release's archived major-version host, preventing an unversioned current endpoint
-from being silently labeled as an older release. Evidence records also carry SHA-256 hashes of the
-source API responses or downloadable archives used to create them, and the manifest consolidates
-those hashes by source and release. Git dirty state is explicit so a locally modified build cannot be
-mistaken for an exact committed-code reproduction.
+Small overlap counts are reported rather than hidden. Ontology-based synonym harmonization is not yet implemented.
 
 ## Reference selection
 
-Reference ranking is categorical and auditable, not a learned or composite score. For an adult lung
-cancer target population, source-labeled adult normal lung is primary-eligible, while low donor depth
-is retained as a blocking caveat for strong population claims. Cancer-patient adjacent tissue and
-developmental normal tissue are sensitivity references for different biases. Disease tissue is a
-comparator only. The categories do not imply that a source label of `normal` proves healthy status.
+Reference ranking is categorical and auditable rather than a learned composite score.
 
-Sensitivity summaries remain within modality. CELLxGENE spatial results report the fraction of
-assayed spots with positive raw counts; PDC reports source-scale abundance summaries for tumor and
-adjacent samples. These values are never combined or numerically ranked across assays.
+For the current adult cancer use case:
 
-## Spatial dataset registry
+- adult or unspecified source-labeled normal tissue can be a primary candidate
+- cancer-patient adjacent normal is a sensitivity reference
+- developmental normal is a separate sensitivity reference
+- disease tissue is comparator-only
 
-HuBMAP discovery is a separate dataset-level contract rather than synthetic gene evidence. Published
-spatial assays are selected from the Search API by explicit organ codes and written to
-`spatial_datasets.json`. Each entry retains immutable dataset and donor identifiers, DOI, protocol,
-access level, response checksums, and every ontology-backed donor covariate supplied by HuBMAP.
-Protected datasets remain discoverable but are never represented as directly downloadable public
-data. Target-level spatial expression will be added only for datasets with auditable processed assets.
+Low donor depth remains an explicit caveat even when a reference category is otherwise eligible.
+
+Sensitivity summaries stay within modality. Spatial raw-count prevalence and proteomic abundance are not numerically ranked against each other.
+
+## Provenance
+
+`manifest.json` records:
+
+- input specification SHA-256
+- generated artifact SHA-256 values
+- source release and source URLs
+- retrieval timestamps when available
+- source-payload hashes
+- package version
+- Git commit
+- Git dirty state
+- build time
+
+HPA downloads use release-specific archive hosts rather than silently labeling current data as an older release.
+
+## Schema boundary
+
+The shared record model already distinguishes `measured` and `model_derived` evidence origins.
+
+Only measured-source connectors are currently implemented. PINNACLE, SPATIA, or other model-derived connectors remain future work.
