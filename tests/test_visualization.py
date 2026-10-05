@@ -58,6 +58,17 @@ def test_render_atlas_html_combines_core_and_optional_outputs(tmp_path) -> None:
         "dataset_id": "c1", "donor_id": "D2", "spot_count": 50,
         "positive_spot_count": 25, "detection_state": "assayed_detected",
     }])
+    model_evidence = tmp_path / "model_evidence.json"
+    write_json(model_evidence, [{
+        "model_name": "PINNACLE", "model_version": "published",
+        "evidence_origin": "model_derived",
+        "evidence_kind": "contextual_representation_available",
+        "gene_symbol": "EPCAM", "ensembl_id": "ENSG1", "uniprot_id": "P1",
+        "context_type": "cell_type", "context": "epithelial cell", "tissue": None,
+        "score_name": None, "score": None, "representation_ref": "embed.pth",
+        "source_url": "https://example.test", "citation_url": "https://example.test/paper",
+        "source_payload_sha256": [], "note": "Representation availability only.",
+    }])
     audit = tmp_path / "audit.json"
     write_json(audit, {"candidates": [{
         "reference_context": "source_labeled_normal_adult_or_unspecified",
@@ -65,12 +76,14 @@ def test_render_atlas_html_combines_core_and_optional_outputs(tmp_path) -> None:
         "dataset_count": 2, "caveats": ["low donor depth"],
     }]})
 
-    rendered = render_atlas_html(core, cells, census, audit)
+    rendered = render_atlas_html(core, cells, census, audit, model_evidence)
 
     assert "<h2>EPCAM</h2>" in rendered
     assert "HuBMAP per-cell protein summaries" in rendered
     assert "Spatial transcriptomic reference contexts" in rendered
     assert "Reference context audit" in rendered
+    assert "Model-derived context" in rendered
+    assert "Representation availability only." in rendered
     assert "0.75" in rendered
 
 
