@@ -176,7 +176,7 @@ Each build records source releases, URLs, retrieval metadata, source-payload has
 ## Important limitations
 
 - Most external connectors depend on live public APIs. Exact record counts and current compatibility can change as those services change.
-- CI uses mocked source responses for deterministic connector behavior. It does not continuously run full live-data integration tests.
+- Pull-request CI uses mocked source responses for deterministic behavior. A separate weekly/manual smoke workflow checks lightweight live compatibility with Ensembl, HPA, ProteomicsDB, PDC study lookup, and HuBMAP discovery.
 - CELLxGENE can be pinned to a stable Census release; ProteomicsDB is a live API.
 - HuBMAP per-cell protein extraction depends on the separate Cells API index; not every public spatial dataset is indexed there.
 - The HTML report summarizes generated evidence but is not an interactive image or coordinate viewer.
