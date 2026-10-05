@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class EvidenceOrigin(StrEnum):
@@ -75,6 +75,8 @@ class AtlasSpec(BaseModel):
 
 
 class ModelDerivedEvidenceRecord(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     model_name: str
     model_version: str
     evidence_origin: EvidenceOrigin = EvidenceOrigin.MODEL_DERIVED
