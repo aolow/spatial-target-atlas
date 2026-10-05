@@ -44,23 +44,23 @@ def import_pinnacle_contexts(
         name = str(raw_name)
         if context.startswith("CCI_") or context.startswith("BTO"):
             continue
-        identity = targets.get(name.casefold())
-        if identity is None:
+        matched_identity = targets.get(name.casefold())
+        if matched_identity is None:
             continue
-        key = (identity.ensembl_id, context)
+        key = (matched_identity.ensembl_id, context)
         if key in seen:
             continue
         seen.add(key)
-        matched_targets.add(identity.gene_symbol)
+        matched_targets.add(matched_identity.gene_symbol)
         records.append(
             ModelDerivedEvidenceRecord(
                 model_name="PINNACLE",
                 model_version="published_pretrained_representation",
                 evidence_origin=EvidenceOrigin.MODEL_DERIVED,
                 evidence_kind="contextual_representation_available",
-                gene_symbol=identity.gene_symbol,
-                ensembl_id=identity.ensembl_id,
-                uniprot_id=identity.uniprot_id,
+                gene_symbol=matched_identity.gene_symbol,
+                ensembl_id=matched_identity.ensembl_id,
+                uniprot_id=matched_identity.uniprot_id,
                 context_type="cell_type",
                 context=context,
                 tissue=None,
