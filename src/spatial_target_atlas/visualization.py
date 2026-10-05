@@ -90,7 +90,6 @@ def _overview(
     coverage: list[dict[str, Any]],
     cell_summary: list[dict[str, Any]],
     census: list[dict[str, Any]],
-    model_evidence: list[dict[str, Any]],
 ) -> str:
     rows = []
     for target in targets:
@@ -128,6 +127,7 @@ def _target_section(
     coverage: list[dict[str, Any]],
     cell_summary: list[dict[str, Any]],
     census: list[dict[str, Any]],
+    model_evidence: list[dict[str, Any]],
 ) -> str:
     target_evidence = [row for row in evidence if row.get("gene_symbol") == target]
     parts = [f"<section><h2>{_e(target)}</h2>"]
