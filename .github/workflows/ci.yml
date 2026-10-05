@@ -5,6 +5,24 @@ on:
   pull_request:
 
 jobs:
+  library:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync
+      - name: Verify dependency-light model import
+        run: |
+          uv run python - <<'PY'
+          import importlib.util
+          from spatial_target_atlas.models import ProteinEvidenceRecord
+
+          assert ProteinEvidenceRecord is not None
+          assert importlib.util.find_spec("typer") is None
+          assert importlib.util.find_spec("rich") is None
+          print("minimal library install: ok")
+          PY
+
   test:
     runs-on: ubuntu-latest
     steps:
