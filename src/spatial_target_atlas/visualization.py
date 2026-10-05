@@ -34,9 +34,9 @@ def render_atlas_html(
 
     reference_audit: dict[str, Any] | None = None
     if reference_audit_path is not None and reference_audit_path.exists():
-        value = json.loads(reference_audit_path.read_text(encoding="utf-8"))
-        if isinstance(value, dict):
-            reference_audit = value
+        raw_audit = json.loads(reference_audit_path.read_text(encoding="utf-8"))
+        if isinstance(raw_audit, dict) and all(isinstance(key, str) for key in raw_audit):
+            reference_audit = {str(key): value for key, value in raw_audit.items()}
 
     targets = _target_names(identities, evidence, cell_summary, census)
     sections = [
@@ -285,10 +285,14 @@ def _query_status_section(rows: list[dict[str, Any]]) -> str:
 def _read_list(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
-    value = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(value, list):
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, list):
         return []
-    return [row for row in value if isinstance(row, dict)]
+    output: list[dict[str, Any]] = []
+    for row in raw:
+        if isinstance(row, dict) and all(isinstance(key, str) for key in row):
+            output.append({str(key): value for key, value in row.items()})
+    return output
 
 
 def _table(rows: list[dict[str, Any]]) -> str:
