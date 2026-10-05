@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -3094,15 +3094,21 @@ spatial = [
 [package.metadata]
 requires-dist = [
     { name = "cellxgene-census", marker = "extra == 'spatial'", specifier = ">=1.18.0" },
-    { name = "httpx", marker = "extra == 'cli' or extra == 'dev' or extra == 'spatial'", specifier = ">=0.27,<1" },
+    { name = "httpx", marker = "extra == 'cli'", specifier = ">=0.27,<1" },
+    { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27,<1" },
+    { name = "httpx", marker = "extra == 'spatial'", specifier = ">=0.27,<1" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.11,<2" },
     { name = "pydantic", specifier = ">=2.8,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8,<10" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5,<8" },
-    { name = "pyyaml", marker = "extra == 'cli' or extra == 'dev' or extra == 'spatial'", specifier = ">=6,<7" },
+    { name = "pyyaml", marker = "extra == 'cli'", specifier = ">=6,<7" },
+    { name = "pyyaml", marker = "extra == 'dev'", specifier = ">=6,<7" },
+    { name = "pyyaml", marker = "extra == 'spatial'", specifier = ">=6,<7" },
     { name = "respx", marker = "extra == 'dev'", specifier = ">=0.21,<1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6,<1" },
-    { name = "typer", marker = "extra == 'cli' or extra == 'dev' or extra == 'spatial'", specifier = ">=0.12,<1" },
+    { name = "typer", marker = "extra == 'cli'", specifier = ">=0.12,<1" },
+    { name = "typer", marker = "extra == 'dev'", specifier = ">=0.12,<1" },
+    { name = "typer", marker = "extra == 'spatial'", specifier = ">=0.12,<1" },
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6,<7" },
 ]
 provides-extras = ["cli", "dev", "spatial"]
