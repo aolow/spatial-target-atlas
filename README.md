@@ -23,7 +23,9 @@ A research prototype for assembling target evidence across tissues, cell types, 
 | Target-level HuBMAP per-cell protein extraction | Implemented for Cells API-indexed targeted panels |
 | Self-contained local HTML evidence report | Implemented |
 | Interactive spatial image/browser UI | Not yet implemented |
-| PINNACLE/SPATIA or other model-derived evidence | Not yet implemented |
+| PINNACLE target/context representation coverage | Implemented import |
+| Generic model-derived target evidence contract | Implemented |
+| Direct SPATIA target-scoring pipeline | Not yet implemented |
 | open-cohort-factory context adapter | Implemented |
 
 The code is therefore useful as a reproducible **evidence-integration and reference-audit pipeline**, not yet as a complete spatial atlas application.
@@ -104,6 +106,30 @@ spatial-target-atlas reference-audit examples/luad_targets.yaml \
   --core-evidence outputs/luad/evidence.json \
   -o outputs/luad-reference-audit.json
 ```
+
+### Model-derived evidence
+
+Model outputs are kept separate from measured assays.
+
+PINNACLE's published labels can be imported as **representation coverage**, meaning that a context-specific protein representation exists for the target in that cell type:
+
+```bash
+spatial-target-atlas import-pinnacle \
+  path/to/pinnacle_labels_dict.txt \
+  --target-identities outputs/luad/target_identities.json \
+  --embedding-file path/to/pinnacle_protein_embed.pth \
+  -o outputs/luad-pinnacle
+```
+
+The embedding file is hashed for provenance but is not loaded, so PINNACLE/PyTorch is not a runtime dependency of this project. Representation availability is not converted into a target-prioritization score.
+
+Other model-derived target outputs, including future SPATIA downstream scores, can use the same normalized JSON contract and be checked with:
+
+```bash
+spatial-target-atlas validate-model-evidence model_evidence.json
+```
+
+Pass `--model-evidence model_evidence.json` to `render-atlas` to show those records in a separate model-derived section.
 
 ### Local HTML atlas report
 
