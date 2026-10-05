@@ -4,7 +4,6 @@ import pytest
 from spatial_target_atlas.identifiers import TargetResolver
 from spatial_target_atlas.sources.hpa import HPAClient
 
-
 ENSEMBL = "ENSG00000119888"
 
 
