@@ -21,7 +21,8 @@ A research prototype for assembling target evidence across tissues, cell types, 
 | SHA-256 build provenance and artifact manifest | Implemented |
 | Gene-symbol and Ensembl input resolution | Implemented |
 | Target-level HuBMAP per-cell protein extraction | Implemented for Cells API-indexed targeted panels |
-| Interactive body → tissue → cell → compartment visualization | Not yet implemented |
+| Self-contained local HTML evidence report | Implemented |
+| Interactive spatial image/browser UI | Not yet implemented |
 | PINNACLE/SPATIA or other model-derived evidence | Not yet implemented |
 | open-cohort-factory adapter | Not yet implemented |
 
@@ -49,7 +50,7 @@ The GitHub CI runs linting, strict mypy, and pytest with a 70% coverage floor.
 
 ## Quick start
 
-The example uses three LUAD-related targets and expects Ensembl gene IDs.
+The example uses three LUAD-related gene symbols. Ensembl gene IDs are also accepted.
 
 ```bash
 spatial-target-atlas build examples/luad_targets.yaml -o outputs/luad
@@ -104,6 +105,21 @@ spatial-target-atlas reference-audit examples/luad_targets.yaml \
   -o outputs/luad-reference-audit.json
 ```
 
+### Local HTML atlas report
+
+Once you have built the evidence layers you want, render a self-contained report:
+
+```bash
+spatial-target-atlas render-atlas \
+  --core outputs/luad \
+  --hubmap-cells outputs/luad-hubmap-cells \
+  --spatial-census outputs/luad-census-spatial \
+  --reference-audit outputs/luad-reference-audit.json \
+  -o outputs/luad-atlas.html
+```
+
+Only `--core` is required. The report adds optional HuBMAP cell, CELLxGENE, and reference-audit sections when those outputs are supplied. It has no external JavaScript, CSS, or network dependency and does not combine source-specific intensity scales.
+
 ## Design principles
 
 ### Keep unlike measurements separate
@@ -137,7 +153,7 @@ Each build records source releases, URLs, retrieval metadata, source-payload has
 - CI uses mocked source responses for deterministic connector behavior. It does not continuously run full live-data integration tests.
 - CELLxGENE can be pinned to a stable Census release; ProteomicsDB is a live API.
 - HuBMAP per-cell protein extraction depends on the separate Cells API index; not every public spatial dataset is indexed there.
-- No visualization layer exists yet.
+- The HTML report summarizes generated evidence but is not an interactive image or coordinate viewer.
 - Model-derived evidence is represented in the schema but not populated by a model connector.
 - Source data retain their own licenses and citation requirements. The MIT license applies to this software.
 

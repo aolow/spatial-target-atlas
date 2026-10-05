@@ -292,6 +292,34 @@ def build_hubmap_cells(
     )
 
 
+@app.command("render-atlas")
+def render_atlas(
+    core: Annotated[Path, typer.Option("--core", exists=True, file_okay=False, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path("atlas.html"),
+    hubmap_cells: Annotated[
+        Path | None,
+        typer.Option("--hubmap-cells", exists=True, file_okay=False, readable=True),
+    ] = None,
+    spatial_census: Annotated[
+        Path | None,
+        typer.Option("--spatial-census", exists=True, file_okay=False, readable=True),
+    ] = None,
+    reference_audit: Annotated[
+        Path | None,
+        typer.Option("--reference-audit", exists=True, dir_okay=False, readable=True),
+    ] = None,
+) -> None:
+    """Render a self-contained local HTML atlas report from saved outputs."""
+    from .visualization import render_atlas_html
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        render_atlas_html(core, hubmap_cells, spatial_census, reference_audit),
+        encoding="utf-8",
+    )
+    typer.echo(f"Rendered atlas report: {output}")
+
+
 @app.command("reference-audit")
 def reference_audit(
     spec: Annotated[Path, typer.Argument(exists=True, readable=True)],
