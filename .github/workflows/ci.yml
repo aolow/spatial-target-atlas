@@ -10,7 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
-      - run: uv lock --check
+      - name: Regenerate lock for inspection
+        run: |
+          uv lock
+          git diff -- uv.lock
+          git diff --quiet -- uv.lock
       - run: uv sync
       - name: Verify dependency-light model import
         run: |
