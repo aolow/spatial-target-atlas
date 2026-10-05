@@ -77,6 +77,17 @@ class TargetResolver:
         if not gene_symbol:
             raise ValueError(f"Could not resolve a gene symbol for {target!r}.")
 
+        return TargetIdentityRecord(
+            input_id=target,
+            ensembl_id=ensembl_id,
+            gene_symbol=gene_symbol,
+            uniprot_id=uniprot_id,
+            resolution_sources=sources,
+            source_urls=urls,
+            source_payload_sha256=hashes,
+            retrieved_at=datetime.now(UTC).isoformat(),
+        )
+
     def _ensembl_lookup_symbol(
         self, symbol: str
     ) -> tuple[dict[str, object], str, str]:
@@ -105,14 +116,3 @@ class TargetResolver:
         if not _ENSEMBL_GENE.fullmatch(ensembl_id) or object_type.casefold() != "gene":
             raise ValueError("Ensembl lookup did not resolve to one human gene.")
         return payload, url, hashlib.sha256(response.content).hexdigest()
-
-        return TargetIdentityRecord(
-            input_id=target,
-            ensembl_id=ensembl_id,
-            gene_symbol=gene_symbol,
-            uniprot_id=uniprot_id,
-            resolution_sources=sources,
-            source_urls=urls,
-            source_payload_sha256=hashes,
-            retrieved_at=datetime.now(UTC).isoformat(),
-        )
