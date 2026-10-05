@@ -4,22 +4,40 @@ build-backend = "hatchling.build"
 
 [project]
 name = "spatial-target-atlas"
-version = "0.5.1"
+version = "0.5.2"
 description = "Integrate multimodal target evidence across tissues, cells, and spatial datasets."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "Aleksandra Olow"}]
-dependencies = ["httpx>=0.27,<1", "pydantic>=2.8,<3", "pyyaml>=6,<7", "typer>=0.12,<1"]
+dependencies = ["pydantic>=2.8,<3"]
 
 [project.optional-dependencies]
-dev = ["mypy>=1.11,<2", "pytest>=8,<10", "pytest-cov>=5,<8", "respx>=0.21,<1", "ruff>=0.6,<1", "types-PyYAML>=6,<7"]
+cli = [
+    "httpx>=0.27,<1",
+    "pyyaml>=6,<7",
+    "typer>=0.12,<1",
+]
+dev = [
+    "httpx>=0.27,<1",
+    "mypy>=1.11,<2",
+    "pytest>=8,<10",
+    "pytest-cov>=5,<8",
+    "pyyaml>=6,<7",
+    "respx>=0.21,<1",
+    "ruff>=0.6,<1",
+    "typer>=0.12,<1",
+    "types-PyYAML>=6,<7",
+]
 spatial = [
     "cellxgene-census>=1.18.0",
+    "httpx>=0.27,<1",
+    "pyyaml>=6,<7",
+    "typer>=0.12,<1",
 ]
 
 [project.scripts]
-spatial-target-atlas = "spatial_target_atlas.cli:app"
+spatial-target-atlas = "spatial_target_atlas.entrypoint:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/spatial_target_atlas"]
