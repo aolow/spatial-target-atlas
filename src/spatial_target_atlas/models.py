@@ -74,6 +74,26 @@ class AtlasSpec(BaseModel):
 
 
 
+class ModelDerivedEvidenceRecord(BaseModel):
+    model_name: str
+    model_version: str
+    evidence_origin: EvidenceOrigin = EvidenceOrigin.MODEL_DERIVED
+    evidence_kind: str
+    gene_symbol: str
+    ensembl_id: str
+    uniprot_id: str | None = None
+    context_type: str
+    context: str
+    tissue: str | None = None
+    score_name: str | None = None
+    score: float | None = None
+    representation_ref: str | None = None
+    source_url: str
+    citation_url: str
+    source_payload_sha256: list[str] = Field(default_factory=list)
+    note: str
+
+
 class TargetIdentityRecord(BaseModel):
     input_id: str
     ensembl_id: str
