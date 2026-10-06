@@ -237,6 +237,7 @@ def render_body(
         '<g class="body-silhouette" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2">',
         BODY_SILHOUETTE,
         "</g>",
+        ANATOMY_SCAFFOLD,
     ]
     for region, paths in ORGAN_PATHS.items():
         data = regions.get(region)
