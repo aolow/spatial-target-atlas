@@ -18,7 +18,7 @@ from .anatomy import (
 
 CHANNELS = {
     "C": {
-        "label": "HPA protein",
+        "label": "Human Protein Atlas protein",
         "description": "Human Protein Atlas tissue protein evidence",
         "color": "#00b7d8",
     },
@@ -33,7 +33,7 @@ CHANNELS = {
         "color": "#facc15",
     },
     "K": {
-        "label": "Spatial protein",
+        "label": "HuBMAP spatial protein",
         "description": "HuBMAP per-cell protein positivity",
         "color": "#111827",
     },
