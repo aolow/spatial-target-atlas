@@ -64,6 +64,23 @@ Counts are summarized within datasets and contexts. They are not normalized or n
 
 Pin a Census version for reproducibility.
 
+## Spatial overlay semantics
+
+The spatial renderer uses a CMYK-inspired categorical overlay rather than a shared quantitative scale:
+
+- **C** = Human Protein Atlas tissue protein support
+- **M** = ProteomicsDB tissue protein support
+- **Y** = CELLxGENE spatial RNA positivity
+- **K** = HuBMAP per-cell spatial protein positivity
+
+C/M/Y mix into categorical colors. K is drawn as a dark outline so spatial-protein support remains visible without masking the other channels.
+
+A failed connector is `unknown`, never negative. ProteomicsDB absence is also treated as unknown because its connector records quantified evidence rather than an explicit assayed-negative matrix.
+
+Quantitative views are source- and dataset-specific. HuBMAP median source-scale intensity and CELLxGENE mean raw count may be normalized for bar length **within one dataset only**. The source value and unit remain visible, and values are never normalized across datasets or modalities.
+
+PDC tumor-versus-adjacent evidence is shown separately as disease context rather than mixed into the body positivity palette.
+
 ## Detection-state semantics
 
 The project distinguishes measurement coverage from biological absence.
