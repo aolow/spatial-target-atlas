@@ -281,6 +281,7 @@ def render_small_multiples(
 
 
 def render_cell_contexts(rows: Any, colors: dict[str, str]) -> str:
+    """Render cell contexts as small tissue microenvironment scenes."""
     if not isinstance(rows, list) or not rows:
         return '<p class="empty">No cell-context evidence available.</p>'
     cards = []
@@ -291,31 +292,191 @@ def render_cell_contexts(rows: Any, colors: dict[str, str]) -> str:
         category = cell_category(name)
         states = row.get("channels", {})
         strengths = row.get("strengths", {})
-        layers = []
-        for channel in ("C", "Y"):
-            if isinstance(states, dict) and states.get(channel) == "positive":
-                strength = _number(strengths.get(channel)) if isinstance(strengths, dict) else None
-                layers.append(
-                    f'<circle cx="44" cy="44" r="{32 if channel == "C" else 24}" '
-                    f'fill="{colors[channel]}" '
-                    f'fill-opacity="{_source_opacity("positive", strength):.3f}"/>'
-                )
-        if isinstance(states, dict) and states.get("K") == "positive":
-            strength = _number(strengths.get("K")) if isinstance(strengths, dict) else None
-            opacity = _source_opacity("positive", strength)
-            layers.append(
-                f'<circle cx="44" cy="44" r="35" fill="none" stroke="{colors["K"]}" '
-                f'stroke-width="{2 + 4 * (strength or 1.0):.2f}" '
-                f'stroke-opacity="{opacity:.3f}"/>'
-            )
-        icon = _cell_icon(category)
+        scene = _cell_scene(category, states, strengths, colors)
         cards.append(
-            '<div class="cell-context-card">'
-            f'<svg viewBox="0 0 88 88" class="cell-context-icon">{"".join(layers)}{icon}</svg>'
-            f'<strong>{_e(name)}</strong><small>{_e(category)}</small>'
-            f'{_channel_badges(states, strengths, colors)}</div>'
+            '<div class="cell-context-card cell-scene-card">'
+            f'{scene}<div class="cell-scene-copy"><strong>{_e(name)}</strong>'
+            f'<small>{_e(_cell_category_label(category))}</small>'
+            f'{_channel_badges(states, strengths, colors)}</div></div>'
         )
-    return '<div class="cell-context-grid">' + "".join(cards) + "</div>"
+    return '<div class="cell-context-grid cell-scene-grid">' + "".join(cards) + "</div>"
+
+
+def _cell_scene(
+    category: str,
+    states: Any,
+    strengths: Any,
+    colors: dict[str, str],
+) -> str:
+    layers = _scene_signal_layers(states, strengths, colors)
+    if category == "epithelial":
+        biology = _epithelial_scene()
+        aria = "Epithelial tissue scene"
+    elif category == "endothelial":
+        biology = _endothelial_scene()
+        aria = "Endothelial vessel scene"
+    elif category == "fibroblast":
+        biology = _fibroblast_scene()
+        aria = "Fibroblast extracellular matrix scene"
+    elif category == "immune":
+        biology = _immune_scene()
+        aria = "Immune microenvironment scene"
+    else:
+        biology = _generic_tissue_scene()
+        aria = "Generic tissue scene"
+    return (
+        f'<svg viewBox="0 0 220 128" class="cell-context-scene" role="img" '
+        f'aria-label="{aria}">{layers}{biology}</svg>'
+    )
+
+
+def _scene_signal_layers(states: Any, strengths: Any, colors: dict[str, str]) -> str:
+    if not isinstance(states, dict):
+        return ""
+    strength_map = strengths if isinstance(strengths, dict) else {}
+    parts = []
+    if states.get("C") == "positive":
+        strength = _number(strength_map.get("C"))
+        parts.append(
+            f'<rect x="5" y="8" width="210" height="112" rx="18" fill="{colors["C"]}" '
+            f'fill-opacity="{0.08 + 0.25 * (strength or 1.0):.3f}"/>'
+        )
+    if states.get("Y") == "positive":
+        strength = _number(strength_map.get("Y"))
+        parts.append(
+            f'<ellipse cx="110" cy="66" rx="92" ry="45" fill="{colors["Y"]}" '
+            f'fill-opacity="{0.06 + 0.22 * (strength or 1.0):.3f}"/>'
+        )
+    if states.get("K") == "positive":
+        strength = _number(strength_map.get("K"))
+        width = 1.5 + 3.5 * (strength or 1.0)
+        parts.append(
+            f'<rect x="8" y="10" width="204" height="108" rx="17" fill="none" '
+            f'stroke="{colors["K"]}" stroke-width="{width:.2f}" '
+            f'stroke-opacity="{0.25 + 0.65 * (strength or 1.0):.3f}"/>'
+        )
+    return "".join(parts)
+
+
+def _epithelial_scene() -> str:
+    cells = []
+    x_positions = (22, 50, 78, 106, 134, 162, 190)
+    for index, x in enumerate(x_positions):
+        top = 39 + (index % 2) * 3
+        cells.append(
+            f'<path d="M{x - 12} {top} L{x + 12} {top} L{x + 10} 93 '
+            f'Q{x} 101 {x - 10} 93 Z" fill="#fff" stroke="#64748b" '
+            'stroke-width="1.2"/>'
+            f'<ellipse cx="{x}" cy="72" rx="6.5" ry="9" fill="#cbd5e1" '
+            'stroke="#64748b" stroke-width=".8"/>'
+        )
+    return (
+        '<path d="M10 27 Q45 14 78 25 T145 23 T210 26" fill="none" '
+        'stroke="#93c5fd" stroke-width="3"/>'
+        '<text x="16" y="20" class="scene-label">lumen</text>'
+        + "".join(cells)
+        + '<path d="M12 101 C50 96 83 106 111 100 C145 93 175 105 208 99" '
+        'fill="none" stroke="#a78bfa" stroke-width="3"/>'
+        '<text x="137" y="116" class="scene-label">basement membrane</text>'
+    )
+
+
+def _endothelial_scene() -> str:
+    rbc = "".join(
+        f'<ellipse cx="{x}" cy="{y}" rx="9" ry="4.5" fill="#fecaca" '
+        'stroke="#ef4444" stroke-width=".8"/>'
+        for x, y in ((70, 58), (107, 50), (144, 64))
+    )
+    return (
+        '<ellipse cx="110" cy="62" rx="90" ry="37" fill="#eff6ff" '
+        'stroke="#94a3b8" stroke-width="1.2"/>'
+        '<ellipse cx="110" cy="62" rx="75" ry="25" fill="#fff" '
+        'stroke="#cbd5e1" stroke-width="1"/>'
+        + rbc
+        + '<path d="M34 45 C48 33 62 31 79 35 M86 33 C104 26 124 28 141 35 '
+        'M148 36 C167 38 180 45 190 54" fill="none" stroke="#475569" '
+        'stroke-width="6" stroke-linecap="round"/>'
+        '<path d="M34 79 C48 91 62 93 79 89 M86 91 C104 98 124 96 141 89 '
+        'M148 88 C167 86 180 79 190 70" fill="none" stroke="#475569" '
+        'stroke-width="6" stroke-linecap="round"/>'
+        '<circle cx="57" cy="37" r="4" fill="#bfdbfe"/><circle cx="116" cy="31" r="4" '
+        'fill="#bfdbfe"/><circle cx="164" cy="43" r="4" fill="#bfdbfe"/>'
+        '<text x="82" y="116" class="scene-label">vascular lumen</text>'
+    )
+
+
+def _fibroblast_scene() -> str:
+    fibers = "".join(
+        f'<path d="{path}" fill="none" stroke="{color}" stroke-width="2" '
+        'stroke-linecap="round"/>'
+        for path, color in (
+            ("M12 27 C48 12 85 39 122 24 S184 19 210 34", "#d6b98c"),
+            ("M8 55 C47 39 82 68 118 51 S178 45 212 61", "#c4a77d"),
+            ("M12 87 C52 70 91 98 130 80 S184 73 210 88", "#d6b98c"),
+            ("M16 108 C55 91 99 117 139 102 S185 96 208 106", "#c4a77d"),
+        )
+    )
+    fibroblasts = "".join(
+        (
+            f'<g transform="translate({x} {y}) rotate({angle})">'
+            '<path d="M-28 0 C-13 -8 -9 -16 0 -5 C9 -16 13 -8 28 0 '
+            'C13 8 9 16 0 5 C-9 16 -13 8 -28 0Z" fill="#fff" '
+            'stroke="#6b7280" stroke-width="1.1"/>'
+            '<ellipse cx="0" cy="0" rx="7" ry="4" fill="#fed7aa" stroke="#ea580c"/>'
+            "</g>"
+        )
+        for x, y, angle in ((62, 47, -12), (145, 74, 18), (102, 101, -7))
+    )
+    return (
+        fibers
+        + fibroblasts
+        + '<text x="14" y="118" class="scene-label">collagen-rich ECM</text>'
+    )
+
+
+def _immune_scene() -> str:
+    macrophage = (
+        '<path d="M122 66 C117 51 128 40 143 45 C157 42 169 54 165 68 '
+        'C169 82 156 91 144 87 C131 92 119 80 122 66Z" fill="#fff" '
+        'stroke="#64748b" stroke-width="1.2"/>'
+        '<path d="M134 64 C135 53 151 51 154 62 C157 72 147 79 139 75 '
+        'C135 73 133 69 134 64Z" fill="#c4b5fd" stroke="#7c3aed"/>'
+    )
+    lymphocytes = "".join(
+        f'<g><circle cx="{x}" cy="{y}" r="13" fill="#fff" stroke="#64748b"/>'
+        f'<circle cx="{x}" cy="{y}" r="8" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        for x, y in ((45, 47), (79, 84), (181, 45), (176, 91))
+    )
+    return (
+        '<path d="M12 108 C44 92 78 115 112 100 S175 92 208 108" fill="none" '
+        'stroke="#d1d5db" stroke-width="2"/>'
+        + lymphocytes
+        + macrophage
+        + '<text x="13" y="22" class="scene-label">mixed immune field</text>'
+    )
+
+
+def _generic_tissue_scene() -> str:
+    cells = "".join(
+        f'<g><circle cx="{x}" cy="{y}" r="15" fill="#fff" stroke="#64748b"/>'
+        f'<circle cx="{x}" cy="{y}" r="6" fill="#dbeafe" stroke="#2563eb"/></g>'
+        for x, y in ((47, 46), (91, 79), (137, 44), (174, 83))
+    )
+    return (
+        '<path d="M8 109 C43 93 75 113 108 101 S172 92 212 107" fill="none" '
+        'stroke="#d1d5db" stroke-width="2"/>'
+        + cells
+    )
+
+
+def _cell_category_label(category: str) -> str:
+    return {
+        "epithelial": "epithelial compartment",
+        "endothelial": "vascular compartment",
+        "fibroblast": "stromal / ECM compartment",
+        "immune": "immune compartment",
+        "other": "other cell context",
+    }[category]
 
 
 def render_subcellular(locations: Any) -> str:
@@ -405,39 +566,6 @@ def _channel_badges(states: Any, strengths: Any, colors: dict[str, str]) -> str:
             f'style="--source-color:{colors[channel]}">{_e(text)}</span>'
         )
     return '<div class="cell-source-badges">' + "".join(badges) + "</div>"
-
-
-def _cell_icon(category: str) -> str:
-    if category == "immune":
-        return (
-            '<circle cx="44" cy="44" r="18" fill="#fff" fill-opacity=".92" stroke="#475569"/>'
-            '<path d="M34 43 C36 32 52 31 55 42 C57 51 48 58 39 55 '
-            'C34 53 32 48 34 43Z" fill="#c4b5fd" stroke="#7c3aed"/>'
-        )
-    if category == "endothelial":
-        return (
-            '<path d="M16 50 C28 33 61 31 72 48 C61 57 28 59 16 50Z" '
-            'fill="#fff" fill-opacity=".92" stroke="#475569"/>'
-            '<ellipse cx="44" cy="46" rx="10" ry="5" fill="#bae6fd" stroke="#0284c7"/>'
-        )
-    if category == "fibroblast":
-        return (
-            '<path d="M10 45 C25 35 29 18 44 35 C59 18 63 35 78 45 '
-            'C63 55 59 72 44 55 C29 72 25 55 10 45Z" '
-            'fill="#fff" fill-opacity=".92" stroke="#475569"/>'
-            '<ellipse cx="44" cy="45" rx="8" ry="5" fill="#fed7aa" stroke="#ea580c"/>'
-        )
-    if category == "epithelial":
-        return (
-            '<path d="M16 27 L72 27 L68 62 C57 69 31 69 20 62Z" '
-            'fill="#fff" fill-opacity=".92" stroke="#475569"/>'
-            '<path d="M27 29 V62 M40 28 V66 M54 28 V65" stroke="#cbd5e1"/>'
-            '<ellipse cx="44" cy="48" rx="8" ry="10" fill="#bfdbfe" stroke="#2563eb"/>'
-        )
-    return (
-        '<circle cx="44" cy="44" r="21" fill="#fff" fill-opacity=".92" stroke="#475569"/>'
-        '<circle cx="44" cy="44" r="8" fill="#dbeafe" stroke="#2563eb"/>'
-    )
 
 
 def _number(value: Any) -> float | None:

@@ -4,6 +4,19 @@ These files are **visual design examples**, not scientific output from the LUAD 
 
 They are checked in so the spatial language can be reviewed directly in GitHub before relying on it for biological interpretation.
 
+## Cell-context redesign
+
+![Cell context v3](cell_context_v3.svg)
+
+The cell section now uses tissue microenvironment scenes rather than isolated cartoon cell icons:
+
+- epithelial sheet with lumen and basement membrane
+- endothelial vessel with vascular lumen
+- fibroblast/stromal field with collagen-rich ECM
+- mixed immune field with lymphocyte and macrophage-like morphologies
+
+Source signal is drawn as translucent context overlays or outlines behind/around the biological structures. The cells themselves stay mostly neutral so morphology remains readable.
+
 ## v2 source-opacity redesign
 
 ![Spatial overlay v2](spatial_overlay_v2.svg)

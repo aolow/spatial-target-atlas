@@ -173,7 +173,7 @@ spatial-target-atlas build-overlay \
 
 When quantitative values are available, the HTML atlas also shows separate dataset cards with intensity bars normalized **within that dataset only**. Raw/source-scale values remain visible beside the bars.
 
-The visual layer now uses repo-owned SVG anatomy masks, cell-type icons, and a subcellular cell schematic rather than primitive circles and rectangles. These are visualization masks, not diagnostic anatomy.
+The visual layer uses repo-owned SVG anatomy masks, tissue microenvironment scenes, and a subcellular cell schematic. Cell-context views depict tissue structure rather than isolated cartoon cells, while source signal is rendered as translucent context overlays around the biology. These are visualization masks, not diagnostic anatomy.
 
 See [examples/vignettes/README.md](examples/vignettes/README.md) for checked-in visual design examples, including the v2 opacity redesign.
 
