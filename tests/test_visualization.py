@@ -80,7 +80,9 @@ def test_render_atlas_html_combines_core_and_optional_outputs(tmp_path) -> None:
 
     assert "<h2>EPCAM</h2>" in rendered
     assert "EPCAM spatial atlas" in rendered
-    assert "Integrated tissue microenvironment" in rendered
+    assert "Normal versus tumor tissue context" in rendered
+    assert "Normal / reference tissue" in rendered
+    assert "Tumor tissue" in rendered
     assert "radial-tissue-tracks" in rendered
     assert "Human Protein Atlas protein" in rendered
     assert "Dataset-resolved views" in rendered
