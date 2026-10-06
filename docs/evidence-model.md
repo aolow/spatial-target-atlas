@@ -66,14 +66,9 @@ Pin a Census version for reproducibility.
 
 ## Spatial overlay semantics
 
-The spatial renderer uses source-specific transparent layers rather than a shared quantitative scale:
+The spatial renderer uses source-specific transparent layers rather than a shared quantitative scale. The visible layers are Human Protein Atlas tissue protein, ProteomicsDB tissue protein, CELLxGENE spatial RNA, and HuBMAP per-cell spatial protein.
 
-- **C** = Human Protein Atlas tissue protein
-- **M** = ProteomicsDB tissue protein
-- **Y** = CELLxGENE spatial RNA
-- **K** = HuBMAP per-cell spatial protein
-
-C/M/Y are alpha-composited with multiply blending. K is drawn as a dark outline so spatial-protein support remains visible without masking the other channels.
+The first three layers are alpha-composited with multiply blending. HuBMAP spatial protein is drawn as a dark outline so it remains visible without masking the other source layers. User-facing views use full source names. Internal payload channel keys remain unchanged for backward compatibility.
 
 Opacity has source-specific meaning. HPA and ProteomicsDB use within-target, within-source relative tissue intensity with a nonzero floor for positive tissue. CELLxGENE uses positive-spot fraction. HuBMAP uses positive-cell fraction. These strengths are not a common numerical scale and must not be compared across source families.
 

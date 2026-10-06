@@ -154,12 +154,9 @@ Pass `--model-evidence model_evidence.json` to `render-atlas` to show those reco
 
 The atlas includes a source-layered spatial view at body, organ, cell-context, and subcellular scales.
 
-- **C**: HPA tissue protein
-- **M**: ProteomicsDB tissue protein
-- **Y**: CELLxGENE spatial RNA
-- **K**: HuBMAP spatial protein, shown as a dark outline
+The four visual layers are Human Protein Atlas tissue protein, ProteomicsDB tissue protein, CELLxGENE spatial RNA, and HuBMAP spatial protein. Each source has its own color, but the UI uses full source names rather than channel acronyms.
 
-The composite uses transparent C/M/Y layers with multiply blending. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Four source-specific small body maps sit beside the composite so mixed colors remain auditable.
+The composite uses transparent source-colored layers with multiply blending. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Four source-specific small body maps sit beside the composite so mixed colors remain auditable.
 
 Build the inspectable overlay payload directly:
 

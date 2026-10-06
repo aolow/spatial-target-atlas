@@ -21,30 +21,23 @@ Source signal is drawn as translucent context overlays or outlines behind/around
 
 ![Spatial overlay v2](spatial_overlay_v2.svg)
 
-This is the current visual direction: better anatomy masks, true transparent source layers, source-separated small multiples, cell-type icons, and a subcellular cell schematic.
+This is the current visual direction: better anatomy masks, true transparent source layers, source-separated small multiples, tissue microenvironment scenes, and a subcellular cell schematic. Current views use full source names rather than channel acronyms.
 
 ## Original v0.6 concept
 
 ![LUAD overlay design concept](luad_overlay_concept.svg)
 
-The visual grammar is:
-
-- **C**: HPA tissue protein support
-- **M**: ProteomicsDB tissue protein support
-- **Y**: spatial RNA positivity
-- **K**: HuBMAP spatial protein support, rendered as a dark outline
-
-C/M/Y colors mix categorically. K remains an outline so it does not erase the other source combination.
+The original v0.6 concept used channel letters. Those labels are retained here only as historical design context; current atlas views use plain-English source names and color overlays without exposing the internal channel keys.
 
 Gray means no positive channel is shown in the design example. In generated reports, unavailable or failed sources remain explicitly `unknown`; they are not converted to negatives.
 
-## Dataset-resolved view
+## Legacy early HTML prototype
 
-Open [luad_overlay_vignette.html](luad_overlay_vignette.html) locally to review the fuller layout with:
+[luad_overlay_vignette.html](luad_overlay_vignette.html) is retained as an early layout prototype. Use the v2 body overlay and v3 cell-context SVGs above for current visual review. The legacy HTML includes:
 
 - body-level source overlays
 - organ evidence cards
-- cell-context bubbles
+- early cell-context bubbles
 - subcellular localization
 - PDC tumor-versus-adjacent badges
 - within-dataset intensity bars
