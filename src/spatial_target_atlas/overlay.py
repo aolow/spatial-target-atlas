@@ -720,8 +720,8 @@ def _region_shape(
 def _legend_html() -> str:
     items = "".join(
         f'<span class="legend-item"><span class="swatch" style="background:{data["color"]}">'
-        f'</span><strong>{key}</strong> {_e(data["label"])}</span>'
-        for key, data in CHANNELS.items()
+        f'</span>{_e(data["label"])}</span>'
+        for data in CHANNELS.values()
     )
     return f'<div class="overlay-legend">{items}</div>'
 
@@ -732,7 +732,9 @@ def _organ_cards(regions: dict[str, dict[str, Any]]) -> str:
     cards = []
     for region, row in sorted(regions.items()):
         chips = "".join(
-            f'<span class="channel-chip state-{_e(state)}">{key}</span>'
+            f'<span class="channel-chip state-{_e(state)}">'
+            f'<span class="channel-chip-dot" style="background:{CHANNELS[key]["color"]}"></span>'
+            f'{_e(CHANNELS[key]["label"])}</span>'
             for key, state in row.get("channels", {}).items()
         )
         cards.append(
