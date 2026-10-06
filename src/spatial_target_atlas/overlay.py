@@ -129,20 +129,26 @@ def build_overlay_payload(
         if row.get("gene_symbol")
     })
     return {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "overlay_semantics": {
             "C": CHANNELS["C"],
             "M": CHANNELS["M"],
             "Y": CHANNELS["Y"],
             "K": CHANNELS["K"],
             "mixing": (
-                "C/M/Y use categorical subtractive-style color combinations; "
-                "K is shown as a dark outline so spatial-protein support does not "
-                "erase the other channels."
+                "C/M/Y are rendered as transparent source-colored organ layers with "
+                "multiply blending; K is a dark outline so spatial-protein support "
+                "does not erase the other channels."
+            ),
+            "strength_rule": (
+                "HPA and ProteomicsDB opacity uses within-target, within-source "
+                "relative tissue intensity. Spatial RNA uses positive-spot fraction. "
+                "HuBMAP spatial protein uses positive-cell fraction. Strengths are "
+                "never compared numerically across source families."
             ),
             "quantitative_rule": (
-                "Intensity is shown only within a dataset/source-specific view and "
-                "is never normalized across datasets."
+                "Dataset-resolved intensity is shown only within a dataset/source-specific "
+                "view and is never normalized across datasets."
             ),
         },
         "targets": [
