@@ -10,11 +10,12 @@ from statistics import median
 from typing import Any
 
 from .anatomy import (
-    render_body,
-    render_cell_contexts,
-    render_small_multiples,
+    cell_category,
+    render_radial_atlas,
     render_subcellular,
+    render_tissue_microenvironment,
 )
+from .radial_layout import TISSUE_DISPLAY_NAMES, TISSUE_ORDER
 
 CHANNELS = {
     "C": {
@@ -57,8 +58,14 @@ BODY_REGIONS: dict[str, dict[str, Any]] = {
 }
 
 _TISSUE_ALIASES = {
+    "vasculature": ("vasculature", "blood vessel", "artery", "vein", "vascular"),
+    "bone_marrow": ("bone marrow", "marrow"),
+    "lymph_node": ("lymph node", "lymphoid node"),
+    "small_intestine": ("small intestine", "ileum", "jejunum", "duodenum"),
+    "salivary_gland": ("salivary gland", "parotid", "submandibular"),
     "brain": ("brain", "cerebr", "cerebral cortex"),
     "thyroid": ("thyroid",),
+    "trachea": ("trachea",),
     "lung": ("lung", "bronch", "alveol"),
     "heart": ("heart", "cardiac", "myocard"),
     "liver": ("liver", "hepatic"),
@@ -66,10 +73,18 @@ _TISSUE_ALIASES = {
     "pancreas": ("pancrea",),
     "kidney": ("kidney", "renal"),
     "spleen": ("spleen",),
+    "thymus": ("thymus",),
     "colon": ("colon", "large intestine", "rectum", "colorectal"),
     "bladder": ("bladder", "urothel"),
     "breast": ("breast", "mammary"),
     "skin": ("skin", "epiderm", "dermis"),
+    "fat": ("adipose", "fat"),
+    "muscle": ("skeletal muscle", "muscle"),
+    "ovary": ("ovary", "ovarian"),
+    "prostate": ("prostate",),
+    "testis": ("testis", "testicular"),
+    "tongue": ("tongue",),
+    "uterus": ("uterus", "uterine", "endometrium"),
 }
 
 _POSITIVE_STATES = {
@@ -129,7 +144,7 @@ def build_overlay_payload(
         if row.get("gene_symbol")
     })
     return {
-        "schema_version": "2.0",
+        "schema_version": "3.0",
         "overlay_semantics": {
             "C": CHANNELS["C"],
             "M": CHANNELS["M"],
@@ -233,10 +248,23 @@ def _target_payload(
         for row in paired
         if row.get("gene_symbol") == target
     ]
+    radial_tissues = _radial_tissue_payload(
+        target_evidence,
+        target_cells,
+        target_census,
+        failures,
+        hpa_strengths,
+        pdb_strengths,
+        rna_strengths,
+        protein_strengths,
+    )
+    microenvironment = _microenvironment_payload(cell_types)
     return {
         "gene_symbol": target,
         "regions": regions,
+        "radial_tissues": radial_tissues,
         "cell_types": cell_types,
+        "microenvironment": microenvironment,
         "subcellular": subcellular,
         "disease_context": disease,
         "dataset_views": {
@@ -252,6 +280,8 @@ def canonical_region(value: Any) -> str | None:
         return None
     if text in {"ll", "rl"}:
         return "lung"
+    if text in {"blood", "whole blood", "peripheral blood"}:
+        return "blood"
     for region, aliases in _TISSUE_ALIASES.items():
         if any(alias in text for alias in aliases):
             return region
@@ -283,26 +313,33 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         for item in target_payload.get("regions", [])
         if isinstance(item, dict)
     }
+    radial_tissues = [
+        item
+        for item in target_payload.get("radial_tissues", [])
+        if isinstance(item, dict)
+    ]
+    raw_microenvironment = target_payload.get("microenvironment")
+    microenvironment = (
+        raw_microenvironment if isinstance(raw_microenvironment, dict) else {}
+    )
     colors = {key: str(value["color"]) for key, value in CHANNELS.items()}
-    composite = render_body(region_map, colors)
-    small_multiples = render_small_multiples(region_map, colors)
+    radial = render_radial_atlas(region_map, radial_tissues, colors)
+    tissue = render_tissue_microenvironment(microenvironment, colors)
     legend = _legend_html()
-    organ_cards = _organ_cards(region_map)
-    cells = render_cell_contexts(target_payload.get("cell_types", []), colors)
     subcellular = render_subcellular(target_payload.get("subcellular", []))
     datasets = _dataset_views_html(target_payload.get("dataset_views", {}))
     disease = _disease_html(target_payload.get("disease_context", []))
     return (
-        f'<div class="spatial-vignette spatial-v2"><div class="spatial-head">'
+        f'<div class="spatial-vignette spatial-v4"><div class="spatial-head">'
         f"<div><h3>{target} spatial atlas</h3>"
-        '<p class="note">Hue identifies source. Opacity encodes strength only within '
-        "that source. Composite layers use multiply blending.</p></div>"
+        '<p class="note">Body orientation sits in the center; radial tracks carry '
+        "source-specific tissue evidence. Opacity remains source-local.</p></div>"
         f"{legend}</div>"
-        f'<div class="spatial-grid"><div class="body-panel">{composite}{disease}</div>'
-        f'<div class="organ-panel"><h4>Source-separated views</h4>{small_multiples}'
-        f'<h4>Organs & tissues</h4>{organ_cards}</div></div>'
-        f'<div class="lower-grid"><div><h4>Cell contexts</h4>{cells}</div>'
-        f'<div><h4>Subcellular localization</h4>{subcellular}</div></div>'
+        f'<div class="radial-panel">{radial}{disease}</div>'
+        '<div class="hierarchy-grid">'
+        f'<div class="tissue-panel"><h4>Integrated tissue microenvironment</h4>{tissue}</div>'
+        f'<div class="subcellular-panel"><h4>Subcellular localization</h4>{subcellular}</div>'
+        "</div>"
         f"{datasets}</div>"
     )
 
@@ -417,7 +454,7 @@ def _cell_type_overlay(
         for row in rows
         if row.get("cell_type")
     })
-    output = []
+    output: list[dict[str, Any]] = []
     for name in names:
         hpa = [
             row for row in evidence
@@ -474,7 +511,120 @@ def _cell_type_overlay(
                 "fill": overlay_color(channels),
                 "k_outline": channels["K"] == "positive",
             })
+    c_values = [
+        float(row["strengths"]["C"])
+        for row in output
+        if isinstance(row.get("strengths"), dict)
+        and isinstance(row["strengths"].get("C"), (int, float))
+    ]
+    if c_values:
+        low = min(c_values)
+        high = max(c_values)
+        for row in output:
+            strengths = row.get("strengths")
+            if not isinstance(strengths, dict):
+                continue
+            value = strengths.get("C")
+            if not isinstance(value, (int, float)):
+                continue
+            strengths["C"] = (
+                1.0
+                if high <= low
+                else 0.25 + 0.75 * ((float(value) - low) / (high - low))
+            )
     return output[:24]
+
+
+def _radial_tissue_payload(
+    evidence: list[dict[str, Any]],
+    cells: list[dict[str, Any]],
+    census: list[dict[str, Any]],
+    failures: set[str],
+    hpa_strengths: dict[str, float],
+    pdb_strengths: dict[str, float],
+    rna_strengths: dict[str, float],
+    protein_strengths: dict[str, float],
+) -> list[dict[str, Any]]:
+    output = []
+    for tissue in TISSUE_ORDER:
+        tracks = {
+            "hpa_protein": {
+                "state": _hpa_state(evidence, tissue, failures),
+                "strength": hpa_strengths.get(tissue),
+            },
+            "proteomicsdb_protein": {
+                "state": _proteomicsdb_state(evidence, tissue, failures),
+                "strength": pdb_strengths.get(tissue),
+            },
+            "spatial_rna": {
+                "state": _census_state(census, tissue),
+                "strength": rna_strengths.get(tissue),
+            },
+            "hubmap_spatial_protein": {
+                "state": _hubmap_state(cells, tissue),
+                "strength": protein_strengths.get(tissue),
+            },
+        }
+        output.append({
+            "tissue": tissue,
+            "display_name": TISSUE_DISPLAY_NAMES[tissue],
+            "tracks": tracks,
+            "has_evidence": any(
+                str(track.get("state")) != "unknown" for track in tracks.values()
+            ),
+        })
+    return output
+
+
+def _microenvironment_payload(
+    cell_types: list[dict[str, Any]],
+) -> dict[str, Any]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in cell_types:
+        grouped[cell_category(str(row.get("cell_type") or ""))].append(row)
+
+    output: dict[str, Any] = {}
+    for category in ("epithelial", "fibroblast", "endothelial", "immune", "other"):
+        rows = grouped.get(category, [])
+        if not rows:
+            output[category] = {
+                "channels": {key: "unknown" for key in CHANNELS},
+                "strengths": {key: None for key in CHANNELS},
+                "cell_types": [],
+            }
+            continue
+
+        channels: dict[str, str] = {}
+        strengths: dict[str, float | None] = {}
+        for channel in CHANNELS:
+            states = [
+                str(row.get("channels", {}).get(channel) or "unknown")
+                for row in rows
+                if isinstance(row.get("channels"), dict)
+            ]
+            channels[channel] = (
+                "positive"
+                if "positive" in states
+                else ("negative" if "negative" in states else "unknown")
+            )
+            values = [
+                float(row["strengths"][channel])
+                for row in rows
+                if isinstance(row.get("strengths"), dict)
+                and isinstance(row["strengths"].get(channel), (int, float))
+            ]
+            strengths[channel] = median(values) if values else None
+
+        output[category] = {
+            "channels": channels,
+            "strengths": strengths,
+            "cell_types": sorted({
+                str(row.get("cell_type"))
+                for row in rows
+                if row.get("cell_type")
+            }),
+        }
+    return output
 
 
 def _relative_region_strength(

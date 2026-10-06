@@ -9,6 +9,8 @@ from __future__ import annotations
 import html
 from typing import Any
 
+from .radial_layout import render_radial_tracks
+
 BODY_VIEWBOX = "0 0 320 560"
 
 BODY_SILHOUETTE = """
@@ -477,6 +479,260 @@ def _cell_category_label(category: str) -> str:
         "immune": "immune compartment",
         "other": "other cell context",
     }[category]
+
+
+def render_radial_atlas(
+    regions: dict[str, dict[str, Any]],
+    radial_tissues: list[dict[str, Any]],
+    colors: dict[str, str],
+) -> str:
+    """Render a central anatomy map surrounded by source-specific tissue tracks."""
+    parts = [
+        '<svg class="radial-atlas" viewBox="0 0 1000 1000" role="img" '
+        'aria-label="Radial body and tissue evidence atlas">',
+        render_radial_tracks(radial_tissues, colors),
+        '<g class="radial-center-body" transform="translate(357 288) scale(.58)">',
+        '<g fill="#fbfcfe" stroke="#94a3b8" stroke-width="2.2">',
+        BODY_SILHOUETTE,
+        "</g>",
+    ]
+    for region, paths in ORGAN_PATHS.items():
+        data = regions.get(region)
+        parts.append(
+            f'<g class="center-organ center-organ-{_e(region)}" fill="#f1f5f9" '
+            'stroke="#94a3b8" stroke-width="1.2">'
+            f"{paths}</g>"
+        )
+        if data is None:
+            continue
+        states = data.get("channels", {})
+        strengths = data.get("strengths", {})
+        if not isinstance(states, dict):
+            continue
+        strength_map = strengths if isinstance(strengths, dict) else {}
+        for channel in ("C", "M", "Y"):
+            if states.get(channel) != "positive":
+                continue
+            strength = _number(strength_map.get(channel))
+            parts.append(
+                _organ_layer(
+                    region,
+                    paths,
+                    colors[channel],
+                    0.10 + 0.42 * (strength if strength is not None else 1.0),
+                    "none",
+                    0,
+                    channel,
+                    blend=True,
+                )
+            )
+        if states.get("K") == "positive":
+            strength = _number(strength_map.get("K"))
+            value = strength if strength is not None else 1.0
+            parts.append(
+                _organ_layer(
+                    region,
+                    paths,
+                    "none",
+                    1.0,
+                    colors["K"],
+                    1.8 + 3.5 * value,
+                    "K",
+                    stroke_opacity=0.3 + 0.6 * value,
+                )
+            )
+    parts.extend(
+        [
+            "</g>",
+            '<text x="500" y="505" text-anchor="middle" class="radial-center-label">'
+            "body orientation</text>",
+            "</svg>",
+        ]
+    )
+    return "".join(parts)
+
+
+def render_tissue_microenvironment(
+    microenvironment: dict[str, Any],
+    colors: dict[str, str],
+) -> str:
+    """Render epithelial, stromal, vascular, and immune evidence in one tissue scene."""
+    epithelial = _compartment(microenvironment, "epithelial")
+    stromal = _compartment(microenvironment, "fibroblast")
+    endothelial = _compartment(microenvironment, "endothelial")
+    immune = _compartment(microenvironment, "immune")
+
+    return (
+        '<div class="microenvironment-view">'
+        '<svg class="microenvironment-scene" viewBox="0 0 760 360" role="img" '
+        'aria-label="Integrated tissue microenvironment evidence view">'
+        '<rect x="8" y="8" width="744" height="344" rx="22" fill="#fcfcfd" '
+        'stroke="#e2e8f0"/>'
+        + _micro_signal(stromal, colors, 20, 24, 720, 316, 28)
+        + _ecm_background()
+        + _micro_signal(epithelial, colors, 34, 166, 345, 158, 22)
+        + _epithelial_nest()
+        + _micro_signal(endothelial, colors, 438, 36, 282, 126, 28)
+        + _vessel_scene()
+        + _micro_signal(immune, colors, 390, 176, 330, 150, 28)
+        + _immune_infiltrate()
+        + _fibroblasts_in_stroma()
+        + '<text x="42" y="342" class="micro-label">stromal / ECM compartment</text>'
+        '<text x="52" y="189" class="micro-label">epithelial compartment</text>'
+        '<text x="500" y="59" class="micro-label">vascular compartment</text>'
+        '<text x="532" y="205" class="micro-label">immune infiltrate</text>'
+        "</svg>"
+        + _microenvironment_summary(microenvironment)
+        + "</div>"
+    )
+
+
+def _compartment(microenvironment: dict[str, Any], name: str) -> dict[str, Any]:
+    value = microenvironment.get(name)
+    return value if isinstance(value, dict) else {}
+
+
+def _micro_signal(
+    compartment: dict[str, Any],
+    colors: dict[str, str],
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    radius: float,
+) -> str:
+    states = compartment.get("channels", {})
+    strengths = compartment.get("strengths", {})
+    if not isinstance(states, dict):
+        return ""
+    strength_map = strengths if isinstance(strengths, dict) else {}
+    layers = []
+    for channel in ("C", "M", "Y"):
+        if states.get(channel) != "positive":
+            continue
+        strength = _number(strength_map.get(channel))
+        value = strength if strength is not None else 1.0
+        layers.append(
+            f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{radius}" '
+            f'fill="{colors[channel]}" fill-opacity="{0.05 + 0.20 * value:.3f}" '
+            'style="mix-blend-mode:multiply"/>'
+        )
+    if states.get("K") == "positive":
+        strength = _number(strength_map.get("K"))
+        value = strength if strength is not None else 1.0
+        layers.append(
+            f'<rect x="{x + 3}" y="{y + 3}" width="{width - 6}" height="{height - 6}" '
+            f'rx="{max(radius - 3, 1)}" fill="none" stroke="{colors["K"]}" '
+            f'stroke-width="{1.5 + 3.5 * value:.2f}" '
+            f'stroke-opacity="{0.25 + 0.65 * value:.3f}"/>'
+        )
+    return "".join(layers)
+
+
+def _ecm_background() -> str:
+    fibers = [
+        ("M22 74 C118 39 187 102 286 61 S468 44 738 91", "#d8c7aa"),
+        ("M18 124 C99 89 201 153 297 113 S511 85 742 137", "#cbb693"),
+        ("M24 276 C112 231 213 297 320 257 S539 229 738 284", "#d8c7aa"),
+        ("M36 319 C139 281 241 342 353 302 S562 283 721 318", "#cbb693"),
+        ("M302 179 C374 138 452 183 527 155 S650 145 733 171", "#ddceb6"),
+    ]
+    return "".join(
+        f'<path d="{path}" fill="none" stroke="{color}" stroke-width="2.2" '
+        'stroke-linecap="round" opacity=".72"/>'
+        for path, color in fibers
+    )
+
+
+def _epithelial_nest() -> str:
+    cells = []
+    for row, y in enumerate((210, 252, 294)):
+        offset = 0 if row % 2 == 0 else 18
+        for x in range(64 + offset, 350, 38):
+            cells.append(
+                f'<path d="M{x - 15} {y - 18} Q{x} {y - 28} {x + 15} {y - 18} '
+                f'L{x + 13} {y + 14} Q{x} {y + 23} {x - 13} {y + 14} Z" '
+                'fill="#fff" fill-opacity=".93" stroke="#64748b" stroke-width="1"/>'
+                f'<ellipse cx="{x}" cy="{y}" rx="6.5" ry="8.5" '
+                'fill="#cbd5e1" stroke="#64748b" stroke-width=".7"/>'
+            )
+    return (
+        '<path d="M44 190 C127 159 251 166 365 194" fill="none" '
+        'stroke="#a78bfa" stroke-width="3"/>'
+        + "".join(cells)
+        + '<path d="M43 317 C139 329 270 331 365 314" fill="none" '
+        'stroke="#a78bfa" stroke-width="3"/>'
+    )
+
+
+def _vessel_scene() -> str:
+    return (
+        '<ellipse cx="578" cy="111" rx="117" ry="43" fill="#f8fbff" '
+        'stroke="#64748b" stroke-width="7"/>'
+        '<ellipse cx="578" cy="111" rx="91" ry="28" fill="#fff" '
+        'stroke="#cbd5e1" stroke-width="1.2"/>'
+        '<ellipse cx="536" cy="105" rx="13" ry="6" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="582" cy="118" rx="13" ry="6" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="625" cy="102" rx="13" ry="6" fill="#fecaca" stroke="#ef4444"/>'
+        '<circle cx="491" cy="91" r="4.5" fill="#bfdbfe"/>'
+        '<circle cx="553" cy="72" r="4.5" fill="#bfdbfe"/>'
+        '<circle cx="639" cy="77" r="4.5" fill="#bfdbfe"/>'
+    )
+
+
+def _immune_infiltrate() -> str:
+    lymphocytes = "".join(
+        f'<g><circle cx="{x}" cy="{y}" r="13" fill="#fff" stroke="#64748b"/>'
+        f'<circle cx="{x}" cy="{y}" r="8" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        for x, y in ((425, 240), (474, 291), (529, 226), (646, 263), (690, 306))
+    )
+    macrophages = "".join(
+        (
+            f'<g transform="translate({x} {y})"><path d="M-20 0 C-24 -16 -10 -26 5 -21 '
+            'C19 -25 31 -11 26 4 C31 18 16 29 3 24 C-11 30 -24 16 -20 0Z" '
+            'fill="#fff" stroke="#64748b"/>'
+            '<path d="M-6 -2 C-5 -13 11 -15 15 -4 C19 7 9 16 -1 12 '
+            'C-6 10 -8 5 -6 -2Z" fill="#c4b5fd" stroke="#7c3aed"/></g>'
+        )
+        for x, y in ((588, 292), (705, 220))
+    )
+    return lymphocytes + macrophages
+
+
+def _fibroblasts_in_stroma() -> str:
+    return "".join(
+        (
+            f'<g transform="translate({x} {y}) rotate({angle})">'
+            '<path d="M-25 0 C-11 -8 -8 -15 0 -5 C8 -15 11 -8 25 0 '
+            'C11 8 8 15 0 5 C-8 15 -11 8 -25 0Z" fill="#fff" '
+            'stroke="#6b7280" stroke-width="1"/>'
+            '<ellipse cx="0" cy="0" rx="6" ry="4" fill="#fed7aa" stroke="#ea580c"/>'
+            "</g>"
+        )
+        for x, y, angle in ((135, 94, -12), (324, 115, 14), (398, 304, -7))
+    )
+
+
+def _microenvironment_summary(microenvironment: dict[str, Any]) -> str:
+    rows = []
+    labels = {
+        "epithelial": "Epithelial",
+        "fibroblast": "Stromal / ECM",
+        "endothelial": "Endothelial",
+        "immune": "Immune",
+    }
+    for key, label in labels.items():
+        compartment = _compartment(microenvironment, key)
+        names = compartment.get("cell_types", [])
+        if not isinstance(names, list) or not names:
+            continue
+        rows.append(
+            f'<span class="micro-summary-item"><strong>{label}:</strong> '
+            f'{_e(", ".join(str(name) for name in names[:4]))}</span>'
+        )
+    if not rows:
+        return '<p class="note">No cell-type evidence was mappable to tissue compartments.</p>'
+    return '<div class="micro-summary">' + "".join(rows) + "</div>"
 
 
 def render_subcellular(locations: Any) -> str:

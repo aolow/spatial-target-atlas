@@ -21,10 +21,15 @@ def test_cmy_overlay_mix_and_k_outline_are_separate() -> None:
     )
 
 
-def test_region_normalization_handles_lung_and_renal_labels() -> None:
+def test_region_normalization_handles_broad_radial_tissues() -> None:
     assert canonical_region("Bronchus and lung") == "lung"
     assert canonical_region("LL") == "lung"
     assert canonical_region("renal cortex") == "kidney"
+    assert canonical_region("bone marrow") == "bone_marrow"
+    assert canonical_region("visceral adipose tissue") == "fat"
+    assert canonical_region("small intestine") == "small_intestine"
+    assert canonical_region("blood vessel") == "vasculature"
+    assert canonical_region("whole blood") == "blood"
 
 
 def test_overlay_preserves_failed_source_as_unknown() -> None:
@@ -204,3 +209,50 @@ def test_hpa_transcript_does_not_light_protein_cell_channel() -> None:
     payload = build_overlay_payload(evidence, [], [], [])
 
     assert payload["targets"][0]["cell_types"] == []
+
+
+def test_overlay_builds_fixed_radial_tracks_and_integrated_microenvironment() -> None:
+    evidence = [
+        {
+            "gene_symbol": "EPCAM",
+            "source": "Human Protein Atlas",
+            "spatial_scale": "tissue",
+            "modality": "mass_spectrometry",
+            "tissue": "lung",
+            "detection_state": "detected",
+            "value": 10.0,
+        },
+        {
+            "gene_symbol": "EPCAM",
+            "source": "Human Protein Atlas",
+            "spatial_scale": "cell_type",
+            "modality": "mass_spectrometry",
+            "cell_type": "alveolar epithelial cell",
+            "detection_state": "detected",
+            "value": 3.0,
+        },
+    ]
+    census = [
+        {
+            "gene_symbol": "EPCAM",
+            "tissue": "lung",
+            "cell_type": "CD8-positive T cell",
+            "detection_state": "assayed_detected",
+            "positive_spot_count": 6,
+            "spot_count": 10,
+            "positive_spot_fraction": 0.6,
+        }
+    ]
+
+    payload = build_overlay_payload(evidence, [], census, [])
+    target = payload["targets"][0]
+
+    assert payload["schema_version"] == "3.0"
+    assert len(target["radial_tissues"]) >= 24
+    lung = next(row for row in target["radial_tissues"] if row["tissue"] == "lung")
+    assert lung["tracks"]["hpa_protein"]["state"] == "positive"
+    assert lung["tracks"]["spatial_rna"]["state"] == "positive"
+    assert target["microenvironment"]["epithelial"]["cell_types"] == [
+        "alveolar epithelial cell"
+    ]
+    assert target["microenvironment"]["immune"]["cell_types"] == ["CD8-positive T cell"]

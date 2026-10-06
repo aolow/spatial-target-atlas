@@ -4,6 +4,12 @@ These files are **visual design examples**, not scientific output from the LUAD 
 
 They are checked in so the spatial language can be reviewed directly in GitHub before relying on it for biological interpretation.
 
+## Radial body + integrated tissue v4
+
+![Radial atlas v4](radial_atlas_v4.svg)
+
+This is the current primary visual direction. The body is an orientation anchor, while a fixed radial tissue ring carries the detailed source tracks. The next level down is one integrated epithelial/stromal/vascular/immune tissue scene rather than separate cell cards.
+
 ## Cell-context redesign
 
 ![Cell context v3](cell_context_v3.svg)

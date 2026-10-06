@@ -152,11 +152,11 @@ Pass `--model-evidence model_evidence.json` to `render-atlas` to show those reco
 
 ### Spatial overlay
 
-The atlas includes a source-layered spatial view at body, organ, cell-context, and subcellular scales.
+The atlas uses a hierarchical spatial view: a central body for orientation, a radial tissue ring for source-specific evidence, one integrated tissue microenvironment, and a subcellular localization panel.
 
 The four visual layers are Human Protein Atlas tissue protein, ProteomicsDB tissue protein, CELLxGENE spatial RNA, and HuBMAP spatial protein. Each source has its own color, but the UI uses full source names rather than channel acronyms.
 
-The composite uses transparent source-colored layers with multiply blending. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Four source-specific small body maps sit beside the composite so mixed colors remain auditable.
+The radial ring carries four concentric source tracks per tissue. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Unknown, measured-negative, and positive states remain distinct. The center body is deliberately lighter-weight and is used for anatomical orientation rather than dense quantitative encoding.
 
 Build the inspectable overlay payload directly:
 
@@ -170,9 +170,9 @@ spatial-target-atlas build-overlay \
 
 When quantitative values are available, the HTML atlas also shows separate dataset cards with intensity bars normalized **within that dataset only**. Raw/source-scale values remain visible beside the bars.
 
-The visual layer uses repo-owned SVG anatomy masks, tissue microenvironment scenes, and a subcellular cell schematic. Cell-context views depict tissue structure rather than isolated cartoon cells, while source signal is rendered as translucent context overlays around the biology. These are visualization masks, not diagnostic anatomy.
+The visual layer uses repo-owned SVG anatomy masks, a radial tissue layout, one integrated tissue microenvironment, and a subcellular cell schematic. The tissue scene combines epithelial, stromal/ECM, endothelial/vascular, and immune compartments in one view, with source signal rendered as translucent context overlays around neutral biological structures. These are visualization masks, not diagnostic anatomy.
 
-See [examples/vignettes/README.md](examples/vignettes/README.md) for checked-in visual design examples, including the v2 opacity redesign.
+See [examples/vignettes/README.md](examples/vignettes/README.md) for checked-in visual design examples, including the current radial v4 hierarchy.
 
 ### Local HTML atlas report
 

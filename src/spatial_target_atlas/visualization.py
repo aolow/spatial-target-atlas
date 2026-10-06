@@ -450,6 +450,22 @@ section { scroll-margin-top: 16px; }
 .subcell-box.active { background:#dbeafe; border-color:#60a5fa; color:#1e3a8a; font-weight:700; }
 .disease-badge { margin:10px 0 0; padding:9px 11px; border-left:4px solid #fb7185;
   background:#fff1f2; font-size:12px; border-radius:6px; }
+.radial-panel { margin-top:18px; background:white; border:1px solid #e5e7eb;
+  border-radius:16px; padding:12px 14px 16px; }
+.radial-atlas { display:block; width:100%; max-width:980px; margin:0 auto; overflow:visible; }
+.radial-label { font:11px system-ui,sans-serif; fill:#334155; }
+.radial-center-label { font:10px system-ui,sans-serif; fill:#94a3b8; letter-spacing:.04em; }
+.radial-track { transition:opacity .15s ease; }
+.hierarchy-grid { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(260px,.7fr);
+  gap:18px; margin-top:18px; align-items:start; }
+.tissue-panel, .subcellular-panel { background:white; border:1px solid #e5e7eb;
+  border-radius:14px; padding:14px; }
+.tissue-panel h4, .subcellular-panel h4 { margin-top:0; }
+.microenvironment-scene { display:block; width:100%; min-height:300px; }
+.micro-label { font:10px system-ui,sans-serif; fill:#475569; paint-order:stroke;
+  stroke:white; stroke-width:3px; }
+.micro-summary { display:grid; gap:5px; margin-top:8px; }
+.micro-summary-item { font-size:11px; color:#475569; }
 .dataset-section { margin-top:20px; }
 .dataset-family { margin:12px 0 18px; }
 .dataset-card { background:white; border:1px solid #e5e7eb; border-radius:10px; padding:8px 11px;
@@ -461,8 +477,9 @@ section { scroll-margin-top: 16px; }
 .intensity-track span { display:block; height:100%;
   background:linear-gradient(90deg,#00b7d8,#d946ef); }
 @media (max-width:760px) {
-  .spatial-grid, .lower-grid { grid-template-columns:1fr; }
+  .spatial-grid, .lower-grid, .hierarchy-grid { grid-template-columns:1fr; }
   .source-multiples { grid-template-columns:repeat(2,1fr); }
+  .radial-label { font-size:9px; }
   .dataset-row { grid-template-columns:1fr; gap:3px; }
 }
 </style>
