@@ -94,7 +94,8 @@ def test_overlay_builds_dataset_resolved_views() -> None:
     rendered = render_overlay_gallery(payload)
     assert "Dataset-resolved views" in rendered
     assert "HBM1" in rendered
-    assert "K" in rendered
+    assert "HuBMAP spatial protein" in rendered
+    assert "<strong>K</strong>" not in rendered
 
 
 def test_overlay_strengths_are_source_local() -> None:
