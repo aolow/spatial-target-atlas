@@ -247,12 +247,71 @@ def test_overlay_builds_fixed_radial_tracks_and_integrated_microenvironment() ->
     payload = build_overlay_payload(evidence, [], census, [])
     target = payload["targets"][0]
 
-    assert payload["schema_version"] == "3.0"
+    assert payload["schema_version"] == "4.0"
     assert len(target["radial_tissues"]) >= 24
     lung = next(row for row in target["radial_tissues"] if row["tissue"] == "lung")
     assert lung["tracks"]["hpa_protein"]["state"] == "positive"
     assert lung["tracks"]["spatial_rna"]["state"] == "positive"
-    assert target["microenvironment"]["epithelial"]["cell_types"] == [
+    assert target["microenvironments"]["normal_reference"]["compartments"]["epithelial"][
+        "cell_types"
+    ] == ["alveolar epithelial cell"]
+    assert target["microenvironments"]["normal_reference"]["compartments"]["immune"][
+        "cell_types"
+    ] == ["CD8-positive T cell"]
+
+
+def test_tumor_spatial_context_is_separated_from_normal_reference() -> None:
+    census = [
+        {
+            "gene_symbol": "EPCAM",
+            "tissue": "lung",
+            "cell_type": "alveolar epithelial cell",
+            "disease": "normal",
+            "reference_context": "source_labeled_normal_adult_or_unspecified",
+            "dataset_id": "normal1",
+            "detection_state": "assayed_detected",
+            "positive_spot_count": 4,
+            "spot_count": 10,
+            "positive_spot_fraction": 0.4,
+        },
+        {
+            "gene_symbol": "EPCAM",
+            "tissue": "lung",
+            "cell_type": "malignant epithelial cell",
+            "disease": "lung adenocarcinoma",
+            "reference_context": "disease_tissue",
+            "dataset_id": "tumor1",
+            "detection_state": "assayed_detected",
+            "positive_spot_count": 8,
+            "spot_count": 10,
+            "positive_spot_fraction": 0.8,
+        },
+    ]
+    paired = [
+        {
+            "gene_symbol": "EPCAM",
+            "study_id": "PDC1",
+            "paired_case_count": 12,
+            "median_paired_tumor_minus_adjacent_log2_ratio": 1.2,
+            "tumor_higher_fraction": 0.75,
+        }
+    ]
+
+    payload = build_overlay_payload([], [], census, paired)
+    target = payload["targets"][0]
+    normal = target["microenvironments"]["normal_reference"]
+    tumor = target["microenvironments"]["tumor"]
+
+    assert normal["dataset_count"] == 1
+    assert tumor["dataset_count"] == 1
+    assert normal["compartments"]["epithelial"]["cell_types"] == [
         "alveolar epithelial cell"
     ]
-    assert target["microenvironment"]["immune"]["cell_types"] == ["CD8-positive T cell"]
+    assert tumor["compartments"]["epithelial"]["cell_types"] == [
+        "malignant epithelial cell"
+    ]
+    assert tumor["disease_labels"] == ["lung adenocarcinoma"]
+    assert tumor["bulk_paired"][0]["study_id"] == "PDC1"
+
+    lung = next(row for row in target["radial_tissues"] if row["tissue"] == "lung")
+    assert lung["tracks"]["spatial_rna"]["strength"] == 0.4
