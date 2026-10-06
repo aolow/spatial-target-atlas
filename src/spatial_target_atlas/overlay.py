@@ -161,6 +161,12 @@ def build_overlay_payload(
                 "HuBMAP spatial protein uses positive-cell fraction. Strengths are "
                 "never compared numerically across source families."
             ),
+            "context_rule": (
+                "The body and radial tissue atlas use normal/reference spatial context. "
+                "Tumor-labeled spatial RNA is rendered separately in the tumor tissue panel. "
+                "PDC paired tumor-versus-adjacent evidence remains bulk context and is never "
+                "mapped onto specific cell compartments."
+            ),
             "quantitative_rule": (
                 "Dataset-resolved intensity is shown only within a dataset/source-specific "
                 "view and is never normalized across datasets."
