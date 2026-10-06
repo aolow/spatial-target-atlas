@@ -511,7 +511,120 @@ def _cell_type_overlay(
                 "fill": overlay_color(channels),
                 "k_outline": channels["K"] == "positive",
             })
+    c_values = [
+        float(row["strengths"]["C"])
+        for row in output
+        if isinstance(row.get("strengths"), dict)
+        and isinstance(row["strengths"].get("C"), (int, float))
+    ]
+    if c_values:
+        low = min(c_values)
+        high = max(c_values)
+        for row in output:
+            strengths = row.get("strengths")
+            if not isinstance(strengths, dict):
+                continue
+            value = strengths.get("C")
+            if not isinstance(value, (int, float)):
+                continue
+            strengths["C"] = (
+                1.0
+                if high <= low
+                else 0.25 + 0.75 * ((float(value) - low) / (high - low))
+            )
     return output[:24]
+
+
+def _radial_tissue_payload(
+    evidence: list[dict[str, Any]],
+    cells: list[dict[str, Any]],
+    census: list[dict[str, Any]],
+    failures: set[str],
+    hpa_strengths: dict[str, float],
+    pdb_strengths: dict[str, float],
+    rna_strengths: dict[str, float],
+    protein_strengths: dict[str, float],
+) -> list[dict[str, Any]]:
+    output = []
+    for tissue in TISSUE_ORDER:
+        tracks = {
+            "hpa_protein": {
+                "state": _hpa_state(evidence, tissue, failures),
+                "strength": hpa_strengths.get(tissue),
+            },
+            "proteomicsdb_protein": {
+                "state": _proteomicsdb_state(evidence, tissue, failures),
+                "strength": pdb_strengths.get(tissue),
+            },
+            "spatial_rna": {
+                "state": _census_state(census, tissue),
+                "strength": rna_strengths.get(tissue),
+            },
+            "hubmap_spatial_protein": {
+                "state": _hubmap_state(cells, tissue),
+                "strength": protein_strengths.get(tissue),
+            },
+        }
+        output.append({
+            "tissue": tissue,
+            "display_name": TISSUE_DISPLAY_NAMES[tissue],
+            "tracks": tracks,
+            "has_evidence": any(
+                str(track.get("state")) != "unknown" for track in tracks.values()
+            ),
+        })
+    return output
+
+
+def _microenvironment_payload(
+    cell_types: list[dict[str, Any]],
+) -> dict[str, Any]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in cell_types:
+        grouped[cell_category(str(row.get("cell_type") or ""))].append(row)
+
+    output: dict[str, Any] = {}
+    for category in ("epithelial", "fibroblast", "endothelial", "immune", "other"):
+        rows = grouped.get(category, [])
+        if not rows:
+            output[category] = {
+                "channels": {key: "unknown" for key in CHANNELS},
+                "strengths": {key: None for key in CHANNELS},
+                "cell_types": [],
+            }
+            continue
+
+        channels: dict[str, str] = {}
+        strengths: dict[str, float | None] = {}
+        for channel in CHANNELS:
+            states = [
+                str(row.get("channels", {}).get(channel) or "unknown")
+                for row in rows
+                if isinstance(row.get("channels"), dict)
+            ]
+            channels[channel] = (
+                "positive"
+                if "positive" in states
+                else ("negative" if "negative" in states else "unknown")
+            )
+            values = [
+                float(row["strengths"][channel])
+                for row in rows
+                if isinstance(row.get("strengths"), dict)
+                and isinstance(row["strengths"].get(channel), (int, float))
+            ]
+            strengths[channel] = median(values) if values else None
+
+        output[category] = {
+            "channels": channels,
+            "strengths": strengths,
+            "cell_types": sorted({
+                str(row.get("cell_type"))
+                for row in rows
+                if row.get("cell_type")
+            }),
+        }
+    return output
 
 
 def _relative_region_strength(
