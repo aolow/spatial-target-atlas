@@ -533,7 +533,7 @@ def render_radial_atlas(
         '<svg class="radial-atlas" viewBox="0 0 1000 1000" role="img" '
         'aria-label="Radial body and tissue evidence atlas">',
         render_radial_tracks(radial_tissues, colors),
-        '<g class="radial-center-body" transform="translate(357 288) scale(.58)">',
+        '<g class="radial-center-body" transform="translate(385 297) scale(.72)">',
         '<g fill="#fbfcfe" stroke="#94a3b8" stroke-width="2.2">',
         BODY_SILHOUETTE,
         "</g>",
