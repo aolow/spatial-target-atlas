@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LUAD spatial overlay design vignette</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;max-width:1080px;margin:auto;padding:30px;color:#1f2937;background:#fff}
+h1{margin-bottom:4px}.note{color:#64748b}.warn{background:#fff7ed;border-left:4px solid #fb923c;padding:12px 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{border:1px solid #d8dee4;border-radius:14px;padding:16px;background:#fbfcfe}
+.legend{display:flex;gap:14px;flex-wrap:wrap}.sw{width:14px;height:14px;display:inline-block;border:1px solid #64748b;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.organs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.organ{padding:9px;border:1px solid #e5e7eb;border-radius:9px;background:white}
+.bubbles{display:flex;gap:8px;flex-wrap:wrap}.bubble{padding:8px 12px;border-radius:999px;border:1px solid #94a3b8;font-size:12px}
+.row{display:grid;grid-template-columns:120px 1fr 60px 55px;gap:8px;align-items:center;font-size:12px;margin:6px 0}.track{height:10px;border-radius:6px;background:#eef2f7;overflow:hidden}.track i{display:block;height:100%;background:linear-gradient(90deg,#00b7d8,#d946ef)}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
+</style></head><body>
+<h1>LUAD spatial overlay design vignette</h1>
+<p class="note">Illustrative design review only. The values and source combinations below are intentionally synthetic.</p>
+<div class="warn"><strong>Scientific rule:</strong> body colors encode categorical support. Quantitative intensity is displayed only inside one dataset at a time.</div>
+<h2>Source palette</h2>
+<div class="legend">
+<span><i class="sw" style="background:#00b7d8"></i><b>C</b> HPA protein</span>
+<span><i class="sw" style="background:#d946ef"></i><b>M</b> ProteomicsDB</span>
+<span><i class="sw" style="background:#facc15"></i><b>Y</b> spatial RNA</span>
+<span><i class="sw" style="background:#fff;border:3px solid #111827"></i><b>K</b> spatial protein outline</span>
+<span><i class="sw" style="background:#2563eb"></i>C+M example</span>
+<span><i class="sw" style="background:#22c55e"></i>C+Y example</span>
+<span><i class="sw" style="background:#ef4444"></i>M+Y example</span>
+</div>
+<h2>EPCAM example</h2>
+<div class="grid">
+<div class="card"><h3>Body / organs</h3><img src="luad_overlay_concept.svg" alt="LUAD overlay concept" style="width:100%;max-height:440px;object-fit:cover;object-position:left"/>
+<p class="note">Generated reports use the same schematic SVG language but derive states from the saved evidence bundle.</p></div>
+<div class="card"><h3>Organ evidence cards</h3><div class="organs">
+<div class="organ"><b>Lung</b><br><span style="color:#2563eb">● C+M</span> <b>K</b> outline</div>
+<div class="organ"><b>Liver</b><br><span style="color:#22c55e">● C+Y</span></div>
+<div class="organ"><b>Heart</b><br><span style="color:#00b7d8">● C</span></div>
+<div class="organ"><b>Kidney</b><br><span style="color:#94a3b8">● unknown</span></div>
+</div><h3>Cell contexts</h3><div class="bubbles">
+<span class="bubble" style="background:#22c55e;outline:3px solid #111827">epithelial</span>
+<span class="bubble" style="background:#facc15">immune</span>
+<span class="bubble" style="background:#00b7d8">endothelial</span>
+<span class="bubble" style="background:#e5e7eb">fibroblast</span></div>
+<h3>Subcellular</h3><div class="bubbles"><span class="bubble" style="background:#dbeafe;border-color:#60a5fa">membrane</span><span class="bubble">cytoplasm</span><span class="bubble">nucleus</span></div></div>
+</div>
+<h2>Dataset-resolved intensity</h2>
+<div class="card"><h3>HBM-example · PhenoCycler</h3>
+<p class="note">Bar length is rescaled within this dataset only. Source-scale values remain printed.</p>
+<div class="row"><span>epithelial</span><div class="track"><i style="width:100%"></i></div><span>8.2</span><span>82% +</span></div>
+<div class="row"><span>endothelial</span><div class="track"><i style="width:58%"></i></div><span>5.1</span><span>47% +</span></div>
+<div class="row"><span>immune</span><div class="track"><i style="width:18%"></i></div><span>2.4</span><span>12% +</span></div>
+<div class="row"><span>fibroblast</span><div class="track"><i style="width:0%"></i></div><span>1.1</span><span>4% +</span></div>
+</div>
+<h2>Disease context</h2>
+<div class="card" style="border-left:5px solid #fb7185"><b>PDC tumor vs adjacent</b><p>Shown as a separate disease-context badge. It never changes the whole-body positivity color.</p></div>
+</body></html>

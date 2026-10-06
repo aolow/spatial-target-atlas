@@ -8,6 +8,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from .overlay import build_overlay_from_files, render_spatial_vignette
+
 
 def render_atlas_html(
     core_dir: Path,
@@ -43,6 +45,13 @@ def render_atlas_html(
         if isinstance(raw_audit, dict) and all(isinstance(key, str) for key in raw_audit):
             reference_audit = {str(key): value for key, value in raw_audit.items()}
 
+    overlay_payload = build_overlay_from_files(core_dir, hubmap_cells_dir, spatial_census_dir)
+    overlay_by_target = {
+        str(item.get("gene_symbol")): item
+        for item in overlay_payload.get("targets", [])
+        if isinstance(item, dict) and item.get("gene_symbol")
+    }
+
     targets = _target_names(identities, evidence, cell_summary, census)
     sections = [
         _overview(targets, evidence, coverage, cell_summary, census),
@@ -57,6 +66,7 @@ def render_atlas_html(
                 cell_summary,
                 census,
                 model_evidence,
+                overlay_by_target.get(target),
             )
             for target in targets
         ],
@@ -128,9 +138,12 @@ def _target_section(
     cell_summary: list[dict[str, Any]],
     census: list[dict[str, Any]],
     model_evidence: list[dict[str, Any]],
+    overlay_target: dict[str, Any] | None,
 ) -> str:
     target_evidence = [row for row in evidence if row.get("gene_symbol") == target]
     parts = [f"<section><h2>{_e(target)}</h2>"]
+    if overlay_target is not None:
+        parts.append(render_spatial_vignette(overlay_target))
     parts.append("<h3>Measured evidence footprint</h3>")
     parts.append(_table(_evidence_footprint(target_evidence)))
 
@@ -373,6 +386,53 @@ table { border-collapse: collapse; width: 100%; font-size: 14px; }
 th, td { border: 1px solid #d8dee4; padding: 7px 9px; text-align: left; vertical-align: top; }
 th { background: #f6f8fa; }
 section { scroll-margin-top: 16px; }
+.spatial-vignette { margin: 18px 0 34px; padding: 20px; border: 1px solid #d8dee4;
+  border-radius: 16px; background: #fbfcfe; }
+.spatial-head { display:flex; gap:18px; align-items:flex-start; justify-content:space-between;
+  flex-wrap:wrap; }
+.spatial-head h3 { margin:0; }
+.overlay-legend { display:flex; gap:9px 14px; flex-wrap:wrap; font-size:12px; max-width:580px; }
+.legend-item { display:flex; align-items:center; gap:5px; }
+.swatch { width:13px; height:13px; border-radius:3px; border:1px solid #64748b;
+  display:inline-block; }
+.spatial-grid { display:grid; grid-template-columns:minmax(270px,.8fr) minmax(300px,1.2fr);
+  gap:22px; align-items:start; margin-top:16px; }
+.body-panel { background:white; border:1px solid #e5e7eb; border-radius:14px; padding:12px; }
+.body-map { width:100%; max-width:360px; margin:auto; display:block; }
+.organ-label { font: 12px system-ui, sans-serif; fill:#475569; }
+.organ-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(175px,1fr)); gap:9px; }
+.organ-card { display:flex; align-items:center; gap:10px; padding:9px; background:white;
+  border:1px solid #e5e7eb; border-radius:10px; }
+.organ-dot { width:25px; height:25px; border-radius:50%; flex:0 0 auto; }
+.channel-chip { display:inline-block; padding:1px 5px; margin:3px 3px 0 0; border-radius:5px;
+  font-size:10px; font-weight:750; border:1px solid #cbd5e1; }
+.state-positive { background:#111827; color:white; }
+.state-negative { background:white; color:#64748b; text-decoration:line-through; }
+.state-unknown { background:#f1f5f9; color:#94a3b8; }
+.lower-grid { display:grid; grid-template-columns:1.2fr .8fr; gap:20px; margin-top:18px; }
+.cell-bubbles { display:flex; gap:8px; flex-wrap:wrap; }
+.cell-bubble { min-width:72px; max-width:150px; padding:9px 11px; border:1px solid #94a3b8;
+  border-radius:999px; font-size:12px; text-align:center; color:#111827; }
+.subcell-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.subcell-box { padding:10px; border-radius:9px; border:1px solid #cbd5e1; background:#f8fafc;
+  color:#94a3b8; font-size:12px; }
+.subcell-box.active { background:#dbeafe; border-color:#60a5fa; color:#1e3a8a; font-weight:700; }
+.disease-badge { margin:10px 0 0; padding:9px 11px; border-left:4px solid #fb7185;
+  background:#fff1f2; font-size:12px; border-radius:6px; }
+.dataset-section { margin-top:20px; }
+.dataset-family { margin:12px 0 18px; }
+.dataset-card { background:white; border:1px solid #e5e7eb; border-radius:10px; padding:8px 11px;
+  margin:7px 0; }
+.dataset-rows { margin:9px 0; }
+.dataset-row { display:grid; grid-template-columns:minmax(120px,1fr) minmax(120px,2fr) 70px 64px;
+  gap:8px; align-items:center; font-size:11px; padding:4px 0; }
+.intensity-track { height:10px; background:#eef2f7; border-radius:7px; overflow:hidden; }
+.intensity-track span { display:block; height:100%;
+  background:linear-gradient(90deg,#00b7d8,#d946ef); }
+@media (max-width:760px) {
+  .spatial-grid, .lower-grid { grid-template-columns:1fr; }
+  .dataset-row { grid-template-columns:1fr; gap:3px; }
+}
 </style>
 </head>
 <body>

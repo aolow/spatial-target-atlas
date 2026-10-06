@@ -397,6 +397,28 @@ def validate_model_evidence(
     typer.echo(f"Valid model-derived evidence: {len(records)} records")
 
 
+@app.command("build-overlay")
+def build_overlay(
+    core: Annotated[Path, typer.Option("--core", exists=True, file_okay=False, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path("atlas_overlay.json"),
+    hubmap_cells: Annotated[
+        Path | None,
+        typer.Option("--hubmap-cells", exists=True, file_okay=False, readable=True),
+    ] = None,
+    spatial_census: Annotated[
+        Path | None,
+        typer.Option("--spatial-census", exists=True, file_okay=False, readable=True),
+    ] = None,
+) -> None:
+    """Build the source-aware body/organ/cell overlay payload."""
+    from .overlay import build_overlay_from_files
+
+    payload = build_overlay_from_files(core, hubmap_cells, spatial_census)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    typer.echo(f"Built spatial overlay payload: {output}")
+
+
 @app.command("render-atlas")
 def render_atlas(
     core: Annotated[Path, typer.Option("--core", exists=True, file_okay=False, readable=True)],
