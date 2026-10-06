@@ -7,9 +7,18 @@ from spatial_target_atlas.overlay import (
 
 
 def test_cmy_overlay_mix_and_k_outline_are_separate() -> None:
-    assert overlay_color({"C": "positive", "M": "unknown", "Y": "unknown", "K": "unknown"}) == "#00b7d8"
-    assert overlay_color({"C": "positive", "M": "positive", "Y": "unknown", "K": "unknown"}) == "#2563eb"
-    assert overlay_color({"C": "unknown", "M": "positive", "Y": "positive", "K": "positive"}) == "#ef4444"
+    assert (
+        overlay_color({"C": "positive", "M": "unknown", "Y": "unknown", "K": "unknown"})
+        == "#00b7d8"
+    )
+    assert (
+        overlay_color({"C": "positive", "M": "positive", "Y": "unknown", "K": "unknown"})
+        == "#2563eb"
+    )
+    assert (
+        overlay_color({"C": "unknown", "M": "positive", "Y": "positive", "K": "positive"})
+        == "#ef4444"
+    )
 
 
 def test_region_normalization_handles_lung_and_renal_labels() -> None:
