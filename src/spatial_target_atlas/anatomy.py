@@ -172,10 +172,10 @@ ORGAN_LABEL_POINTS: dict[str, tuple[int, int]] = {
 }
 
 SOURCE_LABELS = {
-    "C": "HPA protein",
-    "M": "ProteomicsDB",
-    "Y": "spatial RNA",
-    "K": "spatial protein",
+    "C": "Human Protein Atlas protein",
+    "M": "ProteomicsDB protein",
+    "Y": "Spatial RNA",
+    "K": "HuBMAP spatial protein",
 }
 
 
@@ -273,7 +273,7 @@ def render_small_multiples(
             '<div class="source-mini">'
             f'<div class="source-mini-head"><span class="source-dot" '
             f'style="background:{colors[channel]}"></span>'
-            f'<strong>{channel}</strong> {_e(SOURCE_LABELS[channel])}</div>'
+            f'<strong>{_e(SOURCE_LABELS[channel])}</strong></div>'
             f'{render_body(regions, colors, source=channel, mini=True)}'
             "</div>"
         )
@@ -560,7 +560,8 @@ def _channel_badges(states: Any, strengths: Any, colors: dict[str, str]) -> str:
     for channel in ("C", "M", "Y", "K"):
         state = str(states.get(channel) or "unknown")
         strength = _number(strengths.get(channel)) if isinstance(strengths, dict) else None
-        text = channel if strength is None else f"{channel} {strength:.2f}"
+        label = SOURCE_LABELS[channel]
+        text = label if strength is None else f"{label} {strength:.0%}"
         badges.append(
             f'<span class="cell-source-badge state-{_e(state)}" '
             f'style="--source-color:{colors[channel]}">{_e(text)}</span>'
