@@ -250,7 +250,7 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
     return (
         f'<div class="spatial-vignette"><div class="spatial-head">'
         f"<div><h3>{target} spatial view</h3>"
-        "<p class="note">Cross-source colors indicate categorical support only. "
+        '<p class="note">Cross-source colors indicate categorical support only. '
         "K is a dark outline for spatial-protein support.</p></div>"
         f"{legend}</div>"
         f'<div class="spatial-grid"><div class="body-panel">{body}{disease}</div>'
@@ -274,7 +274,10 @@ def _state_from_records(rows: list[dict[str, Any]]) -> str:
         return "unknown"
     if any(_row_positive(row) for row in rows):
         return "positive"
-    if any(str(row.get("detection_state") or "") in {"not_detected", "assayed_not_detected"} for row in rows):
+    if any(
+        str(row.get("detection_state") or "") in {"not_detected", "assayed_not_detected"}
+        for row in rows
+    ):
         return "negative"
     return "unknown"
 
