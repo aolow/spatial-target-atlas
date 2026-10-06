@@ -537,6 +537,7 @@ def render_radial_atlas(
         '<g fill="#fbfcfe" stroke="#94a3b8" stroke-width="2.2">',
         BODY_SILHOUETTE,
         "</g>",
+        ANATOMY_SCAFFOLD,
     ]
     for region, paths in ORGAN_PATHS.items():
         data = regions.get(region)
