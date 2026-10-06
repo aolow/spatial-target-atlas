@@ -49,7 +49,7 @@ BODY_REGIONS: dict[str, dict[str, Any]] = {
 _TISSUE_ALIASES = {
     "brain": ("brain", "cerebr", "cortex"),
     "thyroid": ("thyroid",),
-    "lung": ("lung", "bronch", "alveol", "ll", "rl"),
+    "lung": ("lung", "bronch", "alveol"),
     "heart": ("heart", "cardiac", "myocard"),
     "liver": ("liver", "hepatic"),
     "stomach": ("stomach", "gastric"),
@@ -477,42 +477,46 @@ def _region_shape(
     spec: dict[str, Any], fill: str, stroke: str, width: str, region: str
 ) -> str:
     x, y, kind = spec["x"], spec["y"], spec["shape"]
-    common = (
+    attrs = (
         f'fill="{fill}" stroke="{stroke}" stroke-width="{width}" '
-        f'data-region="{_e(region)}"><title>{_e(region.title())}</title>'
+        f'data-region="{_e(region)}"'
     )
+    title = f"<title>{_e(region.title())}</title>"
     if kind == "ellipse":
         return (
-            f'<g {common}<ellipse cx="{x}" cy="{y}" rx="{spec["rx"]}" ry="{spec["ry"]}"/></g>'
+            f'<g {attrs}>{title}<ellipse cx="{x}" cy="{y}" '
+            f'rx="{spec["rx"]}" ry="{spec["ry"]}"/></g>'
         )
     if kind == "lungs":
         return (
-            f'<g {common}<ellipse cx="{x - 21}" cy="{y}" rx="20" ry="35"/>'
+            f'<g {attrs}>{title}<ellipse cx="{x - 21}" cy="{y}" rx="20" ry="35"/>'
             f'<ellipse cx="{x + 21}" cy="{y}" rx="20" ry="35"/></g>'
         )
     if kind == "kidneys":
         return (
-            f'<g {common}<ellipse cx="{x - 23}" cy="{y}" rx="11" ry="18"/>'
+            f'<g {attrs}>{title}<ellipse cx="{x - 23}" cy="{y}" rx="11" ry="18"/>'
             f'<ellipse cx="{x + 23}" cy="{y}" rx="11" ry="18"/></g>'
         )
     if kind == "heart":
         return (
-            f'<g {common}<path d="M{x},{y + 20} C{x - 32},{y - 2} {x - 20},{y - 25} '
-            f'{x},{y - 9} C{x + 20},{y - 25} {x + 32},{y - 2} {x},{y + 20}Z"/></g>'
+            f'<g {attrs}>{title}<path d="M{x},{y + 20} C{x - 32},{y - 2} '
+            f'{x - 20},{y - 25} {x},{y - 9} C{x + 20},{y - 25} '
+            f'{x + 32},{y - 2} {x},{y + 20}Z"/></g>'
         )
     if kind == "colon":
         return (
-            f'<g {common}<rect x="{x - 32}" y="{y - 20}" width="64" height="40" rx="15" '
-            'fill="none"/><path d="M128,294 C140,306 160,306 172,294 M128,320 '
-            'C140,308 160,308 172,320" fill="none"/></g>'
+            f'<g {attrs}>{title}<rect x="{x - 32}" y="{y - 20}" width="64" '
+            f'height="40" rx="15" fill="none"/><path d="M128,294 C140,306 '
+            '160,306 172,294 M128,320 C140,308 160,308 172,320" fill="none"/></g>'
         )
     if kind == "breast":
         return (
-            f'<g {common}<circle cx="{x - 28}" cy="{y}" r="10"/>'
+            f'<g {attrs}>{title}<circle cx="{x - 28}" cy="{y}" r="10"/>'
             f'<circle cx="{x + 28}" cy="{y}" r="10"/></g>'
         )
     return (
-        f'<g {common}<rect x="{x - 18}" y="{y - 18}" width="36" height="36" rx="8"/></g>'
+        f'<g {attrs}>{title}<rect x="{x - 18}" y="{y - 18}" '
+        'width="36" height="36" rx="8"/></g>'
     )
 
 
