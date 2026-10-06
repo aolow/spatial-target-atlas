@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import html
+import json
 from collections import defaultdict
+from pathlib import Path
 from typing import Any
 
 CHANNELS = {
@@ -69,6 +71,30 @@ _POSITIVE_STATES = {
     "assayed",
     "assayed_detected",
 }
+
+
+def build_overlay_from_files(
+    core_dir: Path,
+    hubmap_cells_dir: Path | None = None,
+    spatial_census_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Build an overlay payload from saved Spatial Target Atlas outputs."""
+    evidence = _read_list(core_dir / "evidence.json")
+    paired = _read_list(core_dir / "paired_tumor_normal.json")
+    cells = (
+        _read_list(hubmap_cells_dir / "hubmap_cell_protein_summary.json")
+        if hubmap_cells_dir is not None
+        else []
+    )
+    census = (
+        _read_list(spatial_census_dir / "census_spatial_expression.json")
+        if spatial_census_dir is not None
+        else []
+    )
+    status = _read_object(core_dir / "source_status.json")
+    failures = status.get("failures")
+    source_failures = failures if isinstance(failures, list) else []
+    return build_overlay_payload(evidence, cells, census, paired, source_failures)
 
 
 def build_overlay_payload(
@@ -653,6 +679,28 @@ def _disease_html(rows: Any) -> str:
 
 def _number(value: Any) -> str:
     return f"{float(value):.3g}" if isinstance(value, (int, float)) else "—"
+
+
+def _read_list(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, list):
+        return []
+    return [
+        {str(key): value for key, value in row.items()}
+        for row in raw
+        if isinstance(row, dict)
+    ]
+
+
+def _read_object(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        return {}
+    return {str(key): value for key, value in raw.items()}
 
 
 def _e(value: Any) -> str:
