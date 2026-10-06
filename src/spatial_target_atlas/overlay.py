@@ -248,10 +248,23 @@ def _target_payload(
         for row in paired
         if row.get("gene_symbol") == target
     ]
+    radial_tissues = _radial_tissue_payload(
+        target_evidence,
+        target_cells,
+        target_census,
+        failures,
+        hpa_strengths,
+        pdb_strengths,
+        rna_strengths,
+        protein_strengths,
+    )
+    microenvironment = _microenvironment_payload(cell_types)
     return {
         "gene_symbol": target,
         "regions": regions,
+        "radial_tissues": radial_tissues,
         "cell_types": cell_types,
+        "microenvironment": microenvironment,
         "subcellular": subcellular,
         "disease_context": disease,
         "dataset_views": {
@@ -300,26 +313,33 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         for item in target_payload.get("regions", [])
         if isinstance(item, dict)
     }
+    radial_tissues = [
+        item
+        for item in target_payload.get("radial_tissues", [])
+        if isinstance(item, dict)
+    ]
+    raw_microenvironment = target_payload.get("microenvironment")
+    microenvironment = (
+        raw_microenvironment if isinstance(raw_microenvironment, dict) else {}
+    )
     colors = {key: str(value["color"]) for key, value in CHANNELS.items()}
-    composite = render_body(region_map, colors)
-    small_multiples = render_small_multiples(region_map, colors)
+    radial = render_radial_atlas(region_map, radial_tissues, colors)
+    tissue = render_tissue_microenvironment(microenvironment, colors)
     legend = _legend_html()
-    organ_cards = _organ_cards(region_map)
-    cells = render_cell_contexts(target_payload.get("cell_types", []), colors)
     subcellular = render_subcellular(target_payload.get("subcellular", []))
     datasets = _dataset_views_html(target_payload.get("dataset_views", {}))
     disease = _disease_html(target_payload.get("disease_context", []))
     return (
-        f'<div class="spatial-vignette spatial-v2"><div class="spatial-head">'
+        f'<div class="spatial-vignette spatial-v4"><div class="spatial-head">'
         f"<div><h3>{target} spatial atlas</h3>"
-        '<p class="note">Hue identifies source. Opacity encodes strength only within '
-        "that source. Composite layers use multiply blending.</p></div>"
+        '<p class="note">Body orientation sits in the center; radial tracks carry '
+        "source-specific tissue evidence. Opacity remains source-local.</p></div>"
         f"{legend}</div>"
-        f'<div class="spatial-grid"><div class="body-panel">{composite}{disease}</div>'
-        f'<div class="organ-panel"><h4>Source-separated views</h4>{small_multiples}'
-        f'<h4>Organs & tissues</h4>{organ_cards}</div></div>'
-        f'<div class="lower-grid"><div><h4>Cell contexts</h4>{cells}</div>'
-        f'<div><h4>Subcellular localization</h4>{subcellular}</div></div>'
+        f'<div class="radial-panel">{radial}{disease}</div>'
+        '<div class="hierarchy-grid">'
+        f'<div class="tissue-panel"><h4>Integrated tissue microenvironment</h4>{tissue}</div>'
+        f'<div class="subcellular-panel"><h4>Subcellular localization</h4>{subcellular}</div>'
+        "</div>"
         f"{datasets}</div>"
     )
 
