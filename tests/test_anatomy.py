@@ -2,8 +2,10 @@ from spatial_target_atlas.anatomy import (
     cell_category,
     render_body,
     render_cell_contexts,
+    render_radial_atlas,
     render_small_multiples,
     render_subcellular,
+    render_tissue_microenvironment,
 )
 
 COLORS = {
@@ -122,3 +124,65 @@ def test_cell_contexts_render_distinct_tissue_scenes() -> None:
     assert "collagen-rich ECM" in rendered
     assert "Immune microenvironment scene" in rendered
     assert "mixed immune field" in rendered
+
+
+def test_radial_atlas_places_body_inside_tissue_tracks() -> None:
+    regions = {
+        "lung": {
+            "channels": {"C": "positive", "M": "unknown", "Y": "unknown", "K": "positive"},
+            "strengths": {"C": 0.8, "M": None, "Y": None, "K": 0.7},
+        }
+    }
+    radial_tissues = [
+        {
+            "tissue": "lung",
+            "tracks": {
+                "hpa_protein": {"state": "positive", "strength": 0.8},
+                "proteomicsdb_protein": {"state": "unknown", "strength": None},
+                "spatial_rna": {"state": "unknown", "strength": None},
+                "hubmap_spatial_protein": {"state": "positive", "strength": 0.7},
+            },
+        }
+    ]
+
+    rendered = render_radial_atlas(regions, radial_tissues, COLORS)
+
+    assert "radial-tissue-tracks" in rendered
+    assert "radial-center-body" in rendered
+    assert "Radial body and tissue evidence atlas" in rendered
+    assert "Lung" in rendered
+
+
+def test_integrated_microenvironment_contains_all_major_compartments() -> None:
+    microenvironment = {
+        "epithelial": {
+            "channels": {"C": "positive", "M": "unknown", "Y": "positive", "K": "positive"},
+            "strengths": {"C": 0.7, "M": None, "Y": 0.4, "K": 0.6},
+            "cell_types": ["alveolar epithelial cell"],
+        },
+        "fibroblast": {
+            "channels": {"C": "positive", "M": "unknown", "Y": "unknown", "K": "unknown"},
+            "strengths": {"C": 0.3, "M": None, "Y": None, "K": None},
+            "cell_types": ["fibroblast"],
+        },
+        "endothelial": {
+            "channels": {"C": "unknown", "M": "unknown", "Y": "positive", "K": "unknown"},
+            "strengths": {"C": None, "M": None, "Y": 0.5, "K": None},
+            "cell_types": ["capillary endothelial cell"],
+        },
+        "immune": {
+            "channels": {"C": "unknown", "M": "unknown", "Y": "positive", "K": "positive"},
+            "strengths": {"C": None, "M": None, "Y": 0.6, "K": 0.8},
+            "cell_types": ["CD8-positive T cell"],
+        },
+    }
+
+    rendered = render_tissue_microenvironment(microenvironment, COLORS)
+
+    assert "Integrated tissue microenvironment evidence view" in rendered
+    assert "epithelial compartment" in rendered
+    assert "stromal / ECM compartment" in rendered
+    assert "vascular compartment" in rendered
+    assert "immune infiltrate" in rendered
+    assert "alveolar epithelial cell" in rendered
+    assert "capillary endothelial cell" in rendered
