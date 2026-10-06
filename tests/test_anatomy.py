@@ -5,6 +5,7 @@ from spatial_target_atlas.anatomy import (
     render_radial_atlas,
     render_small_multiples,
     render_subcellular,
+    render_tissue_comparison,
     render_tissue_microenvironment,
 )
 
@@ -186,3 +187,76 @@ def test_integrated_microenvironment_contains_all_major_compartments() -> None:
     assert "immune infiltrate" in rendered
     assert "alveolar epithelial cell" in rendered
     assert "capillary endothelial cell" in rendered
+
+
+def test_radial_center_anatomy_includes_airway_vessels_and_lymphatics() -> None:
+    rendered = render_radial_atlas({}, [], COLORS)
+
+    assert "anatomy-airway" in rendered
+    assert "anatomy-vessels" in rendered
+    assert "anatomy-lymph" in rendered
+    assert "anatomy-small-intestine" in rendered
+
+
+def test_normal_and_tumor_tissue_contexts_are_rendered_separately() -> None:
+    microenvironments = {
+        "normal_reference": {
+            "available": True,
+            "dataset_count": 1,
+            "disease_labels": ["normal"],
+            "compartments": {
+                "epithelial": {
+                    "channels": {"C": "positive", "M": "unknown", "Y": "positive", "K": "unknown"},
+                    "strengths": {"C": 0.5, "M": None, "Y": 0.4, "K": None},
+                    "cell_types": ["alveolar epithelial cell"],
+                }
+            },
+        },
+        "tumor": {
+            "available": True,
+            "dataset_count": 1,
+            "disease_labels": ["lung adenocarcinoma"],
+            "compartments": {
+                "epithelial": {
+                    "channels": {"C": "unknown", "M": "unknown", "Y": "positive", "K": "unknown"},
+                    "strengths": {"C": None, "M": None, "Y": 0.8, "K": None},
+                    "cell_types": ["malignant epithelial cell"],
+                }
+            },
+            "bulk_paired": [
+                {
+                    "study_id": "PDC1",
+                    "paired_case_count": 12,
+                    "median_tumor_minus_adjacent": 1.2,
+                    "tumor_higher_fraction": 0.75,
+                }
+            ],
+        },
+    }
+
+    rendered = render_tissue_comparison(microenvironments, COLORS)
+
+    assert "Normal / reference tissue" in rendered
+    assert "Tumor tissue" in rendered
+    assert "organized epithelium" in rendered
+    assert "irregular tumor nests" in rendered
+    assert "abnormal vessel" in rendered
+    assert "lung adenocarcinoma" in rendered
+    assert "Paired bulk tumor evidence" in rendered
+    assert "not mapped onto specific cell compartments" in rendered
+
+
+def test_tumor_panel_marks_missing_tumor_resolved_data() -> None:
+    rendered = render_tissue_comparison(
+        {
+            "normal_reference": {"available": False, "compartments": {}},
+            "tumor": {
+                "available": False,
+                "compartments": {},
+                "bulk_paired": [],
+            },
+        },
+        COLORS,
+    )
+
+    assert "No tumor-resolved cell/spatial evidence in this build" in rendered
