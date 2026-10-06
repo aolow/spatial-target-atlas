@@ -558,7 +558,11 @@ def _weighted_fraction(
             fraction = row.get(fallback_fraction)
             weight = row.get(denominator)
             if isinstance(fraction, (int, float)):
-                numeric_weight = float(weight) if isinstance(weight, (int, float)) and float(weight) > 0 else 1.0
+                numeric_weight = (
+                    float(weight)
+                    if isinstance(weight, (int, float)) and float(weight) > 0
+                    else 1.0
+                )
                 weighted_fraction += float(fraction) * numeric_weight
                 weight_total += numeric_weight
     if denominator_total > 0:
