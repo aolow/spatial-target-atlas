@@ -31,13 +31,13 @@ The original v0.6 concept used channel letters. Those labels are retained here o
 
 Gray means no positive channel is shown in the design example. In generated reports, unavailable or failed sources remain explicitly `unknown`; they are not converted to negatives.
 
-## Dataset-resolved view
+## Legacy early HTML prototype
 
-Open [luad_overlay_vignette.html](luad_overlay_vignette.html) locally to review the fuller layout with:
+[luad_overlay_vignette.html](luad_overlay_vignette.html) is retained as an early layout prototype. Use the v2 body overlay and v3 cell-context SVGs above for current visual review. The legacy HTML includes:
 
 - body-level source overlays
 - organ evidence cards
-- cell-context bubbles
+- early cell-context bubbles
 - subcellular localization
 - PDC tumor-versus-adjacent badges
 - within-dataset intensity bars
