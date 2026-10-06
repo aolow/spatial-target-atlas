@@ -4,7 +4,13 @@ These files are **visual design examples**, not scientific output from the LUAD 
 
 They are checked in so the spatial language can be reviewed directly in GitHub before relying on it for biological interpretation.
 
-## CMYK-inspired overlay
+## v2 source-opacity redesign
+
+![Spatial overlay v2](spatial_overlay_v2.svg)
+
+This is the current visual direction: better anatomy masks, true transparent source layers, source-separated small multiples, cell-type icons, and a subcellular cell schematic.
+
+## Original v0.6 concept
 
 ![LUAD overlay design concept](luad_overlay_concept.svg)
 
