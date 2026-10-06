@@ -433,8 +433,10 @@ section { scroll-margin-top: 16px; }
 .organ-card { display:flex; align-items:center; gap:10px; padding:9px; background:white;
   border:1px solid #e5e7eb; border-radius:10px; }
 .organ-dot { width:25px; height:25px; border-radius:50%; flex:0 0 auto; }
-.channel-chip { display:inline-block; padding:1px 5px; margin:3px 3px 0 0; border-radius:5px;
-  font-size:10px; font-weight:750; border:1px solid #cbd5e1; }
+.channel-chip { display:inline-flex; align-items:center; gap:4px; padding:1px 5px;
+  margin:3px 3px 0 0; border-radius:5px; font-size:9px; font-weight:650;
+  border:1px solid #cbd5e1; }
+.channel-chip-dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
 .state-positive { background:#111827; color:white; }
 .state-negative { background:white; color:#64748b; text-decoration:line-through; }
 .state-unknown { background:#f1f5f9; color:#94a3b8; }
