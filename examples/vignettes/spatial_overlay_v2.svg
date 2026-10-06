@@ -14,10 +14,10 @@ text{font-family:system-ui,-apple-system,sans-serif;fill:#1f2937}
 
 <g transform="translate(42,92)">
 <rect class="panel" width="1316" height="66" rx="14"/>
-<rect x="20" y="16" width="18" height="18" rx="4" fill="#00b7d8"/><text x="46" y="30">C · HPA protein</text>
-<rect x="190" y="16" width="18" height="18" rx="4" fill="#d946ef"/><text x="216" y="30">M · ProteomicsDB</text>
-<rect x="410" y="16" width="18" height="18" rx="4" fill="#facc15"/><text x="436" y="30">Y · spatial RNA</text>
-<rect x="585" y="16" width="18" height="18" rx="4" fill="#fff" stroke="#111827" stroke-width="4"/><text x="611" y="30">K · spatial protein</text>
+<rect x="20" y="16" width="18" height="18" rx="4" fill="#00b7d8"/><text x="46" y="30">Human Protein Atlas protein</text>
+<rect x="190" y="16" width="18" height="18" rx="4" fill="#d946ef"/><text x="216" y="30">ProteomicsDB protein</text>
+<rect x="410" y="16" width="18" height="18" rx="4" fill="#facc15"/><text x="436" y="30">Spatial RNA</text>
+<rect x="585" y="16" width="18" height="18" rx="4" fill="#fff" stroke="#111827" stroke-width="4"/><text x="611" y="30">HuBMAP spatial protein</text>
 <text x="820" y="30" class="small">Hue = source · opacity = strength within source · composite uses multiply blending</text>
 <text x="20" y="52" class="small">Four source-specific small maps make every mixed composite auditable.</text>
 </g>
@@ -89,7 +89,7 @@ text{font-family:system-ui,-apple-system,sans-serif;fill:#1f2937}
 
 <g transform="translate(205,82)">
   <rect x="0" y="0" width="170" height="290" rx="14" fill="#fff" stroke="#e5e7eb"/>
-  <text x="14" y="24" font-weight="700">M · ProteomicsDB</text>
+  <text x="14" y="24" font-weight="700">ProteomicsDB protein</text>
   <g transform="translate(10,35) scale(.44)">
     <g class="body"><path d="M160 18 C134 18 115 39 115 66 C115 84 124 100 139 110 L136 126 C111 132 91 145 78 166 C66 187 59 220 55 258 L45 353 C43 372 54 379 65 366 L85 288 L90 246 L100 329 L111 399 L110 534 C110 550 126 553 133 538 L154 408 L160 363 L166 408 L187 538 C194 553 210 550 210 534 L209 399 L220 329 L230 246 L235 288 L255 366 C266 379 277 372 275 353 L265 258 C261 220 254 187 242 166 C229 145 209 132 184 126 L181 110 C196 100 205 84 205 66 C205 39 186 18 160 18 Z"/></g>
     <g fill="#d946ef" stroke="#a21caf"><path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z" fill-opacity=".56"/><path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z" fill-opacity=".56"/><path d="M127 287 C113 284 105 297 108 312 C111 327 124 334 134 325 C141 318 137 307 143 299 C139 292 134 289 127 287 Z" fill-opacity=".9"/><path d="M193 287 C207 284 215 297 212 312 C209 327 196 334 186 325 C179 318 183 307 177 299 C181 292 186 289 193 287 Z" fill-opacity=".9"/></g>
@@ -98,7 +98,7 @@ text{font-family:system-ui,-apple-system,sans-serif;fill:#1f2937}
 
 <g transform="translate(390,82)">
   <rect x="0" y="0" width="170" height="290" rx="14" fill="#fff" stroke="#e5e7eb"/>
-  <text x="14" y="24" font-weight="700">Y · spatial RNA</text>
+  <text x="14" y="24" font-weight="700">Spatial RNA</text>
   <g transform="translate(10,35) scale(.44)">
     <g class="body"><path d="M160 18 C134 18 115 39 115 66 C115 84 124 100 139 110 L136 126 C111 132 91 145 78 166 C66 187 59 220 55 258 L45 353 C43 372 54 379 65 366 L85 288 L90 246 L100 329 L111 399 L110 534 C110 550 126 553 133 538 L154 408 L160 363 L166 408 L187 538 C194 553 210 550 210 534 L209 399 L220 329 L230 246 L235 288 L255 366 C266 379 277 372 275 353 L265 258 C261 220 254 187 242 166 C229 145 209 132 184 126 L181 110 C196 100 205 84 205 66 C205 39 186 18 160 18 Z"/></g>
     <g fill="#facc15" stroke="#ca8a04"><path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z" fill-opacity=".34"/><path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z" fill-opacity=".34"/><path d="M124 318 C109 323 105 340 110 352 L110 383 C111 399 123 408 137 401 L183 401 C197 408 209 399 210 383 L210 352 C215 340 211 323 196 318 C187 315 179 321 178 331 L178 370 L142 370 L142 331 C141 321 133 315 124 318 Z" fill-opacity=".72"/></g>
@@ -107,7 +107,7 @@ text{font-family:system-ui,-apple-system,sans-serif;fill:#1f2937}
 
 <g transform="translate(575,82)">
   <rect x="0" y="0" width="170" height="290" rx="14" fill="#fff" stroke="#e5e7eb"/>
-  <text x="14" y="24" font-weight="700">K · spatial protein</text>
+  <text x="14" y="24" font-weight="700">HuBMAP spatial protein</text>
   <g transform="translate(10,35) scale(.44)">
     <g class="body"><path d="M160 18 C134 18 115 39 115 66 C115 84 124 100 139 110 L136 126 C111 132 91 145 78 166 C66 187 59 220 55 258 L45 353 C43 372 54 379 65 366 L85 288 L90 246 L100 329 L111 399 L110 534 C110 550 126 553 133 538 L154 408 L160 363 L166 408 L187 538 C194 553 210 550 210 534 L209 399 L220 329 L230 246 L235 288 L255 366 C266 379 277 372 275 353 L265 258 C261 220 254 187 242 166 C229 145 209 132 184 126 L181 110 C196 100 205 84 205 66 C205 39 186 18 160 18 Z"/></g>
     <g fill="none" stroke="#111827" stroke-width="8" stroke-opacity=".8"><path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z"/><path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z"/></g>
@@ -123,7 +123,7 @@ text{font-family:system-ui,-apple-system,sans-serif;fill:#1f2937}
   <circle cx="78" cy="91" r="54" fill="none" stroke="#111827" stroke-width="6" stroke-opacity=".75"/>
   <path d="M50 68 L106 68 L102 118 C91 125 65 125 54 118Z" fill="#fff" fill-opacity=".92" stroke="#475569"/>
   <ellipse cx="78" cy="94" rx="8" ry="11" fill="#bfdbfe" stroke="#2563eb"/>
-  <text x="137" y="75" class="small">C 0.62</text><text x="137" y="95" class="small">Y 0.34</text><text x="137" y="115" class="small">K 0.74</text>
+  <text x="137" y="75" class="small">HPA protein 62%</text><text x="137" y="95" class="small">Spatial RNA 34%</text><text x="137" y="115" class="small">HuBMAP protein 74%</text>
 </g>
 
 <g transform="translate(260,430)">
@@ -132,7 +132,7 @@ text{font-family:system-ui,-apple-system,sans-serif;fill:#1f2937}
   <circle cx="78" cy="91" r="50" fill="#00b7d8" fill-opacity=".28"/>
   <path d="M35 91 C50 81 54 64 69 81 C84 64 88 81 103 91 C88 101 84 118 69 101 C54 118 50 101 35 91Z" fill="#fff" fill-opacity=".92" stroke="#475569"/>
   <ellipse cx="69" cy="91" rx="8" ry="5" fill="#fed7aa" stroke="#ea580c"/>
-  <text x="137" y="85" class="small">C 0.22</text><text x="137" y="105" class="small">Y unknown</text>
+  <text x="137" y="85" class="small">HPA protein 22%</text><text x="137" y="105" class="small">Spatial RNA unknown</text>
 </g>
 
 <text x="508" y="405" class="h2">Subcellular</text>
