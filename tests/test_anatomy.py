@@ -6,7 +6,6 @@ from spatial_target_atlas.anatomy import (
     render_subcellular,
 )
 
-
 COLORS = {
     "C": "#00b7d8",
     "M": "#d946ef",
