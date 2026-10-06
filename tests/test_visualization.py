@@ -79,7 +79,7 @@ def test_render_atlas_html_combines_core_and_optional_outputs(tmp_path) -> None:
     rendered = render_atlas_html(core, cells, census, audit, model_evidence)
 
     assert "<h2>EPCAM</h2>" in rendered
-    assert "EPCAM spatial view" in rendered
+    assert "EPCAM spatial atlas" in rendered
     assert "HPA protein" in rendered
     assert "Dataset-resolved views" in rendered
     assert "HuBMAP per-cell protein summaries" in rendered
