@@ -74,6 +74,12 @@ Opacity has source-specific meaning. HPA and ProteomicsDB use within-target, wit
 
 The report also shows four source-separated small-multiple anatomy maps beside the composite. These are the authoritative way to disambiguate a mixed composite color.
 
+The whole-body view uses a fixed radial tissue ordering so targets can be compared visually without tissues moving between reports. Each tissue segment contains four concentric source tracks. Empty/light tracks are unknown, measured-negative tracks remain visually distinct from unknown, and positive tracks use source-local opacity.
+
+The center body is an orientation layer rather than the authoritative quantitative view. Detailed source evidence lives in the radial tracks.
+
+Cell-type evidence is also aggregated into one schematic tissue microenvironment with epithelial, stromal/ECM, endothelial, immune, and fallback compartments. Aggregation preserves source-specific state and median source-local strength; it is a visualization summary, not a model of physical cell-cell adjacency.
+
 A failed connector is `unknown`, never negative. ProteomicsDB absence is also treated as unknown because its connector records quantified evidence rather than an explicit assayed-negative matrix.
 
 Quantitative views are source- and dataset-specific. HuBMAP median source-scale intensity and CELLxGENE mean raw count may be normalized for bar length **within one dataset only**. The source value and unit remain visible, and values are never normalized across datasets or modalities.
