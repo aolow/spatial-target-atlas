@@ -454,7 +454,7 @@ def _cell_type_overlay(
         for row in rows
         if row.get("cell_type")
     })
-    output = []
+    output: list[dict[str, Any]] = []
     for name in names:
         hpa = [
             row for row in evidence
