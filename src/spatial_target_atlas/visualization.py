@@ -461,6 +461,21 @@ section { scroll-margin-top: 16px; }
 .tissue-panel, .subcellular-panel { background:white; border:1px solid #e5e7eb;
   border-radius:14px; padding:14px; }
 .tissue-panel h4, .subcellular-panel h4 { margin-top:0; }
+.tissue-context-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px; }
+.tissue-context-card { border:1px solid #e5e7eb; border-radius:12px; background:#fcfcfd;
+  padding:10px; min-width:0; }
+.tissue-context-card.tumor-context { background:#fffafb; border-color:#eadfe3; }
+.tissue-context-head { display:flex; justify-content:space-between; align-items:baseline;
+  gap:8px; margin-bottom:7px; }
+.tissue-context-head strong { font-size:13px; }
+.tissue-context-head span { font-size:10px; color:#64748b; }
+.context-tissue-scene { display:block; width:100%; min-height:250px; }
+.context-unavailable { margin:8px 0 0; padding:7px 9px; border-radius:8px;
+  background:#f8fafc; color:#64748b; font-size:11px; }
+.bulk-tumor-note { margin-top:8px; padding:8px 10px; border-left:4px solid #fb7185;
+  background:#fff1f2; border-radius:7px; font-size:11px; }
+.bulk-tumor-note ul { margin:5px 0; padding-left:18px; }
 .microenvironment-scene { display:block; width:100%; min-height:300px; }
 .micro-label { font:10px system-ui,sans-serif; fill:#475569; paint-order:stroke;
   stroke:white; stroke-width:3px; }
@@ -477,7 +492,7 @@ section { scroll-margin-top: 16px; }
 .intensity-track span { display:block; height:100%;
   background:linear-gradient(90deg,#00b7d8,#d946ef); }
 @media (max-width:760px) {
-  .spatial-grid, .lower-grid, .hierarchy-grid { grid-template-columns:1fr; }
+  .spatial-grid, .lower-grid, .hierarchy-grid, .tissue-context-pair { grid-template-columns:1fr; }
   .source-multiples { grid-template-columns:repeat(2,1fr); }
   .radial-label { font-size:9px; }
   .dataset-row { grid-template-columns:1fr; gap:3px; }
