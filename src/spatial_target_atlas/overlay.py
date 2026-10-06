@@ -116,7 +116,7 @@ def build_overlay_payload(
     }
     targets = sorted({
         str(row.get("gene_symbol"))
-        for rows in (evidence, cell_summary, census)
+        for rows in (evidence, cell_summary, census, paired)
         for row in rows
         if row.get("gene_symbol")
     })
@@ -378,6 +378,7 @@ def _cell_type_overlay(
             if row.get("cell_type") == name
             and row.get("source") == "Human Protein Atlas"
             and row.get("spatial_scale") == "cell_type"
+            and row.get("modality") == "mass_spectrometry"
         ]
         spatial_rna = [row for row in census if row.get("cell_type") == name]
         spatial_protein = [row for row in cells if row.get("cell_type") == name]
@@ -535,8 +536,9 @@ def _region_shape(
     if kind == "colon":
         return (
             f'<g {attrs}>{title}<rect x="{x - 32}" y="{y - 20}" width="64" '
-            f'height="40" rx="15" fill="none"/><path d="M128,294 C140,306 '
-            '160,306 172,294 M128,320 C140,308 160,308 172,320" fill="none"/></g>'
+            f'height="40" rx="15" fill="{fill}" fill-opacity=".72"/>'
+            '<path d="M128,294 C140,306 160,306 172,294 M128,320 '
+            'C140,308 160,308 172,320" fill="none"/></g>'
         )
     if kind == "breast":
         return (
