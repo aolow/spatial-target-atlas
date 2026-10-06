@@ -66,14 +66,18 @@ Pin a Census version for reproducibility.
 
 ## Spatial overlay semantics
 
-The spatial renderer uses a CMYK-inspired categorical overlay rather than a shared quantitative scale:
+The spatial renderer uses source-specific transparent layers rather than a shared quantitative scale:
 
-- **C** = Human Protein Atlas tissue protein support
-- **M** = ProteomicsDB tissue protein support
-- **Y** = CELLxGENE spatial RNA positivity
-- **K** = HuBMAP per-cell spatial protein positivity
+- **C** = Human Protein Atlas tissue protein
+- **M** = ProteomicsDB tissue protein
+- **Y** = CELLxGENE spatial RNA
+- **K** = HuBMAP per-cell spatial protein
 
-C/M/Y mix into categorical colors. K is drawn as a dark outline so spatial-protein support remains visible without masking the other channels.
+C/M/Y are alpha-composited with multiply blending. K is drawn as a dark outline so spatial-protein support remains visible without masking the other channels.
+
+Opacity has source-specific meaning. HPA and ProteomicsDB use within-target, within-source relative tissue intensity with a nonzero floor for positive tissue. CELLxGENE uses positive-spot fraction. HuBMAP uses positive-cell fraction. These strengths are not a common numerical scale and must not be compared across source families.
+
+The report also shows four source-separated small-multiple anatomy maps beside the composite. These are the authoritative way to disambiguate a mixed composite color.
 
 A failed connector is `unknown`, never negative. ProteomicsDB absence is also treated as unknown because its connector records quantified evidence rather than an explicit assayed-negative matrix.
 
