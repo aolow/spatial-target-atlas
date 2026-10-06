@@ -415,8 +415,10 @@ section { scroll-margin-top: 16px; }
   border:1px solid #e5e7eb; border-radius:12px; background:white; text-align:center; }
 .cell-context-card small { color:#64748b; }
 .cell-context-icon { width:76px; height:76px; }
-.cell-source-badges { display:flex; flex-wrap:wrap; justify-content:center; gap:3px; margin-top:4px; }
-.cell-source-badge { font-size:9px; border-radius:999px; padding:1px 5px; border:1px solid #cbd5e1; }
+.cell-source-badges { display:flex; flex-wrap:wrap; justify-content:center; gap:3px;
+  margin-top:4px; }
+.cell-source-badge { font-size:9px; border-radius:999px; padding:1px 5px;
+  border:1px solid #cbd5e1; }
 .cell-source-badge.state-positive { background:color-mix(in srgb,var(--source-color) 24%,white);
   border-color:var(--source-color); color:#111827; }
 .cell-source-badge.state-negative { background:white; color:#94a3b8; text-decoration:line-through; }
