@@ -13,7 +13,7 @@ from .anatomy import (
     cell_category,
     render_radial_atlas,
     render_subcellular,
-    render_tissue_microenvironment,
+    render_tissue_comparison,
 )
 from .radial_layout import TISSUE_DISPLAY_NAMES, TISSUE_ORDER
 
@@ -144,7 +144,7 @@ def build_overlay_payload(
         if row.get("gene_symbol")
     })
     return {
-        "schema_version": "3.0",
+        "schema_version": "4.0",
         "overlay_semantics": {
             "C": CHANNELS["C"],
             "M": CHANNELS["M"],
@@ -392,13 +392,13 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         for item in target_payload.get("radial_tissues", [])
         if isinstance(item, dict)
     ]
-    raw_microenvironment = target_payload.get("microenvironment")
-    microenvironment = (
-        raw_microenvironment if isinstance(raw_microenvironment, dict) else {}
+    raw_microenvironments = target_payload.get("microenvironments")
+    microenvironments = (
+        raw_microenvironments if isinstance(raw_microenvironments, dict) else {}
     )
     colors = {key: str(value["color"]) for key, value in CHANNELS.items()}
     radial = render_radial_atlas(region_map, radial_tissues, colors)
-    tissue = render_tissue_microenvironment(microenvironment, colors)
+    tissue = render_tissue_comparison(microenvironments, colors)
     legend = _legend_html()
     subcellular = render_subcellular(target_payload.get("subcellular", []))
     datasets = _dataset_views_html(target_payload.get("dataset_views", {}))
@@ -411,7 +411,7 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         f"{legend}</div>"
         f'<div class="radial-panel">{radial}{disease}</div>'
         '<div class="hierarchy-grid">'
-        f'<div class="tissue-panel"><h4>Integrated tissue microenvironment</h4>{tissue}</div>'
+        f'<div class="tissue-panel"><h4>Normal versus tumor tissue context</h4>{tissue}</div>'
         f'<div class="subcellular-panel"><h4>Subcellular localization</h4>{subcellular}</div>'
         "</div>"
         f"{datasets}</div>"
