@@ -49,7 +49,7 @@ BODY_REGIONS: dict[str, dict[str, Any]] = {
 }
 
 _TISSUE_ALIASES = {
-    "brain": ("brain", "cerebr", "cortex"),
+    "brain": ("brain", "cerebr", "cerebral cortex"),
     "thyroid": ("thyroid",),
     "lung": ("lung", "bronch", "alveol"),
     "heart": ("heart", "cardiac", "myocard"),
