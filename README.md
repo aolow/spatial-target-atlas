@@ -152,14 +152,14 @@ Pass `--model-evidence model_evidence.json` to `render-atlas` to show those reco
 
 ### Spatial overlay
 
-The atlas now includes a CMYK-inspired spatial view at body, organ, cell-context, and subcellular scales.
+The atlas includes a source-layered spatial view at body, organ, cell-context, and subcellular scales.
 
-- **C**: HPA tissue protein support
-- **M**: ProteomicsDB tissue protein support
-- **Y**: CELLxGENE spatial RNA positivity
-- **K**: HuBMAP spatial protein positivity, shown as a dark outline so it does not erase the C/M/Y mixture
+- **C**: HPA tissue protein
+- **M**: ProteomicsDB tissue protein
+- **Y**: CELLxGENE spatial RNA
+- **K**: HuBMAP spatial protein, shown as a dark outline
 
-Cross-source colors encode **categorical support only**. They do not pool intensity values.
+The composite uses transparent C/M/Y layers with multiply blending. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Four source-specific small body maps sit beside the composite so mixed colors remain auditable.
 
 Build the inspectable overlay payload directly:
 
@@ -173,7 +173,9 @@ spatial-target-atlas build-overlay \
 
 When quantitative values are available, the HTML atlas also shows separate dataset cards with intensity bars normalized **within that dataset only**. Raw/source-scale values remain visible beside the bars.
 
-See [examples/vignettes/README.md](examples/vignettes/README.md) for checked-in visual design examples.
+The visual layer now uses repo-owned SVG anatomy masks, cell-type icons, and a subcellular cell schematic rather than primitive circles and rectangles. These are visualization masks, not diagnostic anatomy.
+
+See [examples/vignettes/README.md](examples/vignettes/README.md) for checked-in visual design examples, including the v2 opacity redesign.
 
 ### Local HTML atlas report
 

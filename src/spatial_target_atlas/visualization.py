@@ -399,6 +399,32 @@ section { scroll-margin-top: 16px; }
   gap:22px; align-items:start; margin-top:16px; }
 .body-panel { background:white; border:1px solid #e5e7eb; border-radius:14px; padding:12px; }
 .body-map { width:100%; max-width:360px; margin:auto; display:block; }
+.anatomy-map { width:100%; max-width:390px; margin:auto; display:block; overflow:visible; }
+.anatomy-mini { max-width:155px; }
+.anatomy-map .organ { transition:opacity .15s ease; }
+.anatomy-map .anatomy-label { font:11px system-ui,sans-serif; fill:#475569;
+  paint-order:stroke; stroke:white; stroke-width:3px; }
+.source-multiples { display:grid; grid-template-columns:repeat(2,minmax(130px,1fr)); gap:10px;
+  margin-bottom:18px; }
+.source-mini { background:white; border:1px solid #e5e7eb; border-radius:12px; padding:8px; }
+.source-mini-head { display:flex; align-items:center; gap:5px; font-size:11px; color:#475569; }
+.source-dot { display:inline-block; width:10px; height:10px; border-radius:50%; }
+.cell-context-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:9px; }
+.cell-context-card { display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px;
+  border:1px solid #e5e7eb; border-radius:12px; background:white; text-align:center; }
+.cell-context-card small { color:#64748b; }
+.cell-context-icon { width:76px; height:76px; }
+.cell-source-badges { display:flex; flex-wrap:wrap; justify-content:center; gap:3px;
+  margin-top:4px; }
+.cell-source-badge { font-size:9px; border-radius:999px; padding:1px 5px;
+  border:1px solid #cbd5e1; }
+.cell-source-badge.state-positive { background:color-mix(in srgb,var(--source-color) 24%,white);
+  border-color:var(--source-color); color:#111827; }
+.cell-source-badge.state-negative { background:white; color:#94a3b8; text-decoration:line-through; }
+.cell-source-badge.state-unknown { background:#f8fafc; color:#cbd5e1; }
+.subcellular-figure svg { width:100%; max-width:280px; display:block; margin:auto; }
+.subcell-label { font:10px system-ui,sans-serif; fill:#475569; }
 .organ-label { font: 12px system-ui, sans-serif; fill:#475569; }
 .organ-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(175px,1fr)); gap:9px; }
 .organ-card { display:flex; align-items:center; gap:10px; padding:9px; background:white;
@@ -431,6 +457,7 @@ section { scroll-margin-top: 16px; }
   background:linear-gradient(90deg,#00b7d8,#d946ef); }
 @media (max-width:760px) {
   .spatial-grid, .lower-grid { grid-template-columns:1fr; }
+  .source-multiples { grid-template-columns:repeat(2,1fr); }
   .dataset-row { grid-template-columns:1fr; gap:3px; }
 }
 </style>

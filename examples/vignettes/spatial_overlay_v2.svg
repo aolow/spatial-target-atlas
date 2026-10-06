@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+<style>
+text{font-family:system-ui,-apple-system,sans-serif;fill:#1f2937}
+.title{font-size:30px;font-weight:760}.sub{font-size:13px;fill:#64748b}
+.h2{font-size:17px;font-weight:720}.small{font-size:11px;fill:#64748b}
+.panel{fill:#fbfcfe;stroke:#d8dee4;stroke-width:1.5}
+.body{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}
+.organ-base{fill:#eef2f7;stroke:#cbd5e1;stroke-width:1}
+.label{font-size:10px;fill:#475569;paint-order:stroke;stroke:#fff;stroke-width:3px}
+</style>
+<rect width="1400" height="900" fill="#fff"/>
+<text x="42" y="45" class="title">Spatial Target Atlas v2</text>
+<text x="42" y="70" class="sub">Illustrative design only. Opacity demonstrates source-local strength, not LUAD scientific results.</text>
+
+<g transform="translate(42,92)">
+<rect class="panel" width="1316" height="66" rx="14"/>
+<rect x="20" y="16" width="18" height="18" rx="4" fill="#00b7d8"/><text x="46" y="30">C · HPA protein</text>
+<rect x="190" y="16" width="18" height="18" rx="4" fill="#d946ef"/><text x="216" y="30">M · ProteomicsDB</text>
+<rect x="410" y="16" width="18" height="18" rx="4" fill="#facc15"/><text x="436" y="30">Y · spatial RNA</text>
+<rect x="585" y="16" width="18" height="18" rx="4" fill="#fff" stroke="#111827" stroke-width="4"/><text x="611" y="30">K · spatial protein</text>
+<text x="820" y="30" class="small">Hue = source · opacity = strength within source · composite uses multiply blending</text>
+<text x="20" y="52" class="small">Four source-specific small maps make every mixed composite auditable.</text>
+</g>
+
+<g transform="translate(42,182)">
+<rect class="panel" width="520" height="665" rx="18"/>
+<text x="22" y="36" class="h2">Composite anatomy</text>
+<text x="22" y="57" class="sub">EPCAM example grammar</text>
+<g transform="translate(80,78) scale(.86)">
+  <g class="body">
+    <path d="M160 18 C134 18 115 39 115 66 C115 84 124 100 139 110 L136 126 C111 132 91 145 78 166 C66 187 59 220 55 258 L45 353 C43 372 54 379 65 366 L85 288 L90 246 L100 329 L111 399 L110 534 C110 550 126 553 133 538 L154 408 L160 363 L166 408 L187 538 C194 553 210 550 210 534 L209 399 L220 329 L230 246 L235 288 L255 366 C266 379 277 372 275 353 L265 258 C261 220 254 187 242 166 C229 145 209 132 184 126 L181 110 C196 100 205 84 205 66 C205 39 186 18 160 18 Z"/>
+  </g>
+  <g class="organ-base">
+    <path d="M132 57 C132 41 143 30 158 30 C173 25 190 34 192 48 C204 55 202 72 192 78 C190 91 174 97 163 91 C151 99 134 91 134 79 C122 73 122 62 132 57 Z"/>
+    <path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z"/>
+    <path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z"/>
+    <path d="M150 240 C164 225 199 224 222 238 C229 246 222 262 207 268 C189 274 169 270 145 261 C137 255 140 247 150 240 Z"/>
+    <path d="M127 287 C113 284 105 297 108 312 C111 327 124 334 134 325 C141 318 137 307 143 299 C139 292 134 289 127 287 Z"/>
+    <path d="M193 287 C207 284 215 297 212 312 C209 327 196 334 186 325 C179 318 183 307 177 299 C181 292 186 289 193 287 Z"/>
+    <path d="M124 318 C109 323 105 340 110 352 L110 383 C111 399 123 408 137 401 L183 401 C197 408 209 399 210 383 L210 352 C215 340 211 323 196 318 C187 315 179 321 178 331 L178 370 L142 370 L142 331 C141 321 133 315 124 318 Z"/>
+  </g>
+
+  <g style="mix-blend-mode:multiply" fill="#00b7d8" fill-opacity=".86" stroke="none">
+    <path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z"/>
+    <path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z"/>
+    <path d="M150 240 C164 225 199 224 222 238 C229 246 222 262 207 268 C189 274 169 270 145 261 C137 255 140 247 150 240 Z" fill-opacity=".38"/>
+  </g>
+  <g style="mix-blend-mode:multiply" fill="#d946ef" fill-opacity=".55" stroke="none">
+    <path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z"/>
+    <path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z"/>
+    <path d="M127 287 C113 284 105 297 108 312 C111 327 124 334 134 325 C141 318 137 307 143 299 C139 292 134 289 127 287 Z" fill-opacity=".78"/>
+    <path d="M193 287 C207 284 215 297 212 312 C209 327 196 334 186 325 C179 318 183 307 177 299 C181 292 186 289 193 287 Z" fill-opacity=".78"/>
+  </g>
+  <g style="mix-blend-mode:multiply" fill="#facc15" fill-opacity=".32" stroke="none">
+    <path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z"/>
+    <path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z"/>
+    <path d="M124 318 C109 323 105 340 110 352 L110 383 C111 399 123 408 137 401 L183 401 C197 408 209 399 210 383 L210 352 C215 340 211 323 196 318 C187 315 179 321 178 331 L178 370 L142 370 L142 331 C141 321 133 315 124 318 Z" fill-opacity=".68"/>
+  </g>
+  <g fill="none" stroke="#111827" stroke-opacity=".78" stroke-width="5.5">
+    <path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z"/>
+    <path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z"/>
+  </g>
+
+  <text x="220" y="185" class="label">lung</text><text x="230" y="250" class="label">liver</text>
+  <text x="220" y="310" class="label">kidney</text><text x="220" y="360" class="label">colon</text>
+</g>
+
+<g transform="translate(22,560)">
+<rect x="0" y="0" width="476" height="78" rx="12" fill="#fff1f2" stroke="#fecdd3"/>
+<text x="14" y="24" class="small" font-weight="700">Disease context stays separate</text>
+<text x="14" y="45" class="small">PDC tumor-vs-adjacent is a badge, not another body-map pigment.</text>
+<text x="14" y="63" class="small">This keeps normal-tissue spatial support and cancer enrichment conceptually distinct.</text>
+</g>
+</g>
+
+<g transform="translate(586,182)">
+<rect class="panel" width="772" height="665" rx="18"/>
+<text x="22" y="36" class="h2">Source-separated small multiples</text>
+<text x="22" y="57" class="sub">Same anatomy, one source at a time. Opacity is interpretable only within each panel.</text>
+
+<g transform="translate(20,82)">
+  <rect x="0" y="0" width="170" height="290" rx="14" fill="#fff" stroke="#e5e7eb"/>
+  <text x="14" y="24" font-weight="700">C · HPA</text>
+  <g transform="translate(10,35) scale(.44)">
+    <g class="body"><path d="M160 18 C134 18 115 39 115 66 C115 84 124 100 139 110 L136 126 C111 132 91 145 78 166 C66 187 59 220 55 258 L45 353 C43 372 54 379 65 366 L85 288 L90 246 L100 329 L111 399 L110 534 C110 550 126 553 133 538 L154 408 L160 363 L166 408 L187 538 C194 553 210 550 210 534 L209 399 L220 329 L230 246 L235 288 L255 366 C266 379 277 372 275 353 L265 258 C261 220 254 187 242 166 C229 145 209 132 184 126 L181 110 C196 100 205 84 205 66 C205 39 186 18 160 18 Z"/></g>
+    <g fill="#00b7d8" stroke="#0891b2"><path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z" fill-opacity=".9"/><path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z" fill-opacity=".9"/><path d="M150 240 C164 225 199 224 222 238 C229 246 222 262 207 268 C189 274 169 270 145 261 C137 255 140 247 150 240 Z" fill-opacity=".42"/></g>
+  </g>
+</g>
+
+<g transform="translate(205,82)">
+  <rect x="0" y="0" width="170" height="290" rx="14" fill="#fff" stroke="#e5e7eb"/>
+  <text x="14" y="24" font-weight="700">M · ProteomicsDB</text>
+  <g transform="translate(10,35) scale(.44)">
+    <g class="body"><path d="M160 18 C134 18 115 39 115 66 C115 84 124 100 139 110 L136 126 C111 132 91 145 78 166 C66 187 59 220 55 258 L45 353 C43 372 54 379 65 366 L85 288 L90 246 L100 329 L111 399 L110 534 C110 550 126 553 133 538 L154 408 L160 363 L166 408 L187 538 C194 553 210 550 210 534 L209 399 L220 329 L230 246 L235 288 L255 366 C266 379 277 372 275 353 L265 258 C261 220 254 187 242 166 C229 145 209 132 184 126 L181 110 C196 100 205 84 205 66 C205 39 186 18 160 18 Z"/></g>
+    <g fill="#d946ef" stroke="#a21caf"><path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z" fill-opacity=".56"/><path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z" fill-opacity=".56"/><path d="M127 287 C113 284 105 297 108 312 C111 327 124 334 134 325 C141 318 137 307 143 299 C139 292 134 289 127 287 Z" fill-opacity=".9"/><path d="M193 287 C207 284 215 297 212 312 C209 327 196 334 186 325 C179 318 183 307 177 299 C181 292 186 289 193 287 Z" fill-opacity=".9"/></g>
+  </g>
+</g>
+
+<g transform="translate(390,82)">
+  <rect x="0" y="0" width="170" height="290" rx="14" fill="#fff" stroke="#e5e7eb"/>
+  <text x="14" y="24" font-weight="700">Y · spatial RNA</text>
+  <g transform="translate(10,35) scale(.44)">
+    <g class="body"><path d="M160 18 C134 18 115 39 115 66 C115 84 124 100 139 110 L136 126 C111 132 91 145 78 166 C66 187 59 220 55 258 L45 353 C43 372 54 379 65 366 L85 288 L90 246 L100 329 L111 399 L110 534 C110 550 126 553 133 538 L154 408 L160 363 L166 408 L187 538 C194 553 210 550 210 534 L209 399 L220 329 L230 246 L235 288 L255 366 C266 379 277 372 275 353 L265 258 C261 220 254 187 242 166 C229 145 209 132 184 126 L181 110 C196 100 205 84 205 66 C205 39 186 18 160 18 Z"/></g>
+    <g fill="#facc15" stroke="#ca8a04"><path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z" fill-opacity=".34"/><path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z" fill-opacity=".34"/><path d="M124 318 C109 323 105 340 110 352 L110 383 C111 399 123 408 137 401 L183 401 C197 408 209 399 210 383 L210 352 C215 340 211 323 196 318 C187 315 179 321 178 331 L178 370 L142 370 L142 331 C141 321 133 315 124 318 Z" fill-opacity=".72"/></g>
+  </g>
+</g>
+
+<g transform="translate(575,82)">
+  <rect x="0" y="0" width="170" height="290" rx="14" fill="#fff" stroke="#e5e7eb"/>
+  <text x="14" y="24" font-weight="700">K · spatial protein</text>
+  <g transform="translate(10,35) scale(.44)">
+    <g class="body"><path d="M160 18 C134 18 115 39 115 66 C115 84 124 100 139 110 L136 126 C111 132 91 145 78 166 C66 187 59 220 55 258 L45 353 C43 372 54 379 65 366 L85 288 L90 246 L100 329 L111 399 L110 534 C110 550 126 553 133 538 L154 408 L160 363 L166 408 L187 538 C194 553 210 550 210 534 L209 399 L220 329 L230 246 L235 288 L255 366 C266 379 277 372 275 353 L265 258 C261 220 254 187 242 166 C229 145 209 132 184 126 L181 110 C196 100 205 84 205 66 C205 39 186 18 160 18 Z"/></g>
+    <g fill="none" stroke="#111827" stroke-width="8" stroke-opacity=".8"><path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153 Z"/><path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153 Z"/></g>
+  </g>
+</g>
+
+<text x="20" y="405" class="h2">Cell context</text>
+<g transform="translate(20,430)">
+  <rect width="222" height="188" rx="14" fill="#fff" stroke="#e5e7eb"/>
+  <text x="14" y="25" class="small" font-weight="700">epithelial</text>
+  <circle cx="78" cy="91" r="50" fill="#00b7d8" fill-opacity=".55"/>
+  <circle cx="78" cy="91" r="37" fill="#facc15" fill-opacity=".35" style="mix-blend-mode:multiply"/>
+  <circle cx="78" cy="91" r="54" fill="none" stroke="#111827" stroke-width="6" stroke-opacity=".75"/>
+  <path d="M50 68 L106 68 L102 118 C91 125 65 125 54 118Z" fill="#fff" fill-opacity=".92" stroke="#475569"/>
+  <ellipse cx="78" cy="94" rx="8" ry="11" fill="#bfdbfe" stroke="#2563eb"/>
+  <text x="137" y="75" class="small">C 0.62</text><text x="137" y="95" class="small">Y 0.34</text><text x="137" y="115" class="small">K 0.74</text>
+</g>
+
+<g transform="translate(260,430)">
+  <rect width="222" height="188" rx="14" fill="#fff" stroke="#e5e7eb"/>
+  <text x="14" y="25" class="small" font-weight="700">fibroblast</text>
+  <circle cx="78" cy="91" r="50" fill="#00b7d8" fill-opacity=".28"/>
+  <path d="M35 91 C50 81 54 64 69 81 C84 64 88 81 103 91 C88 101 84 118 69 101 C54 118 50 101 35 91Z" fill="#fff" fill-opacity=".92" stroke="#475569"/>
+  <ellipse cx="69" cy="91" rx="8" ry="5" fill="#fed7aa" stroke="#ea580c"/>
+  <text x="137" y="85" class="small">C 0.22</text><text x="137" y="105" class="small">Y unknown</text>
+</g>
+
+<text x="508" y="405" class="h2">Subcellular</text>
+<g transform="translate(508,430)">
+  <rect width="237" height="188" rx="14" fill="#fff" stroke="#e5e7eb"/>
+  <circle cx="112" cy="97" r="74" fill="#f8fafc" stroke="#d1d5db" stroke-dasharray="5 5"/>
+  <circle cx="112" cy="97" r="55" fill="#dbeafe" stroke="#2563eb" stroke-width="6"/>
+  <circle cx="112" cy="97" r="23" fill="#e5e7eb" stroke="#7c3aed"/>
+  <text x="112" y="100" text-anchor="middle" class="small">nucleus</text>
+  <text x="112" y="58" text-anchor="middle" class="small">cytoplasm</text>
+  <text x="112" y="174" text-anchor="middle" class="small">membrane highlighted</text>
+</g>
+</g>
+</svg>
