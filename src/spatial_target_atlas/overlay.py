@@ -10,11 +10,12 @@ from statistics import median
 from typing import Any
 
 from .anatomy import (
-    render_body,
-    render_cell_contexts,
-    render_small_multiples,
+    cell_category,
+    render_radial_atlas,
     render_subcellular,
+    render_tissue_microenvironment,
 )
+from .radial_layout import TISSUE_DISPLAY_NAMES, TISSUE_ORDER
 
 CHANNELS = {
     "C": {
@@ -57,8 +58,14 @@ BODY_REGIONS: dict[str, dict[str, Any]] = {
 }
 
 _TISSUE_ALIASES = {
+    "vasculature": ("vasculature", "blood vessel", "artery", "vein", "vascular"),
+    "bone_marrow": ("bone marrow", "marrow"),
+    "lymph_node": ("lymph node", "lymphoid node"),
+    "small_intestine": ("small intestine", "ileum", "jejunum", "duodenum"),
+    "salivary_gland": ("salivary gland", "parotid", "submandibular"),
     "brain": ("brain", "cerebr", "cerebral cortex"),
     "thyroid": ("thyroid",),
+    "trachea": ("trachea",),
     "lung": ("lung", "bronch", "alveol"),
     "heart": ("heart", "cardiac", "myocard"),
     "liver": ("liver", "hepatic"),
@@ -66,10 +73,18 @@ _TISSUE_ALIASES = {
     "pancreas": ("pancrea",),
     "kidney": ("kidney", "renal"),
     "spleen": ("spleen",),
+    "thymus": ("thymus",),
     "colon": ("colon", "large intestine", "rectum", "colorectal"),
     "bladder": ("bladder", "urothel"),
     "breast": ("breast", "mammary"),
     "skin": ("skin", "epiderm", "dermis"),
+    "fat": ("adipose", "fat"),
+    "muscle": ("skeletal muscle", "muscle"),
+    "ovary": ("ovary", "ovarian"),
+    "prostate": ("prostate",),
+    "testis": ("testis", "testicular"),
+    "tongue": ("tongue",),
+    "uterus": ("uterus", "uterine", "endometrium"),
 }
 
 _POSITIVE_STATES = {
@@ -129,7 +144,7 @@ def build_overlay_payload(
         if row.get("gene_symbol")
     })
     return {
-        "schema_version": "2.0",
+        "schema_version": "3.0",
         "overlay_semantics": {
             "C": CHANNELS["C"],
             "M": CHANNELS["M"],
@@ -252,6 +267,8 @@ def canonical_region(value: Any) -> str | None:
         return None
     if text in {"ll", "rl"}:
         return "lung"
+    if text in {"blood", "whole blood", "peripheral blood"}:
+        return "blood"
     for region, aliases in _TISSUE_ALIASES.items():
         if any(alias in text for alias in aliases):
             return region
