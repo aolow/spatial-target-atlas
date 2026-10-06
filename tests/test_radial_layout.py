@@ -4,7 +4,6 @@ from spatial_target_atlas.radial_layout import (
     render_radial_tracks,
 )
 
-
 COLORS = {
     "C": "#00b7d8",
     "M": "#d946ef",
