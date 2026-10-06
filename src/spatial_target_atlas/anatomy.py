@@ -954,7 +954,13 @@ def _tumor_ecm() -> str:
 
 def _tumor_nests() -> str:
     nests = []
-    for cx, cy, rx, ry in ((92, 183, 55, 43), (198, 207, 67, 53), (120, 266, 60, 38), (253, 270, 48, 34)):
+    nests_spec = (
+        (92, 183, 55, 43),
+        (198, 207, 67, 53),
+        (120, 266, 60, 38),
+        (253, 270, 48, 34),
+    )
+    for cx, cy, rx, ry in nests_spec:
         nests.append(
             f'<path d="M{cx-rx} {cy} C{cx-rx+8} {cy-ry} {cx-18} {cy-ry-8} '
             f'{cx} {cy-ry} C{cx+33} {cy-ry-4} {cx+rx-6} {cy-22} {cx+rx} {cy} '
