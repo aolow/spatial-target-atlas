@@ -52,10 +52,11 @@ def test_small_multiples_render_each_source_separately() -> None:
 
     rendered = render_small_multiples(regions, COLORS)
 
-    assert "C</strong> HPA protein" in rendered
-    assert "M</strong> ProteomicsDB" in rendered
-    assert "Y</strong> spatial RNA" in rendered
-    assert "K</strong> spatial protein" in rendered
+    assert "Human Protein Atlas protein" in rendered
+    assert "ProteomicsDB protein" in rendered
+    assert "Spatial RNA" in rendered
+    assert "HuBMAP spatial protein" in rendered
+    assert "<strong>C</strong>" not in rendered
 
 
 def test_cell_icons_use_biological_categories() -> None:
@@ -82,8 +83,8 @@ def test_cell_icons_use_biological_categories() -> None:
     assert "cell-context-scene" in rendered
     assert "Epithelial tissue scene" in rendered
     assert "epithelial compartment" in rendered
-    assert "C 0.60" in rendered
-    assert "K 0.70" in rendered
+    assert "Human Protein Atlas protein 60%" in rendered
+    assert "HuBMAP spatial protein 70%" in rendered
 
 
 def test_subcellular_schematic_highlights_supported_compartments() -> None:
