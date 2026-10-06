@@ -79,8 +79,9 @@ def test_cell_icons_use_biological_categories() -> None:
         ],
         COLORS,
     )
-    assert "cell-context-icon" in rendered
-    assert "epithelial" in rendered
+    assert "cell-context-scene" in rendered
+    assert "Epithelial tissue scene" in rendered
+    assert "epithelial compartment" in rendered
     assert "C 0.60" in rendered
     assert "K 0.70" in rendered
 
@@ -91,3 +92,32 @@ def test_subcellular_schematic_highlights_supported_compartments() -> None:
     assert "Subcellular localization schematic" in rendered
     assert 'stroke="#2563eb"' in rendered
     assert 'fill="#dbeafe"' in rendered
+
+
+def test_cell_contexts_render_distinct_tissue_scenes() -> None:
+    rows = [
+        {
+            "cell_type": "capillary endothelial cell",
+            "channels": {"C": "positive", "M": "unknown", "Y": "unknown", "K": "unknown"},
+            "strengths": {"C": 0.4, "M": None, "Y": None, "K": None},
+        },
+        {
+            "cell_type": "activated fibroblast",
+            "channels": {"C": "positive", "M": "unknown", "Y": "positive", "K": "unknown"},
+            "strengths": {"C": 0.5, "M": None, "Y": 0.2, "K": None},
+        },
+        {
+            "cell_type": "CD8-positive T cell",
+            "channels": {"C": "unknown", "M": "unknown", "Y": "positive", "K": "positive"},
+            "strengths": {"C": None, "M": None, "Y": 0.6, "K": 0.8},
+        },
+    ]
+
+    rendered = render_cell_contexts(rows, COLORS)
+
+    assert "Endothelial vessel scene" in rendered
+    assert "vascular lumen" in rendered
+    assert "Fibroblast extracellular matrix scene" in rendered
+    assert "collagen-rich ECM" in rendered
+    assert "Immune microenvironment scene" in rendered
+    assert "mixed immune field" in rendered
