@@ -341,7 +341,9 @@ def render_subcellular(locations: Any) -> str:
         '<text x="130" y="55" text-anchor="middle" class="subcell-label">cytoplasm</text>'
         '<text x="130" y="202" text-anchor="middle" class="subcell-label">extracellular</text>'
         "</svg>"
-        f'<p class="note">{_e(", ".join(values) if values else "No HPA subcellular annotation.")}</p>'
+        '<p class="note">'
+        f'{_e(", ".join(values) if values else "No HPA subcellular annotation.")}'
+        "</p>"
         "</div>"
     )
 
