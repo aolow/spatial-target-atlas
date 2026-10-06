@@ -22,7 +22,9 @@ A research prototype for assembling target evidence across tissues, cell types, 
 | Gene-symbol and Ensembl input resolution | Implemented |
 | Target-level HuBMAP per-cell protein extraction | Implemented for Cells API-indexed targeted panels |
 | Self-contained local HTML evidence report | Implemented |
-| Interactive spatial image/browser UI | Not yet implemented |
+| Body → organ → cell → subcellular spatial overlay | Implemented schematic view |
+| Dataset-resolved within-source intensity views | Implemented |
+| Registered histology/image-coordinate viewer | Not yet implemented |
 | PINNACLE target/context representation coverage | Implemented import |
 | Generic model-derived target evidence contract | Implemented |
 | Direct SPATIA target-scoring pipeline | Not yet implemented |
@@ -148,6 +150,31 @@ spatial-target-atlas validate-model-evidence model_evidence.json
 
 Pass `--model-evidence model_evidence.json` to `render-atlas` to show those records in a separate model-derived section.
 
+### Spatial overlay
+
+The atlas now includes a CMYK-inspired spatial view at body, organ, cell-context, and subcellular scales.
+
+- **C**: HPA tissue protein support
+- **M**: ProteomicsDB tissue protein support
+- **Y**: CELLxGENE spatial RNA positivity
+- **K**: HuBMAP spatial protein positivity, shown as a dark outline so it does not erase the C/M/Y mixture
+
+Cross-source colors encode **categorical support only**. They do not pool intensity values.
+
+Build the inspectable overlay payload directly:
+
+```bash
+spatial-target-atlas build-overlay \
+  --core outputs/luad \
+  --hubmap-cells outputs/luad-hubmap-cells \
+  --spatial-census outputs/luad-census-spatial \
+  -o outputs/luad-overlay.json
+```
+
+When quantitative values are available, the HTML atlas also shows separate dataset cards with intensity bars normalized **within that dataset only**. Raw/source-scale values remain visible beside the bars.
+
+See [examples/vignettes/README.md](examples/vignettes/README.md) for checked-in visual design examples.
+
 ### Local HTML atlas report
 
 Once you have built the evidence layers you want, render a self-contained report:
@@ -197,7 +224,7 @@ Each build records source releases, URLs, retrieval metadata, source-payload has
 - Pull-request CI uses mocked source responses for deterministic behavior. A separate weekly/manual smoke workflow checks lightweight live compatibility with Ensembl, HPA, ProteomicsDB, PDC study lookup, and HuBMAP discovery.
 - CELLxGENE can be pinned to a stable Census release; ProteomicsDB is a live API.
 - HuBMAP per-cell protein extraction depends on the separate Cells API index; not every public spatial dataset is indexed there.
-- The HTML report summarizes generated evidence but is not an interactive image or coordinate viewer.
+- The body/organ maps are schematic anatomical views. They are not registered histology images or coordinate-accurate spatial assay viewers.
 - PINNACLE import records contextual representation coverage, but this project does not run PINNACLE/SPATIA models or infer target relevance from embeddings.
 - Source data retain their own licenses and citation requirements. The MIT license applies to this software.
 
