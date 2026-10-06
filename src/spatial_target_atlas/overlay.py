@@ -13,7 +13,7 @@ from .anatomy import (
     cell_category,
     render_radial_atlas,
     render_subcellular,
-    render_tissue_microenvironment,
+    render_tissue_comparison,
 )
 from .radial_layout import TISSUE_DISPLAY_NAMES, TISSUE_ORDER
 
@@ -144,7 +144,7 @@ def build_overlay_payload(
         if row.get("gene_symbol")
     })
     return {
-        "schema_version": "3.0",
+        "schema_version": "4.0",
         "overlay_semantics": {
             "C": CHANNELS["C"],
             "M": CHANNELS["M"],
@@ -160,6 +160,12 @@ def build_overlay_payload(
                 "relative tissue intensity. Spatial RNA uses positive-spot fraction. "
                 "HuBMAP spatial protein uses positive-cell fraction. Strengths are "
                 "never compared numerically across source families."
+            ),
+            "context_rule": (
+                "The body and radial tissue atlas use normal/reference spatial context. "
+                "Tumor-labeled spatial RNA is rendered separately in the tumor tissue panel. "
+                "PDC paired tumor-versus-adjacent evidence remains bulk context and is never "
+                "mapped onto specific cell compartments."
             ),
             "quantitative_rule": (
                 "Dataset-resolved intensity is shown only within a dataset/source-specific "
@@ -184,6 +190,12 @@ def _target_payload(
     target_evidence = [row for row in evidence if row.get("gene_symbol") == target]
     target_cells = [row for row in cell_summary if row.get("gene_symbol") == target]
     target_census = [row for row in census if row.get("gene_symbol") == target]
+    reference_census = [
+        row for row in target_census if _is_reference_census_row(row)
+    ]
+    tumor_census = [
+        row for row in target_census if _is_tumor_census_row(row)
+    ]
     hpa_strengths = _relative_region_strength(
         target_evidence,
         source="Human Protein Atlas",
@@ -197,7 +209,7 @@ def _target_payload(
         modality="mass_spectrometry",
     )
     rna_strengths = _fraction_region_strength(
-        target_census,
+        reference_census,
         numerator="positive_spot_count",
         denominator="spot_count",
     )
@@ -212,7 +224,7 @@ def _target_payload(
         channels = {
             "C": _hpa_state(target_evidence, region, failures),
             "M": _proteomicsdb_state(target_evidence, region, failures),
-            "Y": _census_state(target_census, region),
+            "Y": _census_state(reference_census, region),
             "K": _hubmap_state(target_cells, region),
         }
         if any(state != "unknown" for state in channels.values()):
@@ -229,12 +241,17 @@ def _target_payload(
                     "fill": overlay_color(channels),
                     "k_outline": channels["K"] == "positive",
                     "evidence_count": _region_evidence_count(
-                        target_evidence, target_cells, target_census, region
+                        target_evidence, target_cells, reference_census, region
                     ),
                 }
             )
 
-    cell_types = _cell_type_overlay(target_evidence, target_cells, target_census)
+    reference_cell_types = _cell_type_overlay(
+        target_evidence,
+        target_cells,
+        reference_census,
+    )
+    tumor_cell_types = _cell_type_overlay([], [], tumor_census)
     subcellular = _subcellular_locations(target_evidence)
     disease = [
         {
@@ -251,20 +268,55 @@ def _target_payload(
     radial_tissues = _radial_tissue_payload(
         target_evidence,
         target_cells,
-        target_census,
+        reference_census,
         failures,
         hpa_strengths,
         pdb_strengths,
         rna_strengths,
         protein_strengths,
     )
-    microenvironment = _microenvironment_payload(cell_types)
+    reference_microenvironment = _microenvironment_payload(reference_cell_types)
+    tumor_microenvironment = _microenvironment_payload(tumor_cell_types)
+    microenvironments = {
+        "normal_reference": {
+            "label": "Normal / reference tissue",
+            "available": bool(reference_cell_types),
+            "dataset_count": len({
+                str(row.get("dataset_id"))
+                for row in reference_census
+                if row.get("dataset_id")
+            }),
+            "disease_labels": sorted({
+                str(row.get("disease"))
+                for row in reference_census
+                if row.get("disease")
+            }),
+            "compartments": reference_microenvironment,
+        },
+        "tumor": {
+            "label": "Tumor tissue",
+            "available": bool(tumor_cell_types),
+            "dataset_count": len({
+                str(row.get("dataset_id"))
+                for row in tumor_census
+                if row.get("dataset_id")
+            }),
+            "disease_labels": sorted({
+                str(row.get("disease"))
+                for row in tumor_census
+                if row.get("disease")
+            }),
+            "compartments": tumor_microenvironment,
+            "bulk_paired": disease,
+        },
+    }
     return {
         "gene_symbol": target,
         "regions": regions,
         "radial_tissues": radial_tissues,
-        "cell_types": cell_types,
-        "microenvironment": microenvironment,
+        "cell_types": reference_cell_types,
+        "microenvironment": reference_microenvironment,
+        "microenvironments": microenvironments,
         "subcellular": subcellular,
         "disease_context": disease,
         "dataset_views": {
@@ -272,6 +324,34 @@ def _target_payload(
             "spatial_rna": _census_dataset_views(target_census),
         },
     }
+
+
+_TUMOR_TERMS = (
+    "cancer",
+    "carcinoma",
+    "tumor",
+    "tumour",
+    "malignan",
+    "adenocarcinoma",
+    "melanoma",
+    "sarcoma",
+    "lymphoma",
+    "leukemia",
+    "glioma",
+    "neoplasm",
+)
+
+
+def _is_reference_census_row(row: dict[str, Any]) -> bool:
+    context = str(row.get("reference_context") or "").casefold()
+    disease = str(row.get("disease") or "").casefold()
+    return context != "disease_tissue" and disease in {"", "normal", "healthy"}
+
+
+def _is_tumor_census_row(row: dict[str, Any]) -> bool:
+    context = str(row.get("reference_context") or "").casefold()
+    disease = str(row.get("disease") or "").casefold()
+    return context == "disease_tissue" and any(term in disease for term in _TUMOR_TERMS)
 
 
 def canonical_region(value: Any) -> str | None:
@@ -318,13 +398,13 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         for item in target_payload.get("radial_tissues", [])
         if isinstance(item, dict)
     ]
-    raw_microenvironment = target_payload.get("microenvironment")
-    microenvironment = (
-        raw_microenvironment if isinstance(raw_microenvironment, dict) else {}
+    raw_microenvironments = target_payload.get("microenvironments")
+    microenvironments = (
+        raw_microenvironments if isinstance(raw_microenvironments, dict) else {}
     )
     colors = {key: str(value["color"]) for key, value in CHANNELS.items()}
     radial = render_radial_atlas(region_map, radial_tissues, colors)
-    tissue = render_tissue_microenvironment(microenvironment, colors)
+    tissue = render_tissue_comparison(microenvironments, colors)
     legend = _legend_html()
     subcellular = render_subcellular(target_payload.get("subcellular", []))
     datasets = _dataset_views_html(target_payload.get("dataset_views", {}))
@@ -337,7 +417,7 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         f"{legend}</div>"
         f'<div class="radial-panel">{radial}{disease}</div>'
         '<div class="hierarchy-grid">'
-        f'<div class="tissue-panel"><h4>Integrated tissue microenvironment</h4>{tissue}</div>'
+        f'<div class="tissue-panel"><h4>Normal versus tumor tissue context</h4>{tissue}</div>'
         f'<div class="subcellular-panel"><h4>Subcellular localization</h4>{subcellular}</div>'
         "</div>"
         f"{datasets}</div>"

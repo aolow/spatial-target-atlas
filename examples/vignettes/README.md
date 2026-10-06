@@ -4,6 +4,12 @@ These files are **visual design examples**, not scientific output from the LUAD 
 
 They are checked in so the spatial language can be reviewed directly in GitHub before relying on it for biological interpretation.
 
+## Detailed anatomy + normal/tumor v5
+
+![Detailed anatomy and split tissue contexts](anatomy_normal_tumor_v5.svg)
+
+This is the current primary direction. The center body has more anatomical detail and a visible airway/vascular/lymphatic scaffold. The tissue level is split into **Normal / reference tissue** and **Tumor tissue** instead of blending both contexts into one microenvironment. Tumor compartments are populated only from tumor-resolved spatial evidence; PDC paired proteomics stays a separate bulk annotation.
+
 ## Radial body + integrated tissue v4
 
 ![Radial atlas v4](radial_atlas_v4.svg)

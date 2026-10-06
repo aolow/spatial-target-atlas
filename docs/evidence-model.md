@@ -78,6 +78,12 @@ The whole-body view uses a fixed radial tissue ordering so targets can be compar
 
 The center body is an orientation layer rather than the authoritative quantitative view. Detailed source evidence lives in the radial tracks.
 
+The body/radial atlas is a **normal/reference tissue view**. Source-labeled normal or healthy CELLxGENE spatial RNA can contribute to the radial spatial-RNA track. Tumor-labeled CELLxGENE rows are excluded from that ring and are rendered only in the separate tumor tissue panel.
+
+Normal/reference and tumor microenvironments are constructed independently. HPA cell-type protein and current HuBMAP cell summaries remain on the reference side. Tumor compartments are populated only by tumor-labeled spatial/cell evidence that is actually present. When no tumor-resolved spatial evidence is available, the tumor schematic remains muted and explicitly reports the gap rather than reusing reference evidence.
+
+PDC paired tumor-versus-adjacent proteomics is displayed beside the tumor panel as bulk context. It is never assigned to epithelial, stromal, endothelial, or immune compartments.
+
 Cell-type evidence is also aggregated into one schematic tissue microenvironment with epithelial, stromal/ECM, endothelial, immune, and fallback compartments. Aggregation preserves source-specific state and median source-local strength; it is a visualization summary, not a model of physical cell-cell adjacency.
 
 A failed connector is `unknown`, never negative. ProteomicsDB absence is also treated as unknown because its connector records quantified evidence rather than an explicit assayed-negative matrix.

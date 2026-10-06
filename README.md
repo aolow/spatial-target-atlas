@@ -152,11 +152,11 @@ Pass `--model-evidence model_evidence.json` to `render-atlas` to show those reco
 
 ### Spatial overlay
 
-The atlas uses a hierarchical spatial view: a central body for orientation, a radial tissue ring for source-specific evidence, one integrated tissue microenvironment, and a subcellular localization panel.
+The atlas uses a hierarchical spatial view: a detailed central body for orientation, a radial normal/reference tissue ring for source-specific evidence, separate normal/reference and tumor tissue microenvironments, and a subcellular localization panel.
 
 The four visual layers are Human Protein Atlas tissue protein, ProteomicsDB tissue protein, CELLxGENE spatial RNA, and HuBMAP spatial protein. Each source has its own color, but the UI uses full source names rather than channel acronyms.
 
-The radial ring carries four concentric source tracks per tissue. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Unknown, measured-negative, and positive states remain distinct. The center body is deliberately lighter-weight and is used for anatomical orientation rather than dense quantitative encoding.
+The radial ring carries four concentric source tracks per tissue and is intentionally reference-oriented. Tumor-labeled spatial RNA is excluded from the body/radial reference view and appears only in the tumor panel. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Unknown, measured-negative, and positive states remain distinct. The center body now includes a more detailed airway, vascular, lymphatic, intestinal, and organ scaffold while remaining an orientation layer rather than the authoritative quantitative view.
 
 Build the inspectable overlay payload directly:
 
@@ -170,9 +170,9 @@ spatial-target-atlas build-overlay \
 
 When quantitative values are available, the HTML atlas also shows separate dataset cards with intensity bars normalized **within that dataset only**. Raw/source-scale values remain visible beside the bars.
 
-The visual layer uses repo-owned SVG anatomy masks, a radial tissue layout, one integrated tissue microenvironment, and a subcellular cell schematic. The tissue scene combines epithelial, stromal/ECM, endothelial/vascular, and immune compartments in one view, with source signal rendered as translucent context overlays around neutral biological structures. These are visualization masks, not diagnostic anatomy.
+The visual layer uses repo-owned SVG anatomy masks, a radial tissue layout, side-by-side normal/reference and tumor tissue scenes, and a subcellular cell schematic. Each tissue scene contains epithelial, stromal/ECM, endothelial/vascular, and immune compartments. Reference HPA/HuBMAP and source-labeled normal CELLxGENE evidence stay on the normal/reference side. Tumor-labeled CELLxGENE evidence is rendered only on the tumor side. PDC paired tumor-versus-adjacent proteomics appears as a separate bulk annotation and is never painted onto individual compartments. These are visualization masks, not diagnostic anatomy.
 
-See [examples/vignettes/README.md](examples/vignettes/README.md) for checked-in visual design examples, including the current radial v4 hierarchy.
+See [examples/vignettes/README.md](examples/vignettes/README.md) for checked-in visual design examples, including the current detailed anatomy + normal/tumor v5 hierarchy.
 
 ### Local HTML atlas report
 

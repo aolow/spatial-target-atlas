@@ -14,37 +14,45 @@ from .radial_layout import render_radial_tracks
 BODY_VIEWBOX = "0 0 320 560"
 
 BODY_SILHOUETTE = """
-<path d="M160 18
- C134 18 115 39 115 66
- C115 84 124 100 139 110
- L136 126
- C111 132 91 145 78 166
- C66 187 59 220 55 258
- L45 353
- C43 372 54 379 65 366
- L85 288
- L90 246
- L100 329
- L111 399
- L110 534
- C110 550 126 553 133 538
- L154 408
- L160 363
- L166 408
- L187 538
- C194 553 210 550 210 534
- L209 399
- L220 329
- L230 246
- L235 288
- L255 366
- C266 379 277 372 275 353
- L265 258
- C261 220 254 187 242 166
- C229 145 209 132 184 126
- L181 110
- C196 100 205 84 205 66
- C205 39 186 18 160 18 Z"/>
+<path d="M160 14
+ C142 14 127 25 121 42
+ C115 59 117 76 124 90
+ C128 98 134 104 141 109
+ L138 122
+ C123 126 109 132 98 140
+ C83 151 74 166 68 184
+ C60 208 57 235 52 262
+ L39 340
+ C36 358 39 373 49 377
+ C58 381 65 371 68 356
+ L84 290
+ L94 238
+ L98 311
+ C99 333 104 365 112 392
+ L108 519
+ C108 537 116 551 128 551
+ C139 551 143 538 145 521
+ L158 414
+ L160 369
+ L162 414
+ L175 521
+ C177 538 181 551 192 551
+ C204 551 212 537 212 519
+ L208 392
+ C216 365 221 333 222 311
+ L226 238
+ L236 290
+ L252 356
+ C255 371 262 381 271 377
+ C281 373 284 358 281 340
+ L268 262
+ C263 235 260 208 252 184
+ C246 166 237 151 222 140
+ C211 132 197 126 182 122
+ L179 109
+ C186 104 192 98 196 90
+ C203 76 205 59 199 42
+ C193 25 178 14 160 14 Z"/>
 """
 
 ORGAN_PATHS: dict[str, str] = {
@@ -157,6 +165,39 @@ ORGAN_PATHS: dict[str, str] = {
     """,
 }
 
+ANATOMY_SCAFFOLD = """
+<g class="anatomy-airway" fill="none" stroke="#94a3b8" stroke-width="3"
+ stroke-linecap="round" stroke-linejoin="round">
+  <path d="M160 112 L160 154 M160 151 L141 170 M160 151 L179 170"/>
+  <path d="M141 170 L128 190 M141 170 L148 199 M179 170 L192 190 M179 170 L172 199"
+   stroke-width="1.6"/>
+</g>
+<g class="anatomy-vessels" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M169 185 C181 207 178 235 174 263 L172 340 C172 373 181 408 190 444"
+   stroke="#ef6b6b" stroke-width="4"/>
+  <path d="M151 184 C142 207 145 235 148 263 L149 340 C148 373 139 408 130 444"
+   stroke="#5b8def" stroke-width="4"/>
+  <path d="M170 225 C192 219 208 206 226 188 M149 225 C126 219 111 206 94 188"
+   stroke="#ef6b6b" stroke-width="2"/>
+  <path d="M172 290 C190 286 202 291 212 301 M149 290 C130 286 118 291 108 301"
+   stroke="#ef6b6b" stroke-width="2"/>
+  <path d="M148 294 C131 291 120 297 111 307 M173 294 C190 291 201 297 210 307"
+   stroke="#5b8def" stroke-width="2"/>
+</g>
+<g class="anatomy-lymph" fill="none" stroke="#7abf77" stroke-width="1.5" opacity=".72">
+  <path d="M143 129 C131 148 126 177 130 205 C134 235 137 263 142 292"/>
+  <path d="M177 129 C189 148 194 177 190 205 C186 235 183 263 178 292"/>
+  <circle cx="136" cy="145" r="3" fill="#7abf77"/><circle cx="127" cy="181" r="3" fill="#7abf77"/>
+  <circle cx="184" cy="145" r="3" fill="#7abf77"/><circle cx="193" cy="181" r="3" fill="#7abf77"/>
+  <circle cx="142" cy="276" r="3" fill="#7abf77"/><circle cx="178" cy="276" r="3" fill="#7abf77"/>
+</g>
+<path d="M110 244 Q160 258 210 244" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+<g class="anatomy-small-intestine" fill="none" stroke="#9ca3af" stroke-width="1.5">
+  <path d="M132 336 C149 326 170 326 188 337 C169 347 149 347 132 358
+   C151 368 171 368 188 379 C170 389 149 389 132 400"/>
+</g>
+"""
+
 ORGAN_LABEL_POINTS: dict[str, tuple[int, int]] = {
     "brain": (204, 59),
     "thyroid": (204, 125),
@@ -196,6 +237,7 @@ def render_body(
         '<g class="body-silhouette" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2">',
         BODY_SILHOUETTE,
         "</g>",
+        ANATOMY_SCAFFOLD,
     ]
     for region, paths in ORGAN_PATHS.items():
         data = regions.get(region)
@@ -491,10 +533,11 @@ def render_radial_atlas(
         '<svg class="radial-atlas" viewBox="0 0 1000 1000" role="img" '
         'aria-label="Radial body and tissue evidence atlas">',
         render_radial_tracks(radial_tissues, colors),
-        '<g class="radial-center-body" transform="translate(357 288) scale(.58)">',
+        '<g class="radial-center-body" transform="translate(385 297) scale(.72)">',
         '<g fill="#fbfcfe" stroke="#94a3b8" stroke-width="2.2">',
         BODY_SILHOUETTE,
         "</g>",
+        ANATOMY_SCAFFOLD,
     ]
     for region, paths in ORGAN_PATHS.items():
         data = regions.get(region)
@@ -733,6 +776,284 @@ def _microenvironment_summary(microenvironment: dict[str, Any]) -> str:
     if not rows:
         return '<p class="note">No cell-type evidence was mappable to tissue compartments.</p>'
     return '<div class="micro-summary">' + "".join(rows) + "</div>"
+
+
+def render_tissue_comparison(
+    microenvironments: dict[str, Any],
+    colors: dict[str, str],
+) -> str:
+    """Render normal/reference and tumor tissue as separate spatial contexts."""
+    normal = microenvironments.get("normal_reference")
+    tumor = microenvironments.get("tumor")
+    normal_context = normal if isinstance(normal, dict) else {}
+    tumor_context = tumor if isinstance(tumor, dict) else {}
+    return (
+        '<div class="tissue-context-pair">'
+        + _render_reference_tissue_panel(normal_context, colors)
+        + _render_tumor_tissue_panel(tumor_context, colors)
+        + "</div>"
+    )
+
+
+def _render_reference_tissue_panel(
+    context: dict[str, Any],
+    colors: dict[str, str],
+) -> str:
+    compartments = context.get("compartments")
+    data = compartments if isinstance(compartments, dict) else {}
+    available = bool(context.get("available"))
+    scene = (
+        '<svg class="context-tissue-scene" viewBox="0 0 520 330" role="img" '
+        'aria-label="Normal or reference tissue microenvironment">'
+        '<rect x="7" y="7" width="506" height="316" rx="20" fill="#fbfcfd" '
+        'stroke="#dbe2ea"/>'
+        + _micro_signal(_compartment(data, "fibroblast"), colors, 18, 20, 484, 292, 24)
+        + _reference_ecm()
+        + _micro_signal(_compartment(data, "epithelial"), colors, 30, 145, 270, 148, 18)
+        + _reference_epithelium()
+        + _micro_signal(_compartment(data, "endothelial"), colors, 322, 35, 174, 105, 22)
+        + _reference_vessel()
+        + _micro_signal(_compartment(data, "immune"), colors, 330, 166, 160, 126, 22)
+        + _reference_immune_cells()
+        + _reference_fibroblasts()
+        + '<text x="36" y="169" class="micro-label">organized epithelium</text>'
+        '<text x="345" y="55" class="micro-label">vessel</text>'
+        '<text x="358" y="190" class="micro-label">immune cells</text>'
+        '<text x="33" y="309" class="micro-label">stromal ECM</text>'
+        "</svg>"
+    )
+    note = _context_note(context, "Reference cell/spatial evidence", available)
+    return (
+        '<div class="tissue-context-card reference-context">'
+        '<div class="tissue-context-head"><strong>Normal / reference tissue</strong>'
+        '<span>reference-oriented sources</span></div>'
+        + scene
+        + note
+        + "</div>"
+    )
+
+
+def _render_tumor_tissue_panel(
+    context: dict[str, Any],
+    colors: dict[str, str],
+) -> str:
+    compartments = context.get("compartments")
+    data = compartments if isinstance(compartments, dict) else {}
+    available = bool(context.get("available"))
+    opacity = "1" if available else ".34"
+    scene = (
+        f'<svg class="context-tissue-scene tumor-scene" viewBox="0 0 520 330" role="img" '
+        f'aria-label="Tumor tissue microenvironment" opacity="{opacity}">'
+        '<rect x="7" y="7" width="506" height="316" rx="20" fill="#fffafb" '
+        'stroke="#eadfe3"/>'
+        + _micro_signal(_compartment(data, "fibroblast"), colors, 18, 20, 484, 292, 24)
+        + _tumor_ecm()
+        + _micro_signal(_compartment(data, "epithelial"), colors, 28, 102, 300, 193, 20)
+        + _tumor_nests()
+        + _micro_signal(_compartment(data, "endothelial"), colors, 330, 32, 170, 112, 20)
+        + _tumor_vessel()
+        + _micro_signal(_compartment(data, "immune"), colors, 320, 155, 177, 145, 22)
+        + _tumor_immune_cells()
+        + _tumor_fibroblasts()
+        + '<text x="40" y="122" class="micro-label">irregular tumor nests</text>'
+        '<text x="353" y="54" class="micro-label">abnormal vessel</text>'
+        '<text x="346" y="181" class="micro-label">immune infiltrate</text>'
+        '<text x="33" y="309" class="micro-label">desmoplastic stroma</text>'
+        "</svg>"
+    )
+    note = _context_note(context, "Tumor-resolved spatial evidence", available)
+    bulk = _bulk_paired_note(context.get("bulk_paired"))
+    if not available:
+        note += (
+            '<p class="context-unavailable">No tumor-resolved cell/spatial evidence '
+            "in this build. The morphology is a muted schematic placeholder.</p>"
+        )
+    return (
+        '<div class="tissue-context-card tumor-context">'
+        '<div class="tissue-context-head"><strong>Tumor tissue</strong>'
+        '<span>tumor-context evidence only</span></div>'
+        + scene
+        + note
+        + bulk
+        + "</div>"
+    )
+
+
+def _reference_ecm() -> str:
+    return "".join(
+        f'<path d="{path}" fill="none" stroke="{color}" stroke-width="2" '
+        'stroke-linecap="round" opacity=".62"/>'
+        for path, color in (
+            ("M18 72 C90 51 154 83 225 59 S385 46 501 78", "#dbcdb7"),
+            ("M16 108 C89 86 158 122 232 96 S395 83 503 113", "#ccb99d"),
+            ("M24 283 C111 258 181 296 265 272 S416 256 501 286", "#dbcdb7"),
+        )
+    )
+
+
+def _reference_epithelium() -> str:
+    cells = []
+    for x in range(50, 288, 34):
+        cells.append(
+            f'<path d="M{x - 14} 184 L{x + 14} 184 L{x + 12} 266 '
+            f'Q{x} 277 {x - 12} 266 Z" fill="#fff" stroke="#64748b"/>'
+            f'<ellipse cx="{x}" cy="230" rx="6" ry="9" fill="#cbd5e1" '
+            'stroke="#64748b" stroke-width=".7"/>'
+        )
+    return (
+        '<path d="M35 171 C104 157 211 158 296 173" fill="none" '
+        'stroke="#93c5fd" stroke-width="3"/>'
+        + "".join(cells)
+        + '<path d="M32 281 C112 288 216 288 302 280" fill="none" '
+        'stroke="#a78bfa" stroke-width="3"/>'
+    )
+
+
+def _reference_vessel() -> str:
+    return (
+        '<ellipse cx="410" cy="96" rx="74" ry="31" fill="#f8fbff" '
+        'stroke="#64748b" stroke-width="6"/>'
+        '<ellipse cx="410" cy="96" rx="55" ry="19" fill="#fff" stroke="#cbd5e1"/>'
+        '<ellipse cx="382" cy="94" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="419" cy="102" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="446" cy="90" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
+    )
+
+
+def _reference_immune_cells() -> str:
+    return "".join(
+        f'<g><circle cx="{x}" cy="{y}" r="11" fill="#fff" stroke="#64748b"/>'
+        f'<circle cx="{x}" cy="{y}" r="7" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        for x, y in ((363, 224), (423, 255), (468, 208))
+    )
+
+
+def _reference_fibroblasts() -> str:
+    return "".join(
+        (
+            f'<g transform="translate({x} {y}) rotate({angle})">'
+            '<path d="M-22 0 C-10 -7 -7 -13 0 -4 C7 -13 10 -7 22 0 '
+            'C10 7 7 13 0 4 C-7 13 -10 7 -22 0Z" fill="#fff" stroke="#6b7280"/>'
+            '<ellipse rx="5.5" ry="3.5" fill="#fed7aa" stroke="#ea580c"/></g>'
+        )
+        for x, y, angle in ((103, 91, -9), (267, 76, 13), (310, 292, -5))
+    )
+
+
+def _tumor_ecm() -> str:
+    return "".join(
+        f'<path d="{path}" fill="none" stroke="{color}" stroke-width="3" '
+        'stroke-linecap="round" opacity=".78"/>'
+        for path, color in (
+            ("M18 69 C81 23 159 96 224 50 S380 35 503 94", "#c9a982"),
+            ("M15 114 C87 63 160 144 232 91 S405 67 504 133", "#b9956d"),
+            ("M19 265 C97 214 177 302 264 242 S414 219 502 278", "#c9a982"),
+            ("M30 302 C111 261 207 323 301 281 S429 269 497 302", "#b9956d"),
+        )
+    )
+
+
+def _tumor_nests() -> str:
+    nests = []
+    nests_spec = (
+        (92, 183, 55, 43),
+        (198, 207, 67, 53),
+        (120, 266, 60, 38),
+        (253, 270, 48, 34),
+    )
+    for cx, cy, rx, ry in nests_spec:
+        nests.append(
+            f'<path d="M{cx-rx} {cy} C{cx-rx+8} {cy-ry} {cx-18} {cy-ry-8} '
+            f'{cx} {cy-ry} C{cx+33} {cy-ry-4} {cx+rx-6} {cy-22} {cx+rx} {cy} '
+            f'C{cx+rx-9} {cy+ry} {cx+22} {cy+ry+7} {cx} {cy+ry} '
+            f'C{cx-34} {cy+ry+3} {cx-rx+5} {cy+22} {cx-rx} {cy}Z" '
+            'fill="#fff" fill-opacity=".92" stroke="#7f1d1d" stroke-width="1.1"/>'
+        )
+        for dx, dy in ((-18, -9), (8, -12), (-5, 13), (22, 9)):
+            nests.append(
+                f'<ellipse cx="{cx+dx}" cy="{cy+dy}" rx="6" ry="8" '
+                'fill="#d8b4b4" stroke="#7f1d1d" stroke-width=".6"/>'
+            )
+    return "".join(nests)
+
+
+def _tumor_vessel() -> str:
+    return (
+        '<path d="M344 101 C361 55 405 50 432 76 C459 49 497 71 488 111 '
+        'C482 142 445 154 416 133 C384 153 350 137 344 101Z" '
+        'fill="#f8fbff" stroke="#64748b" stroke-width="6"/>'
+        '<path d="M365 104 C385 82 407 84 421 99 C440 81 466 94 467 113 '
+        'C447 126 386 128 365 104Z" fill="#fff" stroke="#cbd5e1"/>'
+        '<ellipse cx="398" cy="107" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="445" cy="112" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
+    )
+
+
+def _tumor_immune_cells() -> str:
+    lymphocytes = "".join(
+        f'<g><circle cx="{x}" cy="{y}" r="11" fill="#fff" stroke="#64748b"/>'
+        f'<circle cx="{x}" cy="{y}" r="7" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        for x, y in ((348, 212), (390, 254), (438, 216), (475, 263), (453, 298))
+    )
+    macrophage = (
+        '<path d="M352 282 C347 266 360 254 376 259 C392 254 405 269 400 285 '
+        'C404 301 390 312 376 307 C362 313 349 299 352 282Z" fill="#fff" '
+        'stroke="#64748b"/>'
+        '<path d="M365 280 C366 268 383 267 387 278 C391 290 380 297 371 293 '
+        'C366 291 364 286 365 280Z" fill="#c4b5fd" stroke="#7c3aed"/>'
+    )
+    return lymphocytes + macrophage
+
+
+def _tumor_fibroblasts() -> str:
+    return "".join(
+        (
+            f'<g transform="translate({x} {y}) rotate({angle})">'
+            '<path d="M-25 0 C-11 -8 -8 -15 0 -5 C8 -15 11 -8 25 0 '
+            'C11 8 8 15 0 5 C-8 15 -11 8 -25 0Z" fill="#fff" '
+            'stroke="#6b7280" stroke-width="1.2"/>'
+            '<ellipse rx="6" ry="4" fill="#fed7aa" stroke="#ea580c"/></g>'
+        )
+        for x, y, angle in ((82, 77, -17), (263, 77, 18), (320, 155, -8), (314, 294, 12))
+    )
+
+
+def _context_note(context: dict[str, Any], prefix: str, available: bool) -> str:
+    diseases = context.get("disease_labels")
+    labels = diseases if isinstance(diseases, list) else []
+    datasets = context.get("dataset_count")
+    count = int(datasets) if isinstance(datasets, int) else 0
+    if not available:
+        return f'<p class="note">{_e(prefix)}: unavailable.</p>'
+    suffix = f" · {count} spatial dataset(s)"
+    if labels:
+        suffix += " · " + ", ".join(str(label) for label in labels[:3])
+    return f'<p class="note">{_e(prefix + suffix)}</p>'
+
+
+def _bulk_paired_note(value: Any) -> str:
+    if not isinstance(value, list) or not value:
+        return ""
+    rows = [row for row in value if isinstance(row, dict)]
+    if not rows:
+        return ""
+    fragments = []
+    for row in rows[:3]:
+        paired = row.get("paired_case_count")
+        delta = row.get("median_tumor_minus_adjacent")
+        fraction = row.get("tumor_higher_fraction")
+        detail = f'{_e(row.get("study_id") or "PDC")} · {int(paired or 0)} paired cases'
+        if isinstance(delta, (int, float)):
+            detail += f" · median tumor-adjacent Δ {float(delta):.2g}"
+        if isinstance(fraction, (int, float)):
+            detail += f" · {100 * float(fraction):.0f}% tumor-higher"
+        fragments.append(f"<li>{detail}</li>")
+    return (
+        '<div class="bulk-tumor-note"><strong>Paired bulk tumor evidence</strong>'
+        '<ul>' + "".join(fragments) + "</ul>"
+        '<small>Bulk paired evidence is not mapped onto specific cell compartments.</small>'
+        "</div>"
+    )
 
 
 def render_subcellular(locations: Any) -> str:

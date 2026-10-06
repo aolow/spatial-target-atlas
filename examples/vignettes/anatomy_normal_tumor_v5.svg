@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="980" viewBox="0 0 1700 980">
+<style>
+text{font-family:system-ui,-apple-system,sans-serif;fill:#1f2937}
+.title{font-size:31px;font-weight:760}.sub{font-size:13px;fill:#64748b}
+.h2{font-size:18px;font-weight:720}.small{font-size:11px;fill:#64748b}
+.panel{fill:#fbfcfe;stroke:#d8dee4;stroke-width:1.4}
+.scene-label{font-size:10px;fill:#475569;paint-order:stroke;stroke:#fff;stroke-width:3px}
+.organ{fill:#eef2f7;stroke:#64748b;stroke-width:1.2}.ghost{opacity:.34}
+</style>
+<rect width="1700" height="980" fill="#fff"/>
+<text x="40" y="44" class="title">Spatial Target Atlas v5</text>
+<text x="40" y="69" class="sub">Illustrative design only. Detailed anatomy for orientation; normal/reference and tumor tissue are rendered separately.</text>
+
+<g transform="translate(28,94)">
+  <rect class="panel" x="0" y="0" width="690" height="840" rx="18"/>
+  <text x="24" y="38" class="h2">Detailed body orientation + reference tissue ring</text>
+  <text x="24" y="60" class="sub">Tumor-resolved spatial data no longer contributes to this whole-body reference view.</text>
+
+  <g transform="translate(85,95)">
+    <circle cx="260" cy="320" r="250" fill="none" stroke="#e5e7eb" stroke-width="22"/>
+    <circle cx="260" cy="320" r="222" fill="none" stroke="#f1f5f9" stroke-width="22"/>
+    <circle cx="260" cy="320" r="194" fill="none" stroke="#f8fafc" stroke-width="22"/>
+    <circle cx="260" cy="320" r="166" fill="none" stroke="#f8fafc" stroke-width="22"/>
+    <g transform="translate(145,74) scale(.72)">
+      <path d="M160 14 C142 14 127 25 121 42 C115 59 117 76 124 90 C128 98 134 104 141 109 L138 122 C123 126 109 132 98 140 C83 151 74 166 68 184 C60 208 57 235 52 262 L39 340 C36 358 39 373 49 377 C58 381 65 371 68 356 L84 290 L94 238 L98 311 C99 333 104 365 112 392 L108 519 C108 537 116 551 128 551 C139 551 143 538 145 521 L158 414 L160 369 L162 414 L175 521 C177 538 181 551 192 551 C204 551 212 537 212 519 L208 392 C216 365 221 333 222 311 L226 238 L236 290 L252 356 C255 371 262 381 271 377 C281 373 284 358 281 340 L268 262 C263 235 260 208 252 184 C246 166 237 151 222 140 C211 132 197 126 182 122 L179 109 C186 104 192 98 196 90 C203 76 205 59 199 42 C193 25 178 14 160 14Z" fill="#fbfcfe" stroke="#64748b" stroke-width="2.2"/>
+      <g fill="#dce8f2" stroke="#64748b" stroke-width="1">
+        <path d="M132 57 C132 41 143 30 158 30 C173 25 190 34 192 48 C204 55 202 72 192 78 C190 91 174 97 163 91 C151 99 134 91 134 79 C122 73 122 62 132 57Z"/>
+        <path d="M151 146 C135 148 120 160 116 177 L111 219 C111 238 125 246 143 237 C151 228 153 207 153 184 L153 153Z"/>
+        <path d="M169 146 C185 148 200 160 204 177 L209 219 C209 238 195 246 177 237 C169 228 167 207 167 184 L167 153Z"/>
+        <path d="M160 199 C147 184 127 191 129 208 C131 224 145 237 160 251 C175 237 189 224 191 208 C193 191 173 184 160 199Z" fill="#f2c7c7"/>
+        <path d="M150 240 C164 225 199 224 222 238 C229 246 222 262 207 268 C189 274 169 270 145 261 C137 255 140 247 150 240Z" fill="#eadcf5"/>
+        <path d="M127 287 C113 284 105 297 108 312 C111 327 124 334 134 325 C141 318 137 307 143 299 C139 292 134 289 127 287Z" fill="#f5e5a8"/>
+        <path d="M193 287 C207 284 215 297 212 312 C209 327 196 334 186 325 C179 318 183 307 177 299 C181 292 186 289 193 287Z" fill="#f5e5a8"/>
+        <path d="M124 318 C109 323 105 340 110 352 L110 383 C111 399 123 408 137 401 L183 401 C197 408 209 399 210 383 L210 352 C215 340 211 323 196 318 C187 315 179 321 178 331 L178 370 L142 370 L142 331 C141 321 133 315 124 318Z" fill="#ccebd2"/>
+      </g>
+      <g fill="none" stroke-linecap="round">
+        <path d="M160 112 L160 154 M160 151 L141 170 M160 151 L179 170 M141 170 L128 190 M179 170 L192 190" stroke="#94a3b8" stroke-width="3"/>
+        <path d="M169 185 C181 207 178 235 174 263 L172 340 C172 373 181 408 190 444" stroke="#ef6b6b" stroke-width="4"/>
+        <path d="M151 184 C142 207 145 235 148 263 L149 340 C148 373 139 408 130 444" stroke="#5b8def" stroke-width="4"/>
+        <path d="M143 129 C131 148 126 177 130 205 C134 235 137 263 142 292 M177 129 C189 148 194 177 190 205 C186 235 183 263 178 292" stroke="#7abf77" stroke-width="1.5"/>
+        <path d="M132 336 C149 326 170 326 188 337 C169 347 149 347 132 358 C151 368 171 368 188 379 C170 389 149 389 132 400" stroke="#9ca3af" stroke-width="1.5"/>
+        <path d="M110 244 Q160 258 210 244" stroke="#cbd5e1" stroke-width="2"/>
+      </g>
+      <g fill="#7abf77"><circle cx="136" cy="145" r="3"/><circle cx="127" cy="181" r="3"/><circle cx="184" cy="145" r="3"/><circle cx="193" cy="181" r="3"/><circle cx="142" cy="276" r="3"/><circle cx="178" cy="276" r="3"/></g>
+    </g>
+    <text x="260" y="615" text-anchor="middle" class="small">airway · vessels · lymphatics · organ scaffold</text>
+  </g>
+
+  <g transform="translate(42,730)">
+    <rect x="0" y="0" width="15" height="15" rx="3" fill="#00b7d8"/><text x="23" y="12" class="small">Human Protein Atlas protein</text>
+    <rect x="205" y="0" width="15" height="15" rx="3" fill="#d946ef"/><text x="228" y="12" class="small">ProteomicsDB protein</text>
+    <rect x="426" y="0" width="15" height="15" rx="3" fill="#facc15"/><text x="449" y="12" class="small">Spatial RNA</text>
+    <rect x="0" y="28" width="15" height="15" rx="3" fill="#111827"/><text x="23" y="40" class="small">HuBMAP spatial protein</text>
+    <text x="205" y="40" class="small">ring = normal / reference context only</text>
+  </g>
+</g>
+
+<g transform="translate(744,94)">
+  <rect class="panel" x="0" y="0" width="928" height="840" rx="18"/>
+  <text x="24" y="38" class="h2">Tissue context split</text>
+  <text x="24" y="60" class="sub">Reference biology and tumor biology are no longer overlaid into one synthetic tissue scene.</text>
+
+  <g transform="translate(24,88)">
+    <rect x="0" y="0" width="425" height="590" rx="16" fill="#fcfcfd" stroke="#d8dee4"/>
+    <text x="18" y="30" class="h2">Normal / reference tissue</text>
+    <text x="18" y="50" class="small">healthy/reference-oriented spatial sources</text>
+    <g transform="translate(14,72)">
+      <rect x="0" y="0" width="397" height="410" rx="15" fill="#fff" stroke="#e5e7eb"/>
+      <path d="M12 72 C82 48 144 83 211 57 S333 51 386 82" fill="none" stroke="#dbcdb7" stroke-width="3"/>
+      <path d="M14 115 C91 88 158 126 225 99 S341 92 387 122" fill="none" stroke="#ccb99d" stroke-width="3"/>
+      <rect x="18" y="184" width="220" height="180" rx="18" fill="#facc15" fill-opacity=".08"/>
+      <path d="M26 205 C82 190 161 192 228 207" fill="none" stroke="#93c5fd" stroke-width="3"/>
+      <path d="M35 220 L61 220 L59 329 Q48 340 37 329Z" fill="#fff" stroke="#64748b"/><ellipse cx="48" cy="278" rx="6" ry="9" fill="#cbd5e1"/><path d="M67 220 L93 220 L91 329 Q80 340 69 329Z" fill="#fff" stroke="#64748b"/><ellipse cx="80" cy="278" rx="6" ry="9" fill="#cbd5e1"/><path d="M99 220 L125 220 L123 329 Q112 340 101 329Z" fill="#fff" stroke="#64748b"/><ellipse cx="112" cy="278" rx="6" ry="9" fill="#cbd5e1"/><path d="M131 220 L157 220 L155 329 Q144 340 133 329Z" fill="#fff" stroke="#64748b"/><ellipse cx="144" cy="278" rx="6" ry="9" fill="#cbd5e1"/><path d="M163 220 L189 220 L187 329 Q176 340 165 329Z" fill="#fff" stroke="#64748b"/><ellipse cx="176" cy="278" rx="6" ry="9" fill="#cbd5e1"/><path d="M195 220 L221 220 L219 329 Q208 340 197 329Z" fill="#fff" stroke="#64748b"/><ellipse cx="208" cy="278" rx="6" ry="9" fill="#cbd5e1"/>
+      <path d="M26 344 C89 352 164 351 235 343" fill="none" stroke="#a78bfa" stroke-width="3"/>
+      <ellipse cx="310" cy="100" rx="69" ry="30" fill="#f8fbff" stroke="#64748b" stroke-width="6"/>
+      <ellipse cx="310" cy="100" rx="49" ry="18" fill="#fff" stroke="#cbd5e1"/>
+      <ellipse cx="288" cy="97" rx="9" ry="4" fill="#fecaca" stroke="#ef4444"/><ellipse cx="322" cy="105" rx="9" ry="4" fill="#fecaca" stroke="#ef4444"/>
+      <g fill="#fff" stroke="#64748b"><circle cx="276" cy="242" r="11"/><circle cx="333" cy="276" r="11"/><circle cx="366" cy="224" r="11"/></g>
+      <g fill="#bfdbfe" stroke="#2563eb"><circle cx="276" cy="242" r="7"/><circle cx="333" cy="276" r="7"/><circle cx="366" cy="224" r="7"/></g>
+      <text x="30" y="199" class="scene-label">organized epithelium</text><text x="267" y="64" class="scene-label">vessel</text><text x="290" y="218" class="scene-label">immune cells</text><text x="28" y="392" class="scene-label">stromal ECM</text>
+    </g>
+    <text x="18" y="518" class="small">HPA / HuBMAP / normal CELLxGENE remain on this side.</text>
+  </g>
+
+  <g transform="translate(475,88)">
+    <rect x="0" y="0" width="425" height="590" rx="16" fill="#fffafb" stroke="#eadfe3"/>
+    <text x="18" y="30" class="h2">Tumor tissue</text>
+    <text x="18" y="50" class="small">tumor-resolved spatial evidence only</text>
+    <g transform="translate(14,72)">
+      <rect x="0" y="0" width="397" height="410" rx="15" fill="#fff" stroke="#eadfe3"/>
+      <path d="M12 73 C72 25 141 101 210 55 S327 39 385 96" fill="none" stroke="#c9a982" stroke-width="4"/>
+      <path d="M12 126 C79 71 145 153 216 95 S337 75 387 137" fill="none" stroke="#b9956d" stroke-width="4"/>
+      <g fill="#fff" fill-opacity=".94" stroke="#7f1d1d">
+        <path d="M33 182 C43 140 92 133 121 164 C153 137 195 157 194 196 C183 229 144 239 112 219 C74 239 40 222 33 182Z"/>
+        <path d="M77 278 C87 234 139 229 170 258 C199 237 237 254 240 288 C226 324 185 329 153 309 C119 329 85 316 77 278Z"/>
+      </g>
+      <g fill="#d8b4b4" stroke="#7f1d1d"><ellipse cx="77" cy="184" rx="7" ry="9"/><ellipse cx="118" cy="194" rx="7" ry="9"/><ellipse cx="157" cy="180" rx="7" ry="9"/><ellipse cx="126" cy="282" rx="7" ry="9"/><ellipse cx="172" cy="288" rx="7" ry="9"/></g>
+      <path d="M261 104 C275 60 311 58 333 80 C357 55 388 74 381 112 C371 141 337 147 315 129 C288 149 264 135 261 104Z" fill="#f8fbff" stroke="#64748b" stroke-width="6"/>
+      <path d="M278 106 C294 86 313 88 325 100 C342 84 363 95 363 112 C345 125 297 125 278 106Z" fill="#fff" stroke="#cbd5e1"/>
+      <g fill="#fff" stroke="#64748b"><circle cx="271" cy="237" r="11"/><circle cx="316" cy="286" r="11"/><circle cx="360" cy="242" r="11"/><circle cx="366" cy="326" r="11"/></g>
+      <g fill="#bfdbfe" stroke="#2563eb"><circle cx="271" cy="237" r="7"/><circle cx="316" cy="286" r="7"/><circle cx="360" cy="242" r="7"/><circle cx="366" cy="326" r="7"/></g>
+      <text x="35" y="152" class="scene-label">irregular tumor nests</text><text x="280" y="61" class="scene-label">abnormal vessel</text><text x="280" y="213" class="scene-label">immune infiltrate</text><text x="26" y="392" class="scene-label">desmoplastic stroma</text>
+    </g>
+    <rect x="18" y="518" width="389" height="49" rx="8" fill="#fff1f2" stroke="#fecdd3"/>
+    <text x="30" y="538" class="small" font-weight="700">Paired bulk tumor evidence stays separate</text>
+    <text x="30" y="555" class="small">not assigned to epithelial / stroma / immune compartments</text>
+  </g>
+
+  <g transform="translate(24,713)">
+    <text x="0" y="0" class="h2">Subcellular view remains a third scale</text>
+    <circle cx="80" cy="67" r="54" fill="#f8fafc" stroke="#d1d5db" stroke-dasharray="5 5"/>
+    <circle cx="80" cy="67" r="40" fill="#dbeafe" stroke="#2563eb" stroke-width="5"/>
+    <circle cx="80" cy="67" r="17" fill="#ddd6fe" stroke="#7c3aed"/>
+    <text x="151" y="54" class="small">body / tissue / cell compartment / subcellular</text>
+    <text x="151" y="74" class="small">kept conceptually separate rather than collapsed into one view</text>
+  </g>
+</g>
+</svg>
