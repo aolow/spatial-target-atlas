@@ -6,7 +6,15 @@ import html
 import json
 from collections import defaultdict
 from pathlib import Path
+from statistics import median
 from typing import Any
+
+from .anatomy import (
+    render_body,
+    render_cell_contexts,
+    render_small_multiples,
+    render_subcellular,
+)
 
 CHANNELS = {
     "C": {
@@ -155,6 +163,29 @@ def _target_payload(
     target_evidence = [row for row in evidence if row.get("gene_symbol") == target]
     target_cells = [row for row in cell_summary if row.get("gene_symbol") == target]
     target_census = [row for row in census if row.get("gene_symbol") == target]
+    hpa_strengths = _relative_region_strength(
+        target_evidence,
+        source="Human Protein Atlas",
+        scale="tissue",
+        modality="mass_spectrometry",
+    )
+    pdb_strengths = _relative_region_strength(
+        target_evidence,
+        source="ProteomicsDB",
+        scale="tissue",
+        modality="mass_spectrometry",
+    )
+    rna_strengths = _fraction_region_strength(
+        target_census,
+        numerator="positive_spot_count",
+        denominator="spot_count",
+    )
+    protein_strengths = _fraction_region_strength(
+        target_cells,
+        numerator="positive_cell_count",
+        denominator="cell_count",
+        fallback_fraction="positive_cell_fraction",
+    )
     regions = []
     for region in BODY_REGIONS:
         channels = {
@@ -168,6 +199,12 @@ def _target_payload(
                 {
                     "region": region,
                     "channels": channels,
+                    "strengths": {
+                        "C": hpa_strengths.get(region),
+                        "M": pdb_strengths.get(region),
+                        "Y": rna_strengths.get(region),
+                        "K": protein_strengths.get(region),
+                    },
                     "fill": overlay_color(channels),
                     "k_outline": channels["K"] == "positive",
                     "evidence_count": _region_evidence_count(
@@ -240,21 +277,24 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         for item in target_payload.get("regions", [])
         if isinstance(item, dict)
     }
-    body = _body_svg(region_map)
+    colors = {key: str(value["color"]) for key, value in CHANNELS.items()}
+    composite = render_body(region_map, colors)
+    small_multiples = render_small_multiples(region_map, colors)
     legend = _legend_html()
     organ_cards = _organ_cards(region_map)
-    cells = _cell_type_html(target_payload.get("cell_types", []))
-    subcellular = _subcellular_html(target_payload.get("subcellular", []))
+    cells = render_cell_contexts(target_payload.get("cell_types", []), colors)
+    subcellular = render_subcellular(target_payload.get("subcellular", []))
     datasets = _dataset_views_html(target_payload.get("dataset_views", {}))
     disease = _disease_html(target_payload.get("disease_context", []))
     return (
-        f'<div class="spatial-vignette"><div class="spatial-head">'
-        f"<div><h3>{target} spatial view</h3>"
-        '<p class="note">Cross-source colors indicate categorical support only. '
-        "K is a dark outline for spatial-protein support.</p></div>"
+        f'<div class="spatial-vignette spatial-v2"><div class="spatial-head">'
+        f"<div><h3>{target} spatial atlas</h3>"
+        '<p class="note">Hue identifies source. Opacity encodes strength only within '
+        "that source. Composite layers use multiply blending.</p></div>"
         f"{legend}</div>"
-        f'<div class="spatial-grid"><div class="body-panel">{body}{disease}</div>'
-        f'<div class="organ-panel"><h4>Organs & tissues</h4>{organ_cards}</div></div>'
+        f'<div class="spatial-grid"><div class="body-panel">{composite}{disease}</div>'
+        f'<div class="organ-panel"><h4>Source-separated views</h4>{small_multiples}'
+        f'<h4>Organs & tissues</h4>{organ_cards}</div></div>'
         f'<div class="lower-grid"><div><h4>Cell contexts</h4>{cells}</div>'
         f'<div><h4>Subcellular localization</h4>{subcellular}</div></div>'
         f"{datasets}</div>"
@@ -396,14 +436,130 @@ def _cell_type_overlay(
                 else ("negative" if spatial_protein else "unknown")
             ),
         }
+        hpa_values = [
+            float(row["value"])
+            for row in hpa
+            if isinstance(row.get("value"), (int, float))
+            and float(row["value"]) > 0
+        ]
+        hpa_strength = median(hpa_values) if hpa_values else None
+        y_strength = _weighted_fraction(
+            spatial_rna,
+            numerator="positive_spot_count",
+            denominator="spot_count",
+            fallback_fraction="positive_spot_fraction",
+        )
+        k_strength = _weighted_fraction(
+            spatial_protein,
+            numerator="positive_cell_count",
+            denominator="cell_count",
+            fallback_fraction="positive_cell_fraction",
+        )
         if any(state != "unknown" for state in channels.values()):
             output.append({
                 "cell_type": name,
                 "channels": channels,
+                "strengths": {
+                    "C": hpa_strength,
+                    "M": None,
+                    "Y": y_strength,
+                    "K": k_strength,
+                },
                 "fill": overlay_color(channels),
                 "k_outline": channels["K"] == "positive",
             })
     return output[:24]
+
+
+def _relative_region_strength(
+    rows: list[dict[str, Any]],
+    *,
+    source: str,
+    scale: str,
+    modality: str,
+) -> dict[str, float]:
+    grouped: dict[str, list[float]] = defaultdict(list)
+    for row in rows:
+        if (
+            row.get("source") != source
+            or row.get("spatial_scale") != scale
+            or row.get("modality") != modality
+        ):
+            continue
+        region = canonical_region(row.get("tissue") or row.get("organ"))
+        value = row.get("value")
+        if region is None or not isinstance(value, (int, float)) or float(value) <= 0:
+            continue
+        grouped[region].append(float(value))
+
+    medians = {region: median(values) for region, values in grouped.items()}
+    if not medians:
+        return {}
+    low = min(medians.values())
+    high = max(medians.values())
+    if high <= low:
+        return {region: 1.0 for region in medians}
+    return {
+        region: 0.25 + 0.75 * ((value - low) / (high - low))
+        for region, value in medians.items()
+    }
+
+
+def _fraction_region_strength(
+    rows: list[dict[str, Any]],
+    *,
+    numerator: str,
+    denominator: str,
+    fallback_fraction: str | None = None,
+) -> dict[str, float]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        region = canonical_region(row.get("tissue") or row.get("organ"))
+        if region is not None:
+            grouped[region].append(row)
+    output: dict[str, float] = {}
+    for region, subset in grouped.items():
+        value = _weighted_fraction(
+            subset,
+            numerator=numerator,
+            denominator=denominator,
+            fallback_fraction=fallback_fraction,
+        )
+        if value is not None:
+            output[region] = value
+    return output
+
+
+def _weighted_fraction(
+    rows: list[dict[str, Any]],
+    *,
+    numerator: str,
+    denominator: str,
+    fallback_fraction: str | None = None,
+) -> float | None:
+    numerator_total = 0.0
+    denominator_total = 0.0
+    weighted_fraction = 0.0
+    weight_total = 0.0
+    for row in rows:
+        num = row.get(numerator)
+        den = row.get(denominator)
+        if isinstance(num, (int, float)) and isinstance(den, (int, float)) and float(den) > 0:
+            numerator_total += float(num)
+            denominator_total += float(den)
+            continue
+        if fallback_fraction is not None:
+            fraction = row.get(fallback_fraction)
+            weight = row.get(denominator)
+            if isinstance(fraction, (int, float)):
+                numeric_weight = float(weight) if isinstance(weight, (int, float)) and float(weight) > 0 else 1.0
+                weighted_fraction += float(fraction) * numeric_weight
+                weight_total += numeric_weight
+    if denominator_total > 0:
+        return max(0.0, min(1.0, numerator_total / denominator_total))
+    if weight_total > 0:
+        return max(0.0, min(1.0, weighted_fraction / weight_total))
+    return None
 
 
 def _subcellular_locations(evidence: list[dict[str, Any]]) -> list[str]:
