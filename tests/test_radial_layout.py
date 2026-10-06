@@ -1,7 +1,7 @@
 from spatial_target_atlas.radial_layout import (
+    TISSUE_ORDER,
     annular_sector_path,
     render_radial_tracks,
-    TISSUE_ORDER,
 )
 
 
