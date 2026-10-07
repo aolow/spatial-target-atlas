@@ -216,6 +216,45 @@ def test_radial_atlas_uses_professional_anatomy_when_inlined() -> None:
     assert "Lung" in rendered
 
 
+def test_professional_anatomy_maps_expression_to_initial_organs() -> None:
+    regions = {
+        "brain": {
+            "channels": {"C": "positive", "M": "unknown", "Y": "unknown", "K": "unknown"},
+            "strengths": {"C": 0.9, "M": None, "Y": None, "K": None},
+        },
+        "lung": {
+            "channels": {"C": "unknown", "M": "positive", "Y": "unknown", "K": "unknown"},
+            "strengths": {"C": None, "M": 0.7, "Y": None, "K": None},
+        },
+        "liver": {
+            "channels": {"C": "unknown", "M": "unknown", "Y": "positive", "K": "unknown"},
+            "strengths": {"C": None, "M": None, "Y": 0.5, "K": None},
+        },
+        "kidney": {
+            "channels": {"C": "unknown", "M": "unknown", "Y": "unknown", "K": "positive"},
+            "strengths": {"C": None, "M": None, "Y": None, "K": 0.8},
+        },
+    }
+
+    rendered = render_radial_atlas(
+        regions,
+        [],
+        COLORS,
+        anatomy_data_uri="data:image/svg+xml;base64,PHN2Zy8+",
+    )
+
+    assert "dbcls-expression-overlay" in rendered
+    assert "anatomy-expression-brain" in rendered
+    assert "anatomy-expression-lung" in rendered
+    assert "anatomy-expression-liver" in rendered
+    assert "anatomy-expression-kidney" in rendered
+    assert 'fill="#00b7d8"' in rendered
+    assert 'fill="#d946ef"' in rendered
+    assert 'fill="#facc15"' in rendered
+    assert 'stroke="#111827"' in rendered
+    assert "expression overlay" in rendered
+
+
 def test_fetch_default_anatomy_returns_data_uri(monkeypatch) -> None:  # noqa: ANN001
     class FakeResponse:
         content = b"<svg viewBox='0 0 600 1000'></svg>"
