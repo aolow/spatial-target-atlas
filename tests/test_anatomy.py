@@ -255,25 +255,16 @@ def test_professional_anatomy_maps_expression_to_initial_organs() -> None:
     assert "expression overlay" in rendered
 
 
-def test_fetch_default_anatomy_returns_data_uri(monkeypatch) -> None:  # noqa: ANN001
-    class FakeResponse:
-        content = b"<svg viewBox='0 0 600 1000'></svg>"
-        headers = {"content-type": "image/svg+xml"}
+def test_fetch_default_anatomy_returns_bundled_data_uri(monkeypatch) -> None:  # noqa: ANN001
+    def fail_if_network_requested(_name: str):  # noqa: ANN202
+        raise AssertionError("bundled DBCLS anatomy should avoid network access")
 
-        def raise_for_status(self) -> None:
-            return None
-
-    class FakeHttpx:
-        @staticmethod
-        def get(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
-            return FakeResponse()
-
-    monkeypatch.setattr(anatomy_module, "import_module", lambda _name: FakeHttpx)
+    monkeypatch.setattr(anatomy_module, "import_module", fail_if_network_requested)
 
     uri = fetch_default_anatomy_data_uri()
 
     assert uri.startswith("data:image/svg+xml;base64,")
-    assert "PHN2ZyB2aWV3Qm94" in uri
+    assert len(uri) > 100_000
 
 
 def test_normal_and_tumor_tissue_contexts_are_rendered_separately() -> None:
