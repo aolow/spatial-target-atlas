@@ -9,6 +9,7 @@ from __future__ import annotations
 import base64
 import html
 from importlib import import_module
+from importlib.resources import files
 from typing import Any
 
 from .anatomy_overlay import render_dbcls_expression_overlay
@@ -233,17 +234,32 @@ DEFAULT_ANATOMY_ATTRIBUTION = (
 
 
 def fetch_default_anatomy_data_uri(timeout_seconds: float = 15.0) -> str:
-    """Fetch and inline the professional anatomy illustration for offline HTML output."""
-    httpx = import_module("httpx")
-    response = httpx.get(
-        DEFAULT_ANATOMY_ASSET_URL,
-        timeout=timeout_seconds,
-        follow_redirects=True,
-        headers={"User-Agent": "spatial-target-atlas/0.9.2"},
-    )
-    response.raise_for_status()
-    content_type = str(response.headers.get("content-type") or "image/svg+xml").split(";")[0]
-    encoded = base64.b64encode(response.content).decode("ascii")
+    """Load the bundled DBCLS anatomy and inline it into self-contained HTML.
+
+    The atlas vendors the DBCLS SVG so normal rendering never depends on
+    Wikimedia availability. A network fetch is retained only as a compatibility
+    fallback for unusual package installations where the bundled asset is absent.
+    """
+    try:
+        content = (
+            files("spatial_target_atlas")
+            .joinpath("assets", "dbcls_human_anatomy_organs.svg")
+            .read_bytes()
+        )
+        content_type = "image/svg+xml"
+    except (FileNotFoundError, OSError):
+        httpx = import_module("httpx")
+        response = httpx.get(
+            DEFAULT_ANATOMY_ASSET_URL,
+            timeout=timeout_seconds,
+            follow_redirects=True,
+            headers={"User-Agent": "spatial-target-atlas/0.9.2"},
+        )
+        response.raise_for_status()
+        content = response.content
+        content_type = str(response.headers.get("content-type") or "image/svg+xml").split(";")[0]
+
+    encoded = base64.b64encode(content).decode("ascii")
     return f"data:{content_type};base64,{encoded}"
 
 
