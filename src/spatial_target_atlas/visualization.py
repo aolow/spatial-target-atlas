@@ -461,6 +461,10 @@ section { scroll-margin-top: 16px; }
 .radial-panel { margin-top:18px; background:white; border:1px solid #e5e7eb;
   border-radius:16px; padding:12px 14px 16px; }
 .radial-atlas { display:block; width:100%; max-width:980px; margin:0 auto; overflow:visible; }
+.professional-anatomy { opacity:.99; }
+.anatomy-credit { margin:8px auto 0; max-width:880px; color:#64748b; font-size:10px;
+  text-align:center; }
+.anatomy-credit a { color:#475569; }
 .radial-label { font:11px system-ui,sans-serif; fill:#334155; }
 .radial-center-label { font:10px system-ui,sans-serif; fill:#94a3b8; letter-spacing:.04em; }
 .radial-track { transition:opacity .15s ease; }
