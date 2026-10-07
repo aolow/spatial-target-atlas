@@ -217,9 +217,8 @@ SOURCE_LABELS = {
 
 
 DEFAULT_ANATOMY_ASSET_URL = (
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/"
-    "202403_human_anatomy_organs.svg/"
-    "960px-202403_human_anatomy_organs.svg.png"
+    "https://upload.wikimedia.org/wikipedia/commons/0/00/"
+    "202403_human_anatomy_organs.svg"
 )
 DEFAULT_ANATOMY_SOURCE_URL = (
     "https://commons.wikimedia.org/wiki/File:202403_human_anatomy_organs.svg"
@@ -227,8 +226,11 @@ DEFAULT_ANATOMY_SOURCE_URL = (
 DEFAULT_ANATOMY_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
 DEFAULT_ANATOMY_ATTRIBUTION = (
     "Human anatomy organs by DataBase Center for Life Science (DBCLS), "
-    "CC BY 4.0; adapted here as the central orientation illustration."
+    "CC BY 4.0. Used as the central orientation illustration; "
+    "Spatial Target Atlas adds surrounding evidence tracks."
 )
+DEFAULT_ANATOMY_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
+
 
 
 def fetch_default_anatomy_data_uri(timeout_seconds: float = 15.0) -> str:
