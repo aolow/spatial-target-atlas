@@ -1,0 +1,66 @@
+name: Vendor DBCLS anatomy vignette
+
+on:
+  push:
+    branches:
+      - fix/embed-anatomy-vignette
+    paths:
+      - ".github/workflows/vendor-dbcls-anatomy.yml"
+      - "examples/vignettes/professional_anatomy_v6.svg"
+
+permissions:
+  contents: write
+
+jobs:
+  vendor:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/embed-anatomy-vignette
+      - name: Download DBCLS anatomy SVG
+        run: |
+          curl -L --fail --retry 3 \
+            "https://upload.wikimedia.org/wikipedia/commons/0/00/202403_human_anatomy_organs.svg" \
+            -o /tmp/dbcls.svg
+      - name: Inline DBCLS SVG into vignette
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+          import re
+
+          path = Path("examples/vignettes/professional_anatomy_v6.svg")
+          text = path.read_text()
+          svg = Path("/tmp/dbcls.svg").read_bytes()
+          data = "data:image/svg+xml;base64," + base64.b64encode(svg).decode("ascii")
+          replacement = (
+              "<!-- DBCLS_ANATOMY_START -->\n"
+              f'<image href="{data}" x="535" y="430" width="330" height="550" '
+              'preserveAspectRatio="xMidYMid meet" '
+              'aria-label="DBCLS Human anatomy organs"/>\n'
+              "<!-- DBCLS_ANATOMY_END -->"
+          )
+          text, n = re.subn(
+              r"<!-- DBCLS_ANATOMY_START -->.*?<!-- DBCLS_ANATOMY_END -->",
+              replacement,
+              text,
+              count=1,
+              flags=re.S,
+          )
+          if n != 1:
+              raise SystemExit("DBCLS anatomy slot not found")
+          path.write_text(text)
+          PY
+      - name: Commit vendored vignette
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add examples/vignettes/professional_anatomy_v6.svg
+          if git diff --cached --quiet; then
+            echo "No change"
+            exit 0
+          fi
+          git commit -m "Vendor DBCLS anatomy into review vignette"
+          git push
