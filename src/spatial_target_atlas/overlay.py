@@ -386,7 +386,10 @@ def overlay_color(channels: dict[str, str]) -> str:
     }[key]
 
 
-def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
+def render_spatial_vignette(
+    target_payload: dict[str, Any],
+    anatomy_data_uri: str | None = None,
+) -> str:
     target = _e(target_payload.get("gene_symbol") or "target")
     region_map = {
         str(item.get("region")): item
@@ -403,7 +406,12 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         raw_microenvironments if isinstance(raw_microenvironments, dict) else {}
     )
     colors = {key: str(value["color"]) for key, value in CHANNELS.items()}
-    radial = render_radial_atlas(region_map, radial_tissues, colors)
+    radial = render_radial_atlas(
+        region_map,
+        radial_tissues,
+        colors,
+        anatomy_data_uri=anatomy_data_uri,
+    )
     tissue = render_tissue_comparison(microenvironments, colors)
     legend = _legend_html()
     subcellular = render_subcellular(target_payload.get("subcellular", []))
@@ -424,9 +432,12 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
     )
 
 
-def render_overlay_gallery(payload: dict[str, Any]) -> str:
+def render_overlay_gallery(
+    payload: dict[str, Any],
+    anatomy_data_uri: str | None = None,
+) -> str:
     return "".join(
-        render_spatial_vignette(target)
+        render_spatial_vignette(target, anatomy_data_uri=anatomy_data_uri)
         for target in payload.get("targets", [])
         if isinstance(target, dict)
     )
