@@ -153,7 +153,10 @@ def test_radial_atlas_places_body_inside_tissue_tracks() -> None:
     assert "radial-tissue-tracks" in rendered
     assert "radial-center-body" in rendered
     assert "Radial body and tissue evidence atlas" in rendered
+    assert "Brain" in rendered
     assert "Lung" in rendered
+    assert "Kidney" in rendered
+    assert "Large intestine" in rendered
 
 
 def test_integrated_microenvironment_contains_all_major_compartments() -> None:
@@ -204,19 +207,19 @@ def test_radial_atlas_uses_professional_anatomy_when_inlined() -> None:
         {},
         [{"tissue": "lung", "tracks": {}}],
         COLORS,
-        anatomy_data_uri="data:image/png;base64,AAAA",
+        anatomy_data_uri="data:image/svg+xml;base64,PHN2Zy8+",
     )
 
     assert "professional-anatomy" in rendered
-    assert 'href="data:image/png;base64,AAAA"' in rendered
+    assert 'href="data:image/svg+xml;base64,PHN2Zy8+"' in rendered
     assert "radial-center-body" not in rendered
     assert "Lung" in rendered
 
 
 def test_fetch_default_anatomy_returns_data_uri(monkeypatch) -> None:  # noqa: ANN001
     class FakeResponse:
-        content = b"png-bytes"
-        headers = {"content-type": "image/png"}
+        content = b"<svg viewBox='0 0 600 1000'></svg>"
+        headers = {"content-type": "image/svg+xml"}
 
         def raise_for_status(self) -> None:
             return None
@@ -230,8 +233,8 @@ def test_fetch_default_anatomy_returns_data_uri(monkeypatch) -> None:  # noqa: A
 
     uri = fetch_default_anatomy_data_uri()
 
-    assert uri.startswith("data:image/png;base64,")
-    assert "cG5nLWJ5dGVz" in uri
+    assert uri.startswith("data:image/svg+xml;base64,")
+    assert "PHN2ZyB2aWV3Qm94" in uri
 
 
 def test_normal_and_tumor_tissue_contexts_are_rendered_separately() -> None:
