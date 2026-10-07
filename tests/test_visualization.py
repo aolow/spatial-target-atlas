@@ -117,3 +117,25 @@ def test_render_escapes_untrusted_labels(tmp_path) -> None:
 
     assert "<script>alert(1)</script>" not in rendered
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in rendered
+
+
+def test_render_atlas_html_inlines_professional_anatomy_and_attribution(tmp_path) -> None:
+    core = tmp_path / "core"
+    core.mkdir()
+    write_json(core / "target_identities.json", [{"gene_symbol": "EPCAM"}])
+    write_json(core / "evidence.json", [])
+    write_json(core / "concordance.json", [])
+    write_json(core / "cross_source_concordance.json", [])
+    write_json(core / "paired_tumor_normal.json", [])
+    write_json(core / "spatial_target_coverage.json", [])
+
+    rendered = render_atlas_html(
+        core,
+        anatomy_data_uri="data:image/svg+xml;base64,PHN2Zy8+",
+    )
+
+    assert "professional-anatomy" in rendered
+    assert "DataBase Center for Life Science" in rendered
+    assert "CC BY 4.0" in rendered
+    assert "creativecommons.org/licenses/by/4.0" in rendered
+    assert "Brain" in rendered
