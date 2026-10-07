@@ -158,7 +158,7 @@ The four visual layers are Human Protein Atlas tissue protein, ProteomicsDB tiss
 
 The radial ring carries four concentric source tracks per tissue and is intentionally reference-oriented. Tumor-labeled spatial RNA is excluded from the body/radial reference view and appears only in the tumor panel. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Unknown, measured-negative, and positive states remain distinct.
 
-By default, `render-atlas` fetches a professional DBCLS human-anatomy illustration, inlines it into the generated HTML, and keeps the finished report self-contained. The illustration is orientation-only; all quantitative tissue evidence still lives in the radial tracks. If the asset cannot be fetched, the renderer falls back automatically to the earlier v4 schematic body. Use `--schematic-anatomy` to force the fallback.
+By default, `render-atlas` fetches the original professional DBCLS human-anatomy SVG, inlines it into the generated HTML, and keeps the finished report self-contained. The illustration is orientation-only; all quantitative tissue evidence still lives in the radial tracks. If the asset cannot be fetched, the renderer falls back automatically to the earlier v4 schematic body. Use `--schematic-anatomy` to force the fallback.
 
 Build the inspectable overlay payload directly:
 
@@ -172,7 +172,7 @@ spatial-target-atlas build-overlay \
 
 When quantitative values are available, the HTML atlas also shows separate dataset cards with intensity bars normalized **within that dataset only**. Raw/source-scale values remain visible beside the bars.
 
-The visual layer uses repo-owned SVG anatomy masks, a radial tissue layout, side-by-side normal/reference and tumor tissue scenes, and a subcellular cell schematic. Each tissue scene contains epithelial, stromal/ECM, endothelial/vascular, and immune compartments. Reference HPA/HuBMAP and source-labeled normal CELLxGENE evidence stay on the normal/reference side. Tumor-labeled CELLxGENE evidence is rendered only on the tumor side. PDC paired tumor-versus-adjacent proteomics appears as a separate bulk annotation and is never painted onto individual compartments. These are visualization masks, not diagnostic anatomy.
+The visual layer uses a professional DBCLS anatomy illustration at the center of the radial tissue layout, with repo-owned SVG fallback anatomy, side-by-side normal/reference and tumor tissue scenes, and a subcellular cell schematic. Each tissue scene contains epithelial, stromal/ECM, endothelial/vascular, and immune compartments. Reference HPA/HuBMAP and source-labeled normal CELLxGENE evidence stay on the normal/reference side. Tumor-labeled CELLxGENE evidence is rendered only on the tumor side. PDC paired tumor-versus-adjacent proteomics appears as a separate bulk annotation and is never painted onto individual compartments. These are visualization masks, not diagnostic anatomy.
 
 See [examples/vignettes/README.md](examples/vignettes/README.md) for checked-in visual design examples, including the current detailed anatomy + normal/tumor v5 hierarchy.
 
@@ -187,9 +187,15 @@ spatial-target-atlas render-atlas \
   --spatial-census outputs/luad-census-spatial \
   --reference-audit outputs/luad-reference-audit.json \
   -o outputs/luad-atlas.html
+
+# Fully offline rendering with the built-in v4 body schematic
+spatial-target-atlas render-atlas \
+  --core outputs/luad \
+  --schematic-anatomy \
+  -o outputs/luad-atlas.html
 ```
 
-Only `--core` is required. The report adds optional HuBMAP cell, CELLxGENE, and reference-audit sections when those outputs are supplied. It has no external JavaScript, CSS, or network dependency and does not combine source-specific intensity scales.
+Only `--core` is required. The report adds optional HuBMAP cell, CELLxGENE, and reference-audit sections when those outputs are supplied. By default, the render step attempts one network fetch for the DBCLS anatomy SVG and then embeds it; use `--schematic-anatomy` for a fully offline render. The generated HTML itself has no external JavaScript, CSS, image, or network dependency and does not combine source-specific intensity scales.
 
 ## Design principles
 
