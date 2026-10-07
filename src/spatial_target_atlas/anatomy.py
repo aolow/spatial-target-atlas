@@ -11,6 +11,7 @@ import html
 from importlib import import_module
 from typing import Any
 
+from .anatomy_overlay import render_dbcls_expression_overlay
 from .radial_layout import render_radial_tracks
 
 BODY_VIEWBOX = "0 0 320 560"
@@ -560,14 +561,29 @@ def render_radial_atlas(
         render_radial_tracks(radial_tissues, colors),
     ]
     if anatomy_data_uri is not None:
+        anatomy_x = 340.0
+        anatomy_y = 205.0
+        anatomy_width = 320.0
+        anatomy_height = 533.0
         parts.append(
             f'<image class="professional-anatomy" href="{_e(anatomy_data_uri)}" '
-            'x="340" y="205" width="320" height="533" '
+            f'x="{anatomy_x:.0f}" y="{anatomy_y:.0f}" '
+            f'width="{anatomy_width:.0f}" height="{anatomy_height:.0f}" '
             'preserveAspectRatio="xMidYMid meet"/>'
         )
         parts.append(
+            render_dbcls_expression_overlay(
+                regions,
+                colors,
+                x=anatomy_x,
+                y=anatomy_y,
+                width=anatomy_width,
+                height=anatomy_height,
+            )
+        )
+        parts.append(
             '<text x="500" y="765" text-anchor="middle" class="radial-center-label">'
-            "professional anatomy orientation</text>"
+            "professional anatomy orientation + expression overlay</text>"
         )
     else:
         parts.extend([
