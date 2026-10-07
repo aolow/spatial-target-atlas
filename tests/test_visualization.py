@@ -82,7 +82,7 @@ def test_render_atlas_html_combines_core_and_optional_outputs(tmp_path) -> None:
         census,
         audit,
         model_evidence,
-        anatomy_data_uri="data:image/png;base64,AAAA",
+        anatomy_data_uri="data:image/svg+xml;base64,PHN2Zy8+",
     )
 
     assert "<h2>EPCAM</h2>" in rendered
