@@ -1,6 +1,10 @@
 import spatial_target_atlas.anatomy as anatomy_module
+import base64
+
+from spatial_target_atlas import anatomy
 from spatial_target_atlas.anatomy import (
     cell_category,
+    fetch_default_anatomy_data_uri,
     fetch_default_anatomy_data_uri,
     render_body,
     render_cell_contexts,
@@ -296,3 +300,51 @@ def test_tumor_panel_marks_missing_tumor_resolved_data() -> None:
     )
 
     assert "No tumor-resolved cell/spatial evidence in this build" in rendered
+
+
+def test_professional_anatomy_preserves_radial_categories() -> None:
+    rendered = render_radial_atlas(
+        {},
+        [],
+        COLORS,
+        anatomy_data_uri="data:image/svg+xml;base64,PHN2Zy8+",
+    )
+
+    assert "professional-anatomy" in rendered
+    assert "data:image/svg+xml;base64,PHN2Zy8+" in rendered
+    assert "Brain" in rendered
+    assert "Lung" in rendered
+    assert "Kidney" in rendered
+    assert "Large intestine" in rendered
+    assert "radial-center-body" not in rendered
+
+
+def test_radial_atlas_falls_back_to_v4_schematic() -> None:
+    rendered = render_radial_atlas({}, [], COLORS)
+
+    assert "radial-center-body" in rendered
+    assert "professional-anatomy" not in rendered
+    assert "M160 18" in rendered
+    assert "M160 14" not in rendered
+
+
+def test_fetch_default_anatomy_data_uri_inlines_vector(monkeypatch) -> None:  # noqa: ANN001
+    class FakeResponse:
+        content = b"<svg viewBox='0 0 600 1000'></svg>"
+        headers = {"content-type": "image/svg+xml; charset=utf-8"}
+
+        def raise_for_status(self) -> None:
+            return None
+
+    class FakeHttpx:
+        @staticmethod
+        def get(*args, **kwargs):  # noqa: ANN002, ANN003, ANN201
+            return FakeResponse()
+
+    monkeypatch.setattr(anatomy, "import_module", lambda name: FakeHttpx)
+
+    uri = fetch_default_anatomy_data_uri()
+
+    assert uri.startswith("data:image/svg+xml;base64,")
+    decoded = base64.b64decode(uri.split(",", 1)[1]).decode("utf-8")
+    assert "viewBox='0 0 600 1000'" in decoded
