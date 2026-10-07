@@ -507,7 +507,7 @@ def _fibroblast_scene() -> str:
             '<path d="M-28 0 C-13 -8 -9 -16 0 -5 C9 -16 13 -8 28 0 '
             'C13 8 9 16 0 5 C-9 16 -13 8 -28 0Z" fill="#fff" '
             'stroke="#6b7280" stroke-width="1.1"/>'
-            '<ellipse cx="0" cy="0" rx="7" ry="4" fill="#fed7aa" stroke="#ea580c"/>'
+            '<ellipse cx="0" cy="0" rx="7" ry="4" fill="#d1d5db" stroke="#64748b"/>'
             "</g>"
         )
         for x, y, angle in ((62, 47, -12), (145, 74, 18), (102, 101, -7))
@@ -529,7 +529,7 @@ def _immune_scene() -> str:
     )
     lymphocytes = "".join(
         f'<g><circle cx="{x}" cy="{y}" r="13" fill="#fff" stroke="#64748b"/>'
-        f'<circle cx="{x}" cy="{y}" r="8" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        f'<circle cx="{x}" cy="{y}" r="8" fill="#e2e8f0" stroke="#64748b"/></g>'
         for x, y in ((45, 47), (79, 84), (181, 45), (176, 91))
     )
     return (
@@ -798,9 +798,9 @@ def _vessel_scene() -> str:
         'stroke="#64748b" stroke-width="7"/>'
         '<ellipse cx="578" cy="111" rx="91" ry="28" fill="#fff" '
         'stroke="#cbd5e1" stroke-width="1.2"/>'
-        '<ellipse cx="536" cy="105" rx="13" ry="6" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="582" cy="118" rx="13" ry="6" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="625" cy="102" rx="13" ry="6" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="536" cy="105" rx="13" ry="6" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="582" cy="118" rx="13" ry="6" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="625" cy="102" rx="13" ry="6" fill="#d1d5db" stroke="#64748b"/>'
         '<circle cx="491" cy="91" r="4.5" fill="#bfdbfe"/>'
         '<circle cx="553" cy="72" r="4.5" fill="#bfdbfe"/>'
         '<circle cx="639" cy="77" r="4.5" fill="#bfdbfe"/>'
@@ -810,7 +810,7 @@ def _vessel_scene() -> str:
 def _immune_infiltrate() -> str:
     lymphocytes = "".join(
         f'<g><circle cx="{x}" cy="{y}" r="13" fill="#fff" stroke="#64748b"/>'
-        f'<circle cx="{x}" cy="{y}" r="8" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        f'<circle cx="{x}" cy="{y}" r="8" fill="#e2e8f0" stroke="#64748b"/></g>'
         for x, y in ((425, 240), (474, 291), (529, 226), (646, 263), (690, 306))
     )
     macrophages = "".join(
@@ -833,7 +833,7 @@ def _fibroblasts_in_stroma() -> str:
             '<path d="M-25 0 C-11 -8 -8 -15 0 -5 C8 -15 11 -8 25 0 '
             'C11 8 8 15 0 5 C-8 15 -11 8 -25 0Z" fill="#fff" '
             'stroke="#6b7280" stroke-width="1"/>'
-            '<ellipse cx="0" cy="0" rx="6" ry="4" fill="#fed7aa" stroke="#ea580c"/>'
+            '<ellipse cx="0" cy="0" rx="6" ry="4" fill="#d1d5db" stroke="#64748b"/>'
             "</g>"
         )
         for x, y, angle in ((135, 94, -12), (324, 115, 14), (398, 304, -7))
@@ -998,16 +998,16 @@ def _reference_vessel() -> str:
         '<ellipse cx="410" cy="96" rx="74" ry="31" fill="#f8fbff" '
         'stroke="#64748b" stroke-width="6"/>'
         '<ellipse cx="410" cy="96" rx="55" ry="19" fill="#fff" stroke="#cbd5e1"/>'
-        '<ellipse cx="382" cy="94" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="419" cy="102" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="446" cy="90" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="382" cy="94" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="419" cy="102" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="446" cy="90" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
     )
 
 
 def _reference_immune_cells() -> str:
     return "".join(
         f'<g><circle cx="{x}" cy="{y}" r="11" fill="#fff" stroke="#64748b"/>'
-        f'<circle cx="{x}" cy="{y}" r="7" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        f'<circle cx="{x}" cy="{y}" r="7" fill="#e2e8f0" stroke="#64748b"/></g>'
         for x, y in ((363, 224), (423, 255), (468, 208))
     )
 
@@ -1018,7 +1018,7 @@ def _reference_fibroblasts() -> str:
             f'<g transform="translate({x} {y}) rotate({angle})">'
             '<path d="M-22 0 C-10 -7 -7 -13 0 -4 C7 -13 10 -7 22 0 '
             'C10 7 7 13 0 4 C-7 13 -10 7 -22 0Z" fill="#fff" stroke="#6b7280"/>'
-            '<ellipse rx="5.5" ry="3.5" fill="#fed7aa" stroke="#ea580c"/></g>'
+            '<ellipse rx="5.5" ry="3.5" fill="#d1d5db" stroke="#64748b"/></g>'
         )
         for x, y, angle in ((103, 91, -9), (267, 76, 13), (310, 292, -5))
     )
@@ -1051,12 +1051,12 @@ def _tumor_nests() -> str:
             f'{cx} {cy-ry} C{cx+33} {cy-ry-4} {cx+rx-6} {cy-22} {cx+rx} {cy} '
             f'C{cx+rx-9} {cy+ry} {cx+22} {cy+ry+7} {cx} {cy+ry} '
             f'C{cx-34} {cy+ry+3} {cx-rx+5} {cy+22} {cx-rx} {cy}Z" '
-            'fill="#fff" fill-opacity=".92" stroke="#7f1d1d" stroke-width="1.1"/>'
+            'fill="#fff" fill-opacity=".92" stroke="#475569" stroke-width="1.1"/>'
         )
         for dx, dy in ((-18, -9), (8, -12), (-5, 13), (22, 9)):
             nests.append(
                 f'<ellipse cx="{cx+dx}" cy="{cy+dy}" rx="6" ry="8" '
-                'fill="#d8b4b4" stroke="#7f1d1d" stroke-width=".6"/>'
+                'fill="#cbd5e1" stroke="#475569" stroke-width=".6"/>'
             )
     return "".join(nests)
 
@@ -1068,15 +1068,15 @@ def _tumor_vessel() -> str:
         'fill="#f8fbff" stroke="#64748b" stroke-width="6"/>'
         '<path d="M365 104 C385 82 407 84 421 99 C440 81 466 94 467 113 '
         'C447 126 386 128 365 104Z" fill="#fff" stroke="#cbd5e1"/>'
-        '<ellipse cx="398" cy="107" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="445" cy="112" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="398" cy="107" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="445" cy="112" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
     )
 
 
 def _tumor_immune_cells() -> str:
     lymphocytes = "".join(
         f'<g><circle cx="{x}" cy="{y}" r="11" fill="#fff" stroke="#64748b"/>'
-        f'<circle cx="{x}" cy="{y}" r="7" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        f'<circle cx="{x}" cy="{y}" r="7" fill="#e2e8f0" stroke="#64748b"/></g>'
         for x, y in ((348, 212), (390, 254), (438, 216), (475, 263), (453, 298))
     )
     macrophage = (
@@ -1096,7 +1096,7 @@ def _tumor_fibroblasts() -> str:
             '<path d="M-25 0 C-11 -8 -8 -15 0 -5 C8 -15 11 -8 25 0 '
             'C11 8 8 15 0 5 C-8 15 -11 8 -25 0Z" fill="#fff" '
             'stroke="#6b7280" stroke-width="1.2"/>'
-            '<ellipse rx="6" ry="4" fill="#fed7aa" stroke="#ea580c"/></g>'
+            '<ellipse rx="6" ry="4" fill="#d1d5db" stroke="#64748b"/></g>'
         )
         for x, y, angle in ((82, 77, -17), (263, 77, 18), (320, 155, -8), (314, 294, 12))
     )
