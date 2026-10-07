@@ -229,8 +229,6 @@ DEFAULT_ANATOMY_ATTRIBUTION = (
     "CC BY 4.0. Used as the central orientation illustration; "
     "Spatial Target Atlas adds surrounding evidence tracks."
 )
-DEFAULT_ANATOMY_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
-
 
 
 def fetch_default_anatomy_data_uri(timeout_seconds: float = 15.0) -> str:
@@ -240,10 +238,10 @@ def fetch_default_anatomy_data_uri(timeout_seconds: float = 15.0) -> str:
         DEFAULT_ANATOMY_ASSET_URL,
         timeout=timeout_seconds,
         follow_redirects=True,
-        headers={"User-Agent": "spatial-target-atlas/0.9"},
+        headers={"User-Agent": "spatial-target-atlas/0.9.1"},
     )
     response.raise_for_status()
-    content_type = str(response.headers.get("content-type") or "image/png").split(";")[0]
+    content_type = str(response.headers.get("content-type") or "image/svg+xml").split(";")[0]
     encoded = base64.b64encode(response.content).decode("ascii")
     return f"data:{content_type};base64,{encoded}"
 
@@ -564,11 +562,11 @@ def render_radial_atlas(
     if anatomy_data_uri is not None:
         parts.append(
             f'<image class="professional-anatomy" href="{_e(anatomy_data_uri)}" '
-            'x="365" y="245" width="270" height="450" '
+            'x="340" y="205" width="320" height="533" '
             'preserveAspectRatio="xMidYMid meet"/>'
         )
         parts.append(
-            '<text x="500" y="720" text-anchor="middle" class="radial-center-label">'
+            '<text x="500" y="765" text-anchor="middle" class="radial-center-label">'
             "professional anatomy orientation</text>"
         )
     else:
