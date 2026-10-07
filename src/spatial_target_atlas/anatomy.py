@@ -1141,27 +1141,60 @@ def _bulk_paired_note(value: Any) -> str:
 
 
 def render_subcellular(locations: Any) -> str:
+    """Render a cleaner neutral cell map with compartment-specific highlights."""
     values = [str(value) for value in locations] if isinstance(locations, list) else []
     text = " ".join(values).casefold()
     membrane = any(word in text for word in ("membrane", "cell junction", "plasma"))
-    cytoplasm = any(word in text for word in ("cytoplas", "cytosol", "vesicle", "golgi"))
+    cytoplasm = any(word in text for word in ("cytoplas", "cytosol"))
     nucleus = any(word in text for word in ("nucle", "chromatin"))
     extracellular = any(word in text for word in ("secret", "extracellular"))
+    golgi = "golgi" in text
+    vesicle = "vesicle" in text
+    mitochondrial = "mitochond" in text
+
+    membrane_stroke = "#2563eb" if membrane else "#64748b"
+    cytoplasm_fill = "#dbeafe" if cytoplasm else "#f8fafc"
+    nucleus_fill = "#ddd6fe" if nucleus else "#eef2f7"
+    extracellular_fill = "#fef3c7" if extracellular else "#fbfcfe"
+
     return (
         '<div class="subcellular-figure">'
-        '<svg viewBox="0 0 260 220" role="img" aria-label="Subcellular localization schematic">'
-        f'<circle cx="130" cy="110" r="92" fill="{"#fef3c7" if extracellular else "#f8fafc"}" '
-        'stroke="#d1d5db" stroke-dasharray="5 5"/>'
-        f'<circle cx="130" cy="110" r="72" fill="{"#dbeafe" if cytoplasm else "#f8fafc"}" '
-        f'stroke="{"#2563eb" if membrane else "#94a3b8"}" '
-        f'stroke-width="{7 if membrane else 2}"/>'
-        f'<circle cx="130" cy="110" r="31" fill="{"#ddd6fe" if nucleus else "#e5e7eb"}" '
+        '<svg viewBox="0 0 300 240" role="img" '
+        'aria-label="Subcellular localization schematic">'
+        f'<rect x="5" y="5" width="290" height="230" rx="30" fill="{extracellular_fill}" '
+        'stroke="#e2e8f0"/>'
+        f'<path d="M72 52 C95 27 137 29 164 42 C196 32 231 52 237 83 '
+        'C256 105 249 146 224 162 C214 196 174 209 143 196 '
+        'C113 211 76 199 66 169 C41 152 42 112 57 91 C54 73 60 61 72 52Z" '
+        f'fill="{cytoplasm_fill}" stroke="{membrane_stroke}" '
+        f'stroke-width="{6 if membrane else 2.5}"/>'
+        f'<ellipse cx="142" cy="112" rx="42" ry="36" fill="{nucleus_fill}" '
         'stroke="#7c3aed" stroke-width="2"/>'
-        '<circle cx="95" cy="82" r="8" fill="#fca5a5"/>'
-        '<circle cx="162" cy="139" r="7" fill="#fca5a5"/>'
-        '<text x="130" y="113" text-anchor="middle" class="subcell-label">nucleus</text>'
-        '<text x="130" y="55" text-anchor="middle" class="subcell-label">cytoplasm</text>'
-        '<text x="130" y="202" text-anchor="middle" class="subcell-label">extracellular</text>'
+        '<ellipse cx="142" cy="112" rx="16" ry="13" fill="#c4b5fd" opacity=".72"/>'
+        '<path d="M85 87 C103 72 119 72 132 81 M81 101 C99 87 114 88 128 95 '
+        'M85 139 C105 150 121 149 135 139" fill="none" stroke="#94a3b8" '
+        'stroke-width="4" stroke-linecap="round"/>'
+        '<path d="M182 83 C195 73 210 76 216 87 C205 91 194 93 183 97 '
+        'M181 102 C196 95 210 98 218 108 C207 113 194 115 181 119" '
+        f'fill="none" stroke="{"#2563eb" if golgi else "#a78bfa"}" '
+        'stroke-width="4" stroke-linecap="round"/>'
+        '<g fill="#fff" stroke="#64748b">'
+        '<ellipse cx="92" cy="159" rx="20" ry="10" transform="rotate(-24 92 159)"/>'
+        '<ellipse cx="204" cy="148" rx="20" ry="10" transform="rotate(18 204 148)"/>'
+        '</g>'
+        f'<g fill="none" stroke="{"#2563eb" if mitochondrial else "#94a3b8"}" '
+        'stroke-width="2">'
+        '<path d="M76 158 C84 151 94 166 105 157"/>'
+        '<path d="M188 148 C197 141 207 157 218 147"/>'
+        '</g>'
+        f'<g fill="{"#bfdbfe" if vesicle else "#e2e8f0"}" stroke="#64748b">'
+        '<circle cx="76" cy="118" r="7"/><circle cx="221" cy="126" r="6"/>'
+        '<circle cx="177" cy="174" r="5"/></g>'
+        '<text x="142" y="116" text-anchor="middle" class="subcell-label">nucleus</text>'
+        '<text x="99" y="70" text-anchor="middle" class="subcell-label">ER</text>'
+        '<text x="203" y="71" text-anchor="middle" class="subcell-label">Golgi</text>'
+        '<text x="94" y="181" text-anchor="middle" class="subcell-label">mitochondrion</text>'
+        '<text x="150" y="224" text-anchor="middle" class="subcell-label">extracellular</text>'
         "</svg>"
         '<p class="note">'
         f'{_e(", ".join(values) if values else "No HPA subcellular annotation.")}'
