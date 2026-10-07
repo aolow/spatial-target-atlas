@@ -224,6 +224,7 @@ DEFAULT_ANATOMY_ASSET_URL = (
 DEFAULT_ANATOMY_SOURCE_URL = (
     "https://commons.wikimedia.org/wiki/File:202403_human_anatomy_organs.svg"
 )
+DEFAULT_ANATOMY_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
 DEFAULT_ANATOMY_ATTRIBUTION = (
     "Human anatomy organs by DataBase Center for Life Science (DBCLS), "
     "CC BY 4.0; adapted here as the central orientation illustration."
