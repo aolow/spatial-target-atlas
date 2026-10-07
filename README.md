@@ -187,9 +187,15 @@ spatial-target-atlas render-atlas \
   --spatial-census outputs/luad-census-spatial \
   --reference-audit outputs/luad-reference-audit.json \
   -o outputs/luad-atlas.html
+
+# Fully offline rendering with the built-in v4 body schematic
+spatial-target-atlas render-atlas \
+  --core outputs/luad \
+  --schematic-anatomy \
+  -o outputs/luad-atlas.html
 ```
 
-Only `--core` is required. The report adds optional HuBMAP cell, CELLxGENE, and reference-audit sections when those outputs are supplied. It has no external JavaScript, CSS, or network dependency and does not combine source-specific intensity scales.
+Only `--core` is required. The report adds optional HuBMAP cell, CELLxGENE, and reference-audit sections when those outputs are supplied. By default, rendering attempts one network fetch for the DBCLS anatomy asset and then embeds it; use `--schematic-anatomy` for a fully offline render. The generated HTML itself has no external JavaScript, CSS, image, or network dependency and does not combine source-specific intensity scales.
 
 ## Design principles
 
