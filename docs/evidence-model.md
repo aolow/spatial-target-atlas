@@ -76,7 +76,7 @@ The report also shows four source-separated small-multiple anatomy maps beside t
 
 The whole-body view uses a fixed radial tissue ordering so targets can be compared visually without tissues moving between reports. Each tissue segment contains four concentric source tracks. Empty/light tracks are unknown, measured-negative tracks remain visually distinct from unknown, and positive tracks use source-local opacity.
 
-The center body is an orientation layer rather than the authoritative quantitative view. Detailed source evidence lives in the radial tracks.
+The center body is an orientation layer rather than the authoritative quantitative view. Detailed source evidence lives in the radial tracks. When available, the renderer uses the DBCLS **Human anatomy organs** illustration under CC BY 4.0 and inlines it into the final HTML. The anatomy artwork does not contribute measurements, states, or scores. If it cannot be fetched, the renderer uses the v4 schematic fallback.
 
 The body/radial atlas is a **normal/reference tissue view**. Source-labeled normal or healthy CELLxGENE spatial RNA can contribute to the radial spatial-RNA track. Tumor-labeled CELLxGENE rows are excluded from that ring and are rendered only in the separate tumor tissue panel.
 
