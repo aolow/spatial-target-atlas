@@ -12,7 +12,7 @@ from importlib import import_module
 from importlib.resources import files
 from typing import Any
 
-from .anatomy_overlay import render_dbcls_expression_overlay
+from .anatomy_overlay import render_dbcls_expression_overlay, select_anatomy_source
 from .radial_layout import render_radial_tracks
 
 BODY_VIEWBOX = "0 0 320 560"
@@ -574,6 +574,16 @@ def render_radial_atlas(
     parts = [
         '<svg class="radial-atlas" viewBox="0 0 1000 1000" role="img" '
         'aria-label="Radial body and tissue evidence atlas">',
+        (
+            '<defs><filter id="dbcls-grayscale" color-interpolation-filters="sRGB">'
+            '<feColorMatrix type="saturate" values="0"/>'
+            '<feComponentTransfer>'
+            '<feFuncR type="linear" slope=".78" intercept=".16"/>'
+            '<feFuncG type="linear" slope=".78" intercept=".16"/>'
+            '<feFuncB type="linear" slope=".78" intercept=".16"/>'
+            '</feComponentTransfer>'
+            '</filter></defs>'
+        ),
         render_radial_tracks(radial_tissues, colors),
     ]
     if anatomy_data_uri is not None:
@@ -581,11 +591,13 @@ def render_radial_atlas(
         anatomy_y = 205.0
         anatomy_width = 320.0
         anatomy_height = 533.0
+        active_source = select_anatomy_source(regions)
         parts.append(
             f'<image class="professional-anatomy" href="{_e(anatomy_data_uri)}" '
             f'x="{anatomy_x:.0f}" y="{anatomy_y:.0f}" '
             f'width="{anatomy_width:.0f}" height="{anatomy_height:.0f}" '
-            'preserveAspectRatio="xMidYMid meet"/>'
+            'preserveAspectRatio="xMidYMid meet" '
+            'filter="url(#dbcls-grayscale)" opacity=".82"/>'
         )
         parts.append(
             render_dbcls_expression_overlay(
@@ -595,11 +607,13 @@ def render_radial_atlas(
                 y=anatomy_y,
                 width=anatomy_width,
                 height=anatomy_height,
+                active_source=active_source,
             )
         )
+        source_label = SOURCE_LABELS.get(active_source or "", "no mapped source")
         parts.append(
             '<text x="500" y="765" text-anchor="middle" class="radial-center-label">'
-            "professional anatomy orientation + expression overlay</text>"
+            f"grayscale anatomy · {_e(source_label)}</text>"
         )
     else:
         parts.extend([
