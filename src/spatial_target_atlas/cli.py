@@ -443,7 +443,10 @@ def render_atlas(
         bool,
         typer.Option(
             "--detailed-anatomy/--schematic-anatomy",
-            help="Inline professional DBCLS anatomy when available; otherwise use the v4 schematic.",
+            help=(
+                "Inline professional DBCLS anatomy when available; "
+                "otherwise use the v4 schematic."
+            ),
         ),
     ] = True,
 ) -> None:
