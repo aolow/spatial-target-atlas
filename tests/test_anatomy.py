@@ -1,5 +1,7 @@
+import spatial_target_atlas.anatomy as anatomy_module
 from spatial_target_atlas.anatomy import (
     cell_category,
+    fetch_default_anatomy_data_uri,
     render_body,
     render_cell_contexts,
     render_radial_atlas,
@@ -189,13 +191,47 @@ def test_integrated_microenvironment_contains_all_major_compartments() -> None:
     assert "capillary endothelial cell" in rendered
 
 
-def test_radial_center_anatomy_includes_airway_vessels_and_lymphatics() -> None:
+def test_radial_atlas_uses_v4_schematic_fallback() -> None:
     rendered = render_radial_atlas({}, [], COLORS)
 
-    assert "anatomy-airway" in rendered
-    assert "anatomy-vessels" in rendered
-    assert "anatomy-lymph" in rendered
-    assert "anatomy-small-intestine" in rendered
+    assert "radial-center-body" in rendered
+    assert "professional-anatomy" not in rendered
+    assert "body orientation" in rendered
+
+
+def test_radial_atlas_uses_professional_anatomy_when_inlined() -> None:
+    rendered = render_radial_atlas(
+        {},
+        [{"tissue": "lung", "tracks": {}}],
+        COLORS,
+        anatomy_data_uri="data:image/png;base64,AAAA",
+    )
+
+    assert "professional-anatomy" in rendered
+    assert 'href="data:image/png;base64,AAAA"' in rendered
+    assert "radial-center-body" not in rendered
+    assert "Lung" in rendered
+
+
+def test_fetch_default_anatomy_returns_data_uri(monkeypatch) -> None:  # noqa: ANN001
+    class FakeResponse:
+        content = b"png-bytes"
+        headers = {"content-type": "image/png"}
+
+        def raise_for_status(self) -> None:
+            return None
+
+    class FakeHttpx:
+        @staticmethod
+        def get(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+            return FakeResponse()
+
+    monkeypatch.setattr(anatomy_module, "import_module", lambda _name: FakeHttpx)
+
+    uri = fetch_default_anatomy_data_uri()
+
+    assert uri.startswith("data:image/png;base64,")
+    assert "cG5nLWJ5dGVz" in uri
 
 
 def test_normal_and_tumor_tissue_contexts_are_rendered_separately() -> None:
