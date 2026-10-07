@@ -76,7 +76,14 @@ def test_render_atlas_html_combines_core_and_optional_outputs(tmp_path) -> None:
         "dataset_count": 2, "caveats": ["low donor depth"],
     }]})
 
-    rendered = render_atlas_html(core, cells, census, audit, model_evidence)
+    rendered = render_atlas_html(
+        core,
+        cells,
+        census,
+        audit,
+        model_evidence,
+        anatomy_data_uri="data:image/png;base64,AAAA",
+    )
 
     assert "<h2>EPCAM</h2>" in rendered
     assert "EPCAM spatial atlas" in rendered
@@ -84,6 +91,8 @@ def test_render_atlas_html_combines_core_and_optional_outputs(tmp_path) -> None:
     assert "Normal / reference tissue" in rendered
     assert "Tumor tissue" in rendered
     assert "radial-tissue-tracks" in rendered
+    assert "professional-anatomy" in rendered
+    assert "DataBase Center for Life Science" in rendered
     assert "Human Protein Atlas protein" in rendered
     assert "Dataset-resolved views" in rendered
     assert "HuBMAP per-cell protein summaries" in rendered
