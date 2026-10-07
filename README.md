@@ -156,7 +156,9 @@ The atlas uses a hierarchical spatial view: a detailed central body for orientat
 
 The four visual layers are Human Protein Atlas tissue protein, ProteomicsDB tissue protein, CELLxGENE spatial RNA, and HuBMAP spatial protein. Each source has its own color, but the UI uses full source names rather than channel acronyms.
 
-The radial ring carries four concentric source tracks per tissue and is intentionally reference-oriented. Tumor-labeled spatial RNA is excluded from the body/radial reference view and appears only in the tumor panel. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Unknown, measured-negative, and positive states remain distinct. The center body now includes a more detailed airway, vascular, lymphatic, intestinal, and organ scaffold while remaining an orientation layer rather than the authoritative quantitative view.
+The radial ring carries four concentric source tracks per tissue and is intentionally reference-oriented. Tumor-labeled spatial RNA is excluded from the body/radial reference view and appears only in the tumor panel. **Opacity is source-local, not a cross-source score**: HPA and ProteomicsDB are scaled within that target and source across mapped tissues; spatial RNA uses positive-spot fraction; HuBMAP uses positive-cell fraction. Unknown, measured-negative, and positive states remain distinct.
+
+By default, `render-atlas` fetches a professional DBCLS human-anatomy illustration, inlines it into the generated HTML, and keeps the finished report self-contained. The illustration is orientation-only; all quantitative tissue evidence still lives in the radial tracks. If the asset cannot be fetched, the renderer falls back automatically to the earlier v4 schematic body. Use `--schematic-anatomy` to force the fallback.
 
 Build the inspectable overlay payload directly:
 
@@ -223,7 +225,7 @@ Each build records source releases, URLs, retrieval metadata, source-payload has
 - Pull-request CI uses mocked source responses for deterministic behavior. A separate weekly/manual smoke workflow checks lightweight live compatibility with Ensembl, HPA, ProteomicsDB, PDC study lookup, and HuBMAP discovery.
 - CELLxGENE can be pinned to a stable Census release; ProteomicsDB is a live API.
 - HuBMAP per-cell protein extraction depends on the separate Cells API index; not every public spatial dataset is indexed there.
-- The body/organ maps are schematic anatomical views. They are not registered histology images or coordinate-accurate spatial assay viewers.
+- The center anatomy illustration is for orientation only. It is not a registered histology image or coordinate-accurate spatial assay viewer. The default professional illustration is fetched at render time and inlined; the v4 schematic is used as an offline/failure fallback.
 - PINNACLE import records contextual representation coverage, but this project does not run PINNACLE/SPATIA models or infer target relevance from embeddings.
 - Source data retain their own licenses and citation requirements. The MIT license applies to this software.
 

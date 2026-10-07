@@ -6,7 +6,9 @@ They are original project artwork so their fill/opacity can be controlled direct
 
 from __future__ import annotations
 
+import base64
 import html
+from importlib import import_module
 from typing import Any
 
 from .radial_layout import render_radial_tracks
@@ -14,45 +16,37 @@ from .radial_layout import render_radial_tracks
 BODY_VIEWBOX = "0 0 320 560"
 
 BODY_SILHOUETTE = """
-<path d="M160 14
- C142 14 127 25 121 42
- C115 59 117 76 124 90
- C128 98 134 104 141 109
- L138 122
- C123 126 109 132 98 140
- C83 151 74 166 68 184
- C60 208 57 235 52 262
- L39 340
- C36 358 39 373 49 377
- C58 381 65 371 68 356
- L84 290
- L94 238
- L98 311
- C99 333 104 365 112 392
- L108 519
- C108 537 116 551 128 551
- C139 551 143 538 145 521
- L158 414
- L160 369
- L162 414
- L175 521
- C177 538 181 551 192 551
- C204 551 212 537 212 519
- L208 392
- C216 365 221 333 222 311
- L226 238
- L236 290
- L252 356
- C255 371 262 381 271 377
- C281 373 284 358 281 340
- L268 262
- C263 235 260 208 252 184
- C246 166 237 151 222 140
- C211 132 197 126 182 122
- L179 109
- C186 104 192 98 196 90
- C203 76 205 59 199 42
- C193 25 178 14 160 14 Z"/>
+<path d="M160 18
+ C134 18 115 39 115 66
+ C115 84 124 100 139 110
+ L136 126
+ C111 132 91 145 78 166
+ C66 187 59 220 55 258
+ L45 353
+ C43 372 54 379 65 366
+ L85 288
+ L90 246
+ L100 329
+ L111 399
+ L110 534
+ C110 550 126 553 133 538
+ L154 408
+ L160 363
+ L166 408
+ L187 538
+ C194 553 210 550 210 534
+ L209 399
+ L220 329
+ L230 246
+ L235 288
+ L255 366
+ C266 379 277 372 275 353
+ L265 258
+ C261 220 254 187 242 166
+ C229 145 209 132 184 126
+ L181 110
+ C196 100 205 84 205 66
+ C205 39 186 18 160 18 Z"/>
 """
 
 ORGAN_PATHS: dict[str, str] = {
@@ -220,6 +214,36 @@ SOURCE_LABELS = {
     "Y": "Spatial RNA",
     "K": "HuBMAP spatial protein",
 }
+
+
+DEFAULT_ANATOMY_ASSET_URL = (
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/"
+    "202403_human_anatomy_organs.svg/"
+    "960px-202403_human_anatomy_organs.svg.png"
+)
+DEFAULT_ANATOMY_SOURCE_URL = (
+    "https://commons.wikimedia.org/wiki/File:202403_human_anatomy_organs.svg"
+)
+DEFAULT_ANATOMY_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
+DEFAULT_ANATOMY_ATTRIBUTION = (
+    "Human anatomy organs by DataBase Center for Life Science (DBCLS), "
+    "CC BY 4.0; adapted here as the central orientation illustration."
+)
+
+
+def fetch_default_anatomy_data_uri(timeout_seconds: float = 15.0) -> str:
+    """Fetch and inline the professional anatomy illustration for offline HTML output."""
+    httpx = import_module("httpx")
+    response = httpx.get(
+        DEFAULT_ANATOMY_ASSET_URL,
+        timeout=timeout_seconds,
+        follow_redirects=True,
+        headers={"User-Agent": "spatial-target-atlas/0.9"},
+    )
+    response.raise_for_status()
+    content_type = str(response.headers.get("content-type") or "image/png").split(";")[0]
+    encoded = base64.b64encode(response.content).decode("ascii")
+    return f"data:{content_type};base64,{encoded}"
 
 
 def render_body(
@@ -527,71 +551,85 @@ def render_radial_atlas(
     regions: dict[str, dict[str, Any]],
     radial_tissues: list[dict[str, Any]],
     colors: dict[str, str],
+    anatomy_data_uri: str | None = None,
 ) -> str:
     """Render a central anatomy map surrounded by source-specific tissue tracks."""
     parts = [
         '<svg class="radial-atlas" viewBox="0 0 1000 1000" role="img" '
         'aria-label="Radial body and tissue evidence atlas">',
         render_radial_tracks(radial_tissues, colors),
-        '<g class="radial-center-body" transform="translate(385 297) scale(.72)">',
-        '<g fill="#fbfcfe" stroke="#94a3b8" stroke-width="2.2">',
-        BODY_SILHOUETTE,
-        "</g>",
-        ANATOMY_SCAFFOLD,
     ]
-    for region, paths in ORGAN_PATHS.items():
-        data = regions.get(region)
+    if anatomy_data_uri is not None:
         parts.append(
-            f'<g class="center-organ center-organ-{_e(region)}" fill="#f1f5f9" '
-            'stroke="#94a3b8" stroke-width="1.2">'
-            f"{paths}</g>"
+            f'<image class="professional-anatomy" href="{_e(anatomy_data_uri)}" '
+            'x="365" y="245" width="270" height="450" '
+            'preserveAspectRatio="xMidYMid meet"/>'
         )
-        if data is None:
-            continue
-        states = data.get("channels", {})
-        strengths = data.get("strengths", {})
-        if not isinstance(states, dict):
-            continue
-        strength_map = strengths if isinstance(strengths, dict) else {}
-        for channel in ("C", "M", "Y"):
-            if states.get(channel) != "positive":
-                continue
-            strength = _number(strength_map.get(channel))
-            parts.append(
-                _organ_layer(
-                    region,
-                    paths,
-                    colors[channel],
-                    0.10 + 0.42 * (strength if strength is not None else 1.0),
-                    "none",
-                    0,
-                    channel,
-                    blend=True,
-                )
-            )
-        if states.get("K") == "positive":
-            strength = _number(strength_map.get("K"))
-            value = strength if strength is not None else 1.0
-            parts.append(
-                _organ_layer(
-                    region,
-                    paths,
-                    "none",
-                    1.0,
-                    colors["K"],
-                    1.8 + 3.5 * value,
-                    "K",
-                    stroke_opacity=0.3 + 0.6 * value,
-                )
-            )
-    parts.extend(
-        [
+        parts.append(
+            '<text x="500" y="720" text-anchor="middle" class="radial-center-label">'
+            "professional anatomy orientation</text>"
+        )
+    else:
+        parts.extend([
+            '<g class="radial-center-body" transform="translate(357 288) scale(.58)">',
+            '<g fill="#fbfcfe" stroke="#94a3b8" stroke-width="2.2">',
+            BODY_SILHOUETTE,
             "</g>",
-            '<text x="500" y="505" text-anchor="middle" class="radial-center-label">'
-            "body orientation</text>",
-            "</svg>",
-        ]
-    )
+        ])
+        for region, paths in ORGAN_PATHS.items():
+            data = regions.get(region)
+            parts.append(
+                f'<g class="center-organ center-organ-{_e(region)}" fill="#f1f5f9" '
+                'stroke="#94a3b8" stroke-width="1.2">'
+                f"{paths}</g>"
+            )
+            if data is None:
+                continue
+            states = data.get("channels", {})
+            strengths = data.get("strengths", {})
+            if not isinstance(states, dict):
+                continue
+            strength_map = strengths if isinstance(strengths, dict) else {}
+            for channel in ("C", "M", "Y"):
+                if states.get(channel) != "positive":
+                    continue
+                strength = _number(strength_map.get(channel))
+                parts.append(
+                    _organ_layer(
+                        region,
+                        paths,
+                        colors[channel],
+                        0.10 + 0.42 * (strength if strength is not None else 1.0),
+                        "none",
+                        0,
+                        channel,
+                        blend=True,
+                    )
+                )
+            if states.get("K") == "positive":
+                strength = _number(strength_map.get("K"))
+                value = strength if strength is not None else 1.0
+                parts.append(
+                    _organ_layer(
+                        region,
+                        paths,
+                        "none",
+                        1.0,
+                        colors["K"],
+                        1.8 + 3.5 * value,
+                        "K",
+                        stroke_opacity=0.3 + 0.6 * value,
+                    )
+                )
+    if anatomy_data_uri is None:
+        parts.extend(
+            [
+                "</g>",
+                '<text x="500" y="505" text-anchor="middle" class="radial-center-label">'
+                "body orientation</text>",
+            ]
+        )
+    parts.append("</svg>")
     return "".join(parts)
 
 

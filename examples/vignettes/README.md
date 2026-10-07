@@ -1,5 +1,13 @@
 # Spatial overlay vignettes
 
+## Professional anatomy + restored radial categories
+
+![Professional anatomy with radial tissue categories](professional_anatomy_v6.svg)
+
+This is the current body-map direction. The center uses a professional DBCLS anatomy illustration rather than project-drawn anatomy, while the full fixed radial tissue categories remain visible around it. In actual `render-atlas` output, the illustration is fetched once and inlined so the resulting HTML remains self-contained. If the fetch fails, the earlier v4 silhouette is used.
+
+The anatomy illustration is **Human anatomy organs** by DataBase Center for Life Science (DBCLS), licensed under CC BY 4.0. [Source](https://commons.wikimedia.org/wiki/File:202403_human_anatomy_organs.svg) · [License](https://creativecommons.org/licenses/by/4.0/)
+
 These files are **visual design examples**, not scientific output from the LUAD build.
 
 They are checked in so the spatial language can be reviewed directly in GitHub before relying on it for biological interpretation.

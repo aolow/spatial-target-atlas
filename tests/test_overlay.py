@@ -96,11 +96,16 @@ def test_overlay_builds_dataset_resolved_views() -> None:
     assert views[0]["contexts"][0]["relative_intensity"] == 1.0
     assert views[0]["contexts"][1]["relative_intensity"] == 0.0
 
-    rendered = render_overlay_gallery(payload)
+    rendered = render_overlay_gallery(
+        payload,
+        anatomy_data_uri="data:image/png;base64,AAAA",
+    )
     assert "Dataset-resolved views" in rendered
     assert "HBM1" in rendered
     assert "HuBMAP spatial protein" in rendered
     assert "<strong>K</strong>" not in rendered
+    assert "professional-anatomy" in rendered
+    assert "DataBase Center for Life Science" in rendered
 
 
 def test_overlay_strengths_are_source_local() -> None:

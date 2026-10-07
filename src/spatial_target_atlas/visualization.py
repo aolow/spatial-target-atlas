@@ -17,6 +17,7 @@ def render_atlas_html(
     spatial_census_dir: Path | None = None,
     reference_audit_path: Path | None = None,
     model_evidence_path: Path | None = None,
+    anatomy_data_uri: str | None = None,
 ) -> str:
     identities = _read_list(core_dir / "target_identities.json")
     evidence = _read_list(core_dir / "evidence.json")
@@ -67,6 +68,7 @@ def render_atlas_html(
                 census,
                 model_evidence,
                 overlay_by_target.get(target),
+                anatomy_data_uri,
             )
             for target in targets
         ],
@@ -139,11 +141,17 @@ def _target_section(
     census: list[dict[str, Any]],
     model_evidence: list[dict[str, Any]],
     overlay_target: dict[str, Any] | None,
+    anatomy_data_uri: str | None,
 ) -> str:
     target_evidence = [row for row in evidence if row.get("gene_symbol") == target]
     parts = [f"<section><h2>{_e(target)}</h2>"]
     if overlay_target is not None:
-        parts.append(render_spatial_vignette(overlay_target))
+        parts.append(
+            render_spatial_vignette(
+                overlay_target,
+                anatomy_data_uri=anatomy_data_uri,
+            )
+        )
     parts.append("<h3>Measured evidence footprint</h3>")
     parts.append(_table(_evidence_footprint(target_evidence)))
 

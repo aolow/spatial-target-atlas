@@ -439,9 +439,31 @@ def render_atlas(
         Path | None,
         typer.Option("--model-evidence", exists=True, dir_okay=False, readable=True),
     ] = None,
+    detailed_anatomy: Annotated[
+        bool,
+        typer.Option(
+            "--detailed-anatomy/--schematic-anatomy",
+            help=(
+                "Inline professional DBCLS anatomy when available; "
+                "otherwise use the v4 schematic."
+            ),
+        ),
+    ] = True,
 ) -> None:
     """Render a self-contained local HTML atlas report from saved outputs."""
+    from .anatomy import fetch_default_anatomy_data_uri
     from .visualization import render_atlas_html
+
+    anatomy_data_uri: str | None = None
+    if detailed_anatomy:
+        try:
+            anatomy_data_uri = fetch_default_anatomy_data_uri()
+        except Exception as exc:  # noqa: BLE001 - visual asset fetch must degrade gracefully
+            typer.echo(
+                "warning: detailed anatomy asset unavailable; "
+                f"using schematic fallback ({type(exc).__name__}: {exc})",
+                err=True,
+            )
 
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
@@ -451,6 +473,7 @@ def render_atlas(
             spatial_census,
             reference_audit,
             model_evidence,
+            anatomy_data_uri,
         ),
         encoding="utf-8",
     )

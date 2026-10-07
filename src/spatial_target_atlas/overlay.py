@@ -10,6 +10,9 @@ from statistics import median
 from typing import Any
 
 from .anatomy import (
+    DEFAULT_ANATOMY_ATTRIBUTION,
+    DEFAULT_ANATOMY_LICENSE_URL,
+    DEFAULT_ANATOMY_SOURCE_URL,
     cell_category,
     render_radial_atlas,
     render_subcellular,
@@ -386,7 +389,10 @@ def overlay_color(channels: dict[str, str]) -> str:
     }[key]
 
 
-def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
+def render_spatial_vignette(
+    target_payload: dict[str, Any],
+    anatomy_data_uri: str | None = None,
+) -> str:
     target = _e(target_payload.get("gene_symbol") or "target")
     region_map = {
         str(item.get("region")): item
@@ -403,7 +409,12 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         raw_microenvironments if isinstance(raw_microenvironments, dict) else {}
     )
     colors = {key: str(value["color"]) for key, value in CHANNELS.items()}
-    radial = render_radial_atlas(region_map, radial_tissues, colors)
+    radial = render_radial_atlas(
+        region_map,
+        radial_tissues,
+        colors,
+        anatomy_data_uri=anatomy_data_uri,
+    )
     tissue = render_tissue_comparison(microenvironments, colors)
     legend = _legend_html()
     subcellular = render_subcellular(target_payload.get("subcellular", []))
@@ -415,7 +426,17 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
         '<p class="note">Body orientation sits in the center; radial tracks carry '
         "source-specific tissue evidence. Opacity remains source-local.</p></div>"
         f"{legend}</div>"
-        f'<div class="radial-panel">{radial}{disease}</div>'
+        f'<div class="radial-panel">{radial}{disease}'
+        + (
+            '<p class="anatomy-credit">'
+            f'{_e(DEFAULT_ANATOMY_ATTRIBUTION)} '
+            f'<a href="{_e(DEFAULT_ANATOMY_SOURCE_URL)}">Source</a> · '
+            f'<a href="{_e(DEFAULT_ANATOMY_LICENSE_URL)}">License</a>'
+            "</p>"
+            if anatomy_data_uri is not None
+            else ""
+        )
+        + "</div>"
         '<div class="hierarchy-grid">'
         f'<div class="tissue-panel"><h4>Normal versus tumor tissue context</h4>{tissue}</div>'
         f'<div class="subcellular-panel"><h4>Subcellular localization</h4>{subcellular}</div>'
@@ -424,9 +445,12 @@ def render_spatial_vignette(target_payload: dict[str, Any]) -> str:
     )
 
 
-def render_overlay_gallery(payload: dict[str, Any]) -> str:
+def render_overlay_gallery(
+    payload: dict[str, Any],
+    anatomy_data_uri: str | None = None,
+) -> str:
     return "".join(
-        render_spatial_vignette(target)
+        render_spatial_vignette(target, anatomy_data_uri=anatomy_data_uri)
         for target in payload.get("targets", [])
         if isinstance(target, dict)
     )
