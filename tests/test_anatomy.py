@@ -1,5 +1,4 @@
 import pytest
-
 import spatial_target_atlas.anatomy as anatomy_module
 from spatial_target_atlas.anatomy import (
     cell_category,
