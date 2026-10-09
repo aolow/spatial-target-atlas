@@ -1,3 +1,5 @@
+import pytest
+
 from spatial_target_atlas.radial_layout import (
     TISSUE_ORDER,
     annular_sector_path,
@@ -10,6 +12,11 @@ COLORS = {
     "Y": "#facc15",
     "K": "#111827",
 }
+
+def test_radial_tracks_reject_partial_palette() -> None:
+    with pytest.raises(ValueError, match=r"colors is missing channel\(s\): K"):
+        render_radial_tracks([], {"C": "#00b7d8", "M": "#d946ef", "Y": "#facc15"})
+
 
 
 def test_radial_layout_has_stable_broad_tissue_coverage() -> None:

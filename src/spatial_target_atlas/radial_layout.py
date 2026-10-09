@@ -68,6 +68,8 @@ TISSUE_DISPLAY_NAMES = {
     "testis": "Testis",
 }
 
+_REQUIRED_CHANNELS = ("C", "M", "Y", "K")
+
 TRACKS = [
     ("hpa_protein", "Human Protein Atlas protein"),
     ("proteomicsdb_protein", "ProteomicsDB protein"),
@@ -84,6 +86,7 @@ def render_radial_tracks(
     cy: float = 500,
 ) -> str:
     """Render radial tissue tracks around a center body."""
+    _validate_colors(colors)
     by_name = {
         str(row.get("tissue")): row
         for row in tissues
@@ -145,6 +148,12 @@ def render_radial_tracks(
         parts.append(_label(tissue, midpoint, cx, cy, radius=472.0))
     parts.append("</g>")
     return "".join(parts)
+
+
+def _validate_colors(colors: dict[str, str]) -> None:
+    missing = [channel for channel in _REQUIRED_CHANNELS if channel not in colors]
+    if missing:
+        raise ValueError(f"colors is missing channel(s): {', '.join(missing)}")
 
 
 def annular_sector_path(

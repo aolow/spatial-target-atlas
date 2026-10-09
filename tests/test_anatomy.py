@@ -1,3 +1,5 @@
+import pytest
+
 import spatial_target_atlas.anatomy as anatomy_module
 from spatial_target_atlas.anatomy import (
     cell_category,
@@ -10,6 +12,7 @@ from spatial_target_atlas.anatomy import (
     render_tissue_comparison,
     render_tissue_microenvironment,
 )
+from spatial_target_atlas.anatomy_overlay import render_dbcls_expression_overlay
 
 COLORS = {
     "C": "#00b7d8",
@@ -17,6 +20,18 @@ COLORS = {
     "Y": "#facc15",
     "K": "#111827",
 }
+
+def test_anatomy_overlay_rejects_partial_palette() -> None:
+    with pytest.raises(ValueError, match=r"colors is missing channel\(s\): K"):
+        render_dbcls_expression_overlay(
+            {},
+            {"C": "#00b7d8", "M": "#d946ef", "Y": "#facc15"},
+            x=0,
+            y=0,
+            width=320,
+            height=533,
+        )
+
 
 
 def test_composite_anatomy_uses_alpha_layers_and_multiply_blending() -> None:

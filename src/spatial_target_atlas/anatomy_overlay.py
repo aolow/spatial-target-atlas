@@ -8,6 +8,7 @@ from typing import Any
 from .anatomy_regions import REGIONS, SourcePath
 
 CHANNEL_PRIORITY = ("C", "Y", "M", "K")
+_REQUIRED_CHANNELS = ("C", "M", "Y", "K")
 
 
 def select_anatomy_source(regions: dict[str, dict[str, Any]]) -> str | None:
@@ -58,6 +59,7 @@ def render_dbcls_expression_overlay(
     active_source: str | None = None,
 ) -> str:
     """Render one source of tissue evidence over the grayscale DBCLS anatomy."""
+    _validate_colors(colors)
     source = active_source or select_anatomy_source(regions)
     if source is None:
         return (
@@ -150,6 +152,12 @@ def _shape_svg(
         f'stroke="{stroke}" stroke-width="{stroke_width / max(scale_x, scale_y):.3f}" '
         f'stroke-opacity="{stroke_opacity:.3f}"{style}/>'
     )
+
+
+def _validate_colors(colors: dict[str, str]) -> None:
+    missing = [channel for channel in _REQUIRED_CHANNELS if channel not in colors]
+    if missing:
+        raise ValueError(f"colors is missing channel(s): {', '.join(missing)}")
 
 
 def _strength(value: Any) -> float | None:
