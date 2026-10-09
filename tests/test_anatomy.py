@@ -1,4 +1,5 @@
 import pytest
+
 import spatial_target_atlas.anatomy as anatomy_module
 from spatial_target_atlas.anatomy import (
     cell_category,
@@ -12,7 +13,6 @@ from spatial_target_atlas.anatomy import (
     render_tissue_microenvironment,
 )
 from spatial_target_atlas.anatomy_overlay import render_dbcls_expression_overlay
-
 
 COLORS = {
     "C": "#00b7d8",
