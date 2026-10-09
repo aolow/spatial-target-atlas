@@ -12,7 +12,7 @@ from importlib import import_module
 from importlib.resources import files
 from typing import Any
 
-from .anatomy_overlay import render_dbcls_expression_overlay
+from .anatomy_overlay import render_dbcls_expression_overlay, select_anatomy_source
 from .radial_layout import render_radial_tracks
 
 BODY_VIEWBOX = "0 0 320 560"
@@ -507,7 +507,7 @@ def _fibroblast_scene() -> str:
             '<path d="M-28 0 C-13 -8 -9 -16 0 -5 C9 -16 13 -8 28 0 '
             'C13 8 9 16 0 5 C-9 16 -13 8 -28 0Z" fill="#fff" '
             'stroke="#6b7280" stroke-width="1.1"/>'
-            '<ellipse cx="0" cy="0" rx="7" ry="4" fill="#fed7aa" stroke="#ea580c"/>'
+            '<ellipse cx="0" cy="0" rx="7" ry="4" fill="#d1d5db" stroke="#64748b"/>'
             "</g>"
         )
         for x, y, angle in ((62, 47, -12), (145, 74, 18), (102, 101, -7))
@@ -529,7 +529,7 @@ def _immune_scene() -> str:
     )
     lymphocytes = "".join(
         f'<g><circle cx="{x}" cy="{y}" r="13" fill="#fff" stroke="#64748b"/>'
-        f'<circle cx="{x}" cy="{y}" r="8" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        f'<circle cx="{x}" cy="{y}" r="8" fill="#e2e8f0" stroke="#64748b"/></g>'
         for x, y in ((45, 47), (79, 84), (181, 45), (176, 91))
     )
     return (
@@ -574,6 +574,16 @@ def render_radial_atlas(
     parts = [
         '<svg class="radial-atlas" viewBox="0 0 1000 1000" role="img" '
         'aria-label="Radial body and tissue evidence atlas">',
+        (
+            '<defs><filter id="dbcls-grayscale" color-interpolation-filters="sRGB">'
+            '<feColorMatrix type="saturate" values="0"/>'
+            '<feComponentTransfer>'
+            '<feFuncR type="linear" slope=".78" intercept=".16"/>'
+            '<feFuncG type="linear" slope=".78" intercept=".16"/>'
+            '<feFuncB type="linear" slope=".78" intercept=".16"/>'
+            '</feComponentTransfer>'
+            '</filter></defs>'
+        ),
         render_radial_tracks(radial_tissues, colors),
     ]
     if anatomy_data_uri is not None:
@@ -581,11 +591,13 @@ def render_radial_atlas(
         anatomy_y = 205.0
         anatomy_width = 320.0
         anatomy_height = 533.0
+        active_source = select_anatomy_source(regions)
         parts.append(
             f'<image class="professional-anatomy" href="{_e(anatomy_data_uri)}" '
             f'x="{anatomy_x:.0f}" y="{anatomy_y:.0f}" '
             f'width="{anatomy_width:.0f}" height="{anatomy_height:.0f}" '
-            'preserveAspectRatio="xMidYMid meet"/>'
+            'preserveAspectRatio="xMidYMid meet" '
+            'filter="url(#dbcls-grayscale)" opacity=".82"/>'
         )
         parts.append(
             render_dbcls_expression_overlay(
@@ -595,11 +607,13 @@ def render_radial_atlas(
                 y=anatomy_y,
                 width=anatomy_width,
                 height=anatomy_height,
+                active_source=active_source,
             )
         )
+        source_label = SOURCE_LABELS.get(active_source or "", "no mapped source")
         parts.append(
             '<text x="500" y="765" text-anchor="middle" class="radial-center-label">'
-            "professional anatomy orientation + expression overlay</text>"
+            f"grayscale anatomy · {_e(source_label)}</text>"
         )
     else:
         parts.extend([
@@ -784,9 +798,9 @@ def _vessel_scene() -> str:
         'stroke="#64748b" stroke-width="7"/>'
         '<ellipse cx="578" cy="111" rx="91" ry="28" fill="#fff" '
         'stroke="#cbd5e1" stroke-width="1.2"/>'
-        '<ellipse cx="536" cy="105" rx="13" ry="6" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="582" cy="118" rx="13" ry="6" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="625" cy="102" rx="13" ry="6" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="536" cy="105" rx="13" ry="6" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="582" cy="118" rx="13" ry="6" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="625" cy="102" rx="13" ry="6" fill="#d1d5db" stroke="#64748b"/>'
         '<circle cx="491" cy="91" r="4.5" fill="#bfdbfe"/>'
         '<circle cx="553" cy="72" r="4.5" fill="#bfdbfe"/>'
         '<circle cx="639" cy="77" r="4.5" fill="#bfdbfe"/>'
@@ -796,7 +810,7 @@ def _vessel_scene() -> str:
 def _immune_infiltrate() -> str:
     lymphocytes = "".join(
         f'<g><circle cx="{x}" cy="{y}" r="13" fill="#fff" stroke="#64748b"/>'
-        f'<circle cx="{x}" cy="{y}" r="8" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        f'<circle cx="{x}" cy="{y}" r="8" fill="#e2e8f0" stroke="#64748b"/></g>'
         for x, y in ((425, 240), (474, 291), (529, 226), (646, 263), (690, 306))
     )
     macrophages = "".join(
@@ -819,7 +833,7 @@ def _fibroblasts_in_stroma() -> str:
             '<path d="M-25 0 C-11 -8 -8 -15 0 -5 C8 -15 11 -8 25 0 '
             'C11 8 8 15 0 5 C-8 15 -11 8 -25 0Z" fill="#fff" '
             'stroke="#6b7280" stroke-width="1"/>'
-            '<ellipse cx="0" cy="0" rx="6" ry="4" fill="#fed7aa" stroke="#ea580c"/>'
+            '<ellipse cx="0" cy="0" rx="6" ry="4" fill="#d1d5db" stroke="#64748b"/>'
             "</g>"
         )
         for x, y, angle in ((135, 94, -12), (324, 115, 14), (398, 304, -7))
@@ -984,16 +998,16 @@ def _reference_vessel() -> str:
         '<ellipse cx="410" cy="96" rx="74" ry="31" fill="#f8fbff" '
         'stroke="#64748b" stroke-width="6"/>'
         '<ellipse cx="410" cy="96" rx="55" ry="19" fill="#fff" stroke="#cbd5e1"/>'
-        '<ellipse cx="382" cy="94" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="419" cy="102" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="446" cy="90" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="382" cy="94" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="419" cy="102" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="446" cy="90" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
     )
 
 
 def _reference_immune_cells() -> str:
     return "".join(
         f'<g><circle cx="{x}" cy="{y}" r="11" fill="#fff" stroke="#64748b"/>'
-        f'<circle cx="{x}" cy="{y}" r="7" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        f'<circle cx="{x}" cy="{y}" r="7" fill="#e2e8f0" stroke="#64748b"/></g>'
         for x, y in ((363, 224), (423, 255), (468, 208))
     )
 
@@ -1004,7 +1018,7 @@ def _reference_fibroblasts() -> str:
             f'<g transform="translate({x} {y}) rotate({angle})">'
             '<path d="M-22 0 C-10 -7 -7 -13 0 -4 C7 -13 10 -7 22 0 '
             'C10 7 7 13 0 4 C-7 13 -10 7 -22 0Z" fill="#fff" stroke="#6b7280"/>'
-            '<ellipse rx="5.5" ry="3.5" fill="#fed7aa" stroke="#ea580c"/></g>'
+            '<ellipse rx="5.5" ry="3.5" fill="#d1d5db" stroke="#64748b"/></g>'
         )
         for x, y, angle in ((103, 91, -9), (267, 76, 13), (310, 292, -5))
     )
@@ -1037,12 +1051,12 @@ def _tumor_nests() -> str:
             f'{cx} {cy-ry} C{cx+33} {cy-ry-4} {cx+rx-6} {cy-22} {cx+rx} {cy} '
             f'C{cx+rx-9} {cy+ry} {cx+22} {cy+ry+7} {cx} {cy+ry} '
             f'C{cx-34} {cy+ry+3} {cx-rx+5} {cy+22} {cx-rx} {cy}Z" '
-            'fill="#fff" fill-opacity=".92" stroke="#7f1d1d" stroke-width="1.1"/>'
+            'fill="#fff" fill-opacity=".92" stroke="#475569" stroke-width="1.1"/>'
         )
         for dx, dy in ((-18, -9), (8, -12), (-5, 13), (22, 9)):
             nests.append(
                 f'<ellipse cx="{cx+dx}" cy="{cy+dy}" rx="6" ry="8" '
-                'fill="#d8b4b4" stroke="#7f1d1d" stroke-width=".6"/>'
+                'fill="#cbd5e1" stroke="#475569" stroke-width=".6"/>'
             )
     return "".join(nests)
 
@@ -1054,15 +1068,15 @@ def _tumor_vessel() -> str:
         'fill="#f8fbff" stroke="#64748b" stroke-width="6"/>'
         '<path d="M365 104 C385 82 407 84 421 99 C440 81 466 94 467 113 '
         'C447 126 386 128 365 104Z" fill="#fff" stroke="#cbd5e1"/>'
-        '<ellipse cx="398" cy="107" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
-        '<ellipse cx="445" cy="112" rx="10" ry="4.5" fill="#fecaca" stroke="#ef4444"/>'
+        '<ellipse cx="398" cy="107" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
+        '<ellipse cx="445" cy="112" rx="10" ry="4.5" fill="#d1d5db" stroke="#64748b"/>'
     )
 
 
 def _tumor_immune_cells() -> str:
     lymphocytes = "".join(
         f'<g><circle cx="{x}" cy="{y}" r="11" fill="#fff" stroke="#64748b"/>'
-        f'<circle cx="{x}" cy="{y}" r="7" fill="#bfdbfe" stroke="#2563eb"/></g>'
+        f'<circle cx="{x}" cy="{y}" r="7" fill="#e2e8f0" stroke="#64748b"/></g>'
         for x, y in ((348, 212), (390, 254), (438, 216), (475, 263), (453, 298))
     )
     macrophage = (
@@ -1082,7 +1096,7 @@ def _tumor_fibroblasts() -> str:
             '<path d="M-25 0 C-11 -8 -8 -15 0 -5 C8 -15 11 -8 25 0 '
             'C11 8 8 15 0 5 C-8 15 -11 8 -25 0Z" fill="#fff" '
             'stroke="#6b7280" stroke-width="1.2"/>'
-            '<ellipse rx="6" ry="4" fill="#fed7aa" stroke="#ea580c"/></g>'
+            '<ellipse rx="6" ry="4" fill="#d1d5db" stroke="#64748b"/></g>'
         )
         for x, y, angle in ((82, 77, -17), (263, 77, 18), (320, 155, -8), (314, 294, 12))
     )
@@ -1127,27 +1141,60 @@ def _bulk_paired_note(value: Any) -> str:
 
 
 def render_subcellular(locations: Any) -> str:
+    """Render a cleaner neutral cell map with compartment-specific highlights."""
     values = [str(value) for value in locations] if isinstance(locations, list) else []
     text = " ".join(values).casefold()
     membrane = any(word in text for word in ("membrane", "cell junction", "plasma"))
-    cytoplasm = any(word in text for word in ("cytoplas", "cytosol", "vesicle", "golgi"))
+    cytoplasm = any(word in text for word in ("cytoplas", "cytosol"))
     nucleus = any(word in text for word in ("nucle", "chromatin"))
     extracellular = any(word in text for word in ("secret", "extracellular"))
+    golgi = "golgi" in text
+    vesicle = "vesicle" in text
+    mitochondrial = "mitochond" in text
+
+    membrane_stroke = "#2563eb" if membrane else "#64748b"
+    cytoplasm_fill = "#dbeafe" if cytoplasm else "#f8fafc"
+    nucleus_fill = "#ddd6fe" if nucleus else "#eef2f7"
+    extracellular_fill = "#fef3c7" if extracellular else "#fbfcfe"
+
     return (
         '<div class="subcellular-figure">'
-        '<svg viewBox="0 0 260 220" role="img" aria-label="Subcellular localization schematic">'
-        f'<circle cx="130" cy="110" r="92" fill="{"#fef3c7" if extracellular else "#f8fafc"}" '
-        'stroke="#d1d5db" stroke-dasharray="5 5"/>'
-        f'<circle cx="130" cy="110" r="72" fill="{"#dbeafe" if cytoplasm else "#f8fafc"}" '
-        f'stroke="{"#2563eb" if membrane else "#94a3b8"}" '
-        f'stroke-width="{7 if membrane else 2}"/>'
-        f'<circle cx="130" cy="110" r="31" fill="{"#ddd6fe" if nucleus else "#e5e7eb"}" '
+        '<svg viewBox="0 0 300 240" role="img" '
+        'aria-label="Subcellular localization schematic">'
+        f'<rect x="5" y="5" width="290" height="230" rx="30" fill="{extracellular_fill}" '
+        'stroke="#e2e8f0"/>'
+        f'<path d="M72 52 C95 27 137 29 164 42 C196 32 231 52 237 83 '
+        'C256 105 249 146 224 162 C214 196 174 209 143 196 '
+        'C113 211 76 199 66 169 C41 152 42 112 57 91 C54 73 60 61 72 52Z" '
+        f'fill="{cytoplasm_fill}" stroke="{membrane_stroke}" '
+        f'stroke-width="{6 if membrane else 2.5}"/>'
+        f'<ellipse cx="142" cy="112" rx="42" ry="36" fill="{nucleus_fill}" '
         'stroke="#7c3aed" stroke-width="2"/>'
-        '<circle cx="95" cy="82" r="8" fill="#fca5a5"/>'
-        '<circle cx="162" cy="139" r="7" fill="#fca5a5"/>'
-        '<text x="130" y="113" text-anchor="middle" class="subcell-label">nucleus</text>'
-        '<text x="130" y="55" text-anchor="middle" class="subcell-label">cytoplasm</text>'
-        '<text x="130" y="202" text-anchor="middle" class="subcell-label">extracellular</text>'
+        '<ellipse cx="142" cy="112" rx="16" ry="13" fill="#c4b5fd" opacity=".72"/>'
+        '<path d="M85 87 C103 72 119 72 132 81 M81 101 C99 87 114 88 128 95 '
+        'M85 139 C105 150 121 149 135 139" fill="none" stroke="#94a3b8" '
+        'stroke-width="4" stroke-linecap="round"/>'
+        '<path d="M182 83 C195 73 210 76 216 87 C205 91 194 93 183 97 '
+        'M181 102 C196 95 210 98 218 108 C207 113 194 115 181 119" '
+        f'fill="none" stroke="{"#2563eb" if golgi else "#a78bfa"}" '
+        'stroke-width="4" stroke-linecap="round"/>'
+        '<g fill="#fff" stroke="#64748b">'
+        '<ellipse cx="92" cy="159" rx="20" ry="10" transform="rotate(-24 92 159)"/>'
+        '<ellipse cx="204" cy="148" rx="20" ry="10" transform="rotate(18 204 148)"/>'
+        '</g>'
+        f'<g fill="none" stroke="{"#2563eb" if mitochondrial else "#94a3b8"}" '
+        'stroke-width="2">'
+        '<path d="M76 158 C84 151 94 166 105 157"/>'
+        '<path d="M188 148 C197 141 207 157 218 147"/>'
+        '</g>'
+        f'<g fill="{"#bfdbfe" if vesicle else "#e2e8f0"}" stroke="#64748b">'
+        '<circle cx="76" cy="118" r="7"/><circle cx="221" cy="126" r="6"/>'
+        '<circle cx="177" cy="174" r="5"/></g>'
+        '<text x="142" y="116" text-anchor="middle" class="subcell-label">nucleus</text>'
+        '<text x="99" y="70" text-anchor="middle" class="subcell-label">ER</text>'
+        '<text x="203" y="71" text-anchor="middle" class="subcell-label">Golgi</text>'
+        '<text x="94" y="181" text-anchor="middle" class="subcell-label">mitochondrion</text>'
+        '<text x="150" y="224" text-anchor="middle" class="subcell-label">extracellular</text>'
         "</svg>"
         '<p class="note">'
         f'{_e(", ".join(values) if values else "No HPA subcellular annotation.")}'
